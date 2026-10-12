@@ -192,8 +192,9 @@ class BaseController:
             # End current green phase and transition to clearance
             self.state = Phase.YELLOW_CLEARANCE
             self.elapsed = 0.0
+            elapsed_sec = self._elapsed_in_phase(step_length)
             reason = (
-                f"Ending green phase after {elapsed:.1f}s "
+                f"Ending green phase after {elapsed_sec:.1f}s "
                 f"(min={self.config.min_green}s, max={self.config.max_green}s)"
             )
             logger.info(f"Safety: {reason}")

@@ -32,6 +32,7 @@ class SimulationRunner:
         warmup_time: int = 300,
         controller=None,
         gui: bool = False,
+        csv_prefix: str = "controller",
     ):
         """
         Initialize simulation runner.
@@ -57,6 +58,7 @@ class SimulationRunner:
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.csv_prefix = csv_prefix
 
         # Metrics storage
         self.metrics = []
@@ -179,7 +181,7 @@ class SimulationRunner:
         # Create a unique filename with timestamp
         import datetime
         ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = self.output_dir / f"controller_A_{ts}.csv"
+        filename = self.output_dir / f"{self.csv_prefix}_{ts}.csv"
 
         keys = self.metrics[0].keys()
         with open(filename, "w", newline="") as f:
@@ -240,6 +242,7 @@ def run_fixed_time_simulation(
     duration: int = 3600,
     warmup_time: int = 300,
     gui: bool = False,
+    csv_prefix: str = "controller",
 ):
     """Convenience function to run a fixed-time simulation.
 
@@ -261,5 +264,6 @@ def run_fixed_time_simulation(
         warmup_time=warmup_time,
         controller=FixedTimeController(),
         gui=gui,
+        csv_prefix=csv_prefix,
     )
     runner.run()
