@@ -1,0 +1,33 @@
+# QueueSense Experiment Configuration
+simulation:
+  step_length: 1.0
+  duration: 3600
+  warmup_time: 300
+
+controllers:
+  fixed_time:
+    cycle_length: 90
+    green_duration: 35
+    yellow_duration: 5
+  actuated:
+    min_green: 10
+    max_green: 60
+  queue_pressure:
+    alpha: 0.5
+    beta: 0.3
+    gamma: 0.2
+    min_green: 10
+    max_green: 60
+  queuesense:
+    alpha: 0.4
+    beta: 0.4
+    gamma: 0.2
+    min_green: 10
+    max_green: 60
+    spillback_threshold: 0.85
+
+scenarios:
+  - balanced
+  - asymmetric
+  - bottleneck
+  - fault

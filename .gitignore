@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+
+# IDE
+.vscode/
+.sublime-workspace
+.sublime-project
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# QueueSense specific
+results/raw/*.csv
+results/summary/*.png
+results/summary/*.csv
+sumo/network/*.net.xml
+sumo/network/*.nod.xml
+sumo/network/*.edg.xml
+sumo/network/*.con.xml
+*.sumocfg
+*.log
