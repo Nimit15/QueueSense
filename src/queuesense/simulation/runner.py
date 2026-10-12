@@ -13,6 +13,7 @@ import sumolib
 from sumolib import checkBinary
 
 from queuesense.state import TrafficState, ApproachState
+from queuesense.controllers.base import Phase
 from queuesense.controllers.fixed_time import FixedTimeController
 
 
@@ -60,6 +61,16 @@ class SimulationRunner:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.csv_prefix = csv_prefix
 
+        # Phase mapping: our Phase enum to SUMO phase indices
+        # SUMO program N1: [0=NORTH_SOUTH green, 1=YELLOW, 2=EAST_WEST green, 3=ALL_RED]
+        self._phase_to_sumo = {Phase.NORTH_SOUTH: 0, Phase.YELLOW_CLEARANCE: 1,
+                               Phase.EAST_WEST: 2, Phase.ALL_RED: 3}
+        self._sumo_to_phase = {0: Phase.NORTH_SOUTH, 1: Phase.YELLOW_CLEARANCE,
+                               2: Phase.EAST_WEST, 3: Phase.ALL_RED}
+
+        # Set phase mapping on the controller so it can apply decisions
+        self.controller._phase_to_sumo = self._phase_to_sumo
+
         # Metrics storage
         self.metrics = []
 
@@ -75,6 +86,14 @@ class SimulationRunner:
             [sumo_binary, "-n", self.net_file, "-r", ",".join(self.route_files), "--step-length", str(self.step_length)],
             label="sim",
         )
+        # Map our Phase enum to SUMO phase indices for the static program
+        # SUMO program N1: [0=NORTH_SOUTH green, 1=YELLOW, 2=EAST_WEST green, 3=ALL_RED]
+        self._phase_to_sumo = {Phase.NORTH_SOUTH: 0, Phase.YELLOW_CLEARANCE: 1,
+                               Phase.EAST_WEST: 2, Phase.ALL_RED: 3}
+        # Map SUMO phase index back to our Phase enum
+        self._sumo_to_phase = {0: Phase.NORTH_SOUTH, 1: Phase.YELLOW_CLEARANCE,
+                               2: Phase.EAST_WEST, 3: Phase.ALL_RED}
+        logger.info(f"Phase mapping: {self._phase_to_sumo}")
         logger.info("TraCI simulation started")
 
     def _collect_traffic_state(self) -> TrafficState:
@@ -215,8 +234,12 @@ class SimulationRunner:
 
                 # Compute and apply controller action
                 action = self.controller.step(state, self.step_length)
+                # Apply the controller's phase decision to SUMO traffic lights
+                tls_id = "N1"  # Traffic light ID from the network
+                sumo_phase_index = self._phase_to_sumo.get(action["phase"], 0)
+                traci.trafficlight.setPhase(tls_id, sumo_phase_index)
                 # Log the controller action
-                logger.info(f"Controller action: {action}")
+                logger.info(f"Controller action: {action} | Applied SUMO phase={sumo_phase_index} ({action['phase'].name})")
 
                 # Log metrics
                 self._log_metrics(step)
