@@ -54,6 +54,11 @@ class BaseController:
         self.consecutive_invalid: int = 0
         self.max_invalid_before_fallback = 3
         self.fixed_plan_index = 0
+        # The green phase that was interrupted by a clearance interval.
+        # Clearances must resume the *alternating* phase, otherwise every
+        # clearance returns to fixed_cycle[0] and the second movement in the
+        # cycle is never served.
+        self._clearance_origin: Optional[Phase] = None
 
         # Define a simple fixed-time plan for fallback: [NS, EW, NS, EW]
         if self.config.fixed_cycle is None:
@@ -124,6 +129,39 @@ class BaseController:
                 and (elapsed >= self.config.max_green or self._should_end_phase())
             )
 
+    def _clearance_expired(self, step_length: float) -> bool:
+        """Return True when the current clearance phase has run its full duration.
+
+        Clearance phases (YELLOW_CLEARANCE, ALL_RED) are fixed-duration and
+        must not be interrupted.  The previous implementation checked the
+        elapsed time only inside ``_can_end_phase`` and then re-entered
+        ``compute_action`` without advancing ``self.state``, which left the
+        controller permanently stuck in the clearance phase and never toggled
+        the signal to the next green.
+        """
+        elapsed = self._elapsed_in_phase(step_length)
+        if self.state == Phase.YELLOW_CLEARANCE:
+            return elapsed >= self.config.yellow_duration
+        if self.state == Phase.ALL_RED:
+            return elapsed >= self.config.all_red_duration
+        return False
+
+    def _clearance_duration(self) -> float:
+        """Return the fixed duration of the current clearance phase."""
+        if self.state == Phase.YELLOW_CLEARANCE:
+            return self.config.yellow_duration
+        if self.state == Phase.ALL_RED:
+            return self.config.all_red_duration
+        return 0.0
+
+    def _clearance_phase_name(self) -> str:
+        """Human-readable name of the clearance phase just completed."""
+        if self.state == Phase.YELLOW_CLEARANCE:
+            return "Yellow"
+        if self.state == Phase.ALL_RED:
+            return "All-red"
+        return "Clearance"
+
     def _should_end_phase(self) -> bool:
         """Override in subclass: decide whether to end the current green phase early.
 
@@ -143,7 +181,15 @@ class BaseController:
         elif self.state == Phase.EAST_WEST:
             return Phase.NORTH_SOUTH
         else:
-            # After clearances, return to the first phase in fixed cycle
+            # After a clearance interval, resume the alternating phase rather
+            # than always returning to fixed_cycle[0].  Clearances are entered
+            # from a specific green phase (recorded in _clearance_origin).
+            origin = self._clearance_origin
+            if origin == Phase.NORTH_SOUTH:
+                return Phase.EAST_WEST
+            if origin == Phase.EAST_WEST:
+                return Phase.NORTH_SOUTH
+            # Fallback: first phase in the fixed cycle.
             return self.config.fixed_cycle[0]
 
     def _advance_fixed_plan(self) -> Optional[Phase]:
@@ -172,24 +218,37 @@ class BaseController:
                 'duration': Duration to hold this phase (seconds)
                 'reason': str explaining decision
         """
-        # If in clearance, enforce fixed duration and do not allow subclass override
-        if self.state == Phase.YELLOW_CLEARANCE:
-            duration = self.config.yellow_duration
-            reason = f"Yellow clearance enforced for {duration}s"
+        # If in clearance, enforce fixed duration and do not allow subclass override.
+        # When the clearance has expired, advance to the next phase instead of
+        # looping forever in the clearance state.
+        if self.state in (Phase.YELLOW_CLEARANCE, Phase.ALL_RED):
+            if not self._clearance_expired(step_length):
+                duration = step_length
+                reason = (
+                    f"Holding {self.state.name} clearance "
+                    f"({self._elapsed_in_phase(step_length):.1f}s / "
+                    f"{self._clearance_duration():.1f}s)"
+                )
+                self.elapsed += 1
+                logger.debug(f"Safety: {reason}")
+                return {"phase": self.state, "duration": duration, "reason": reason}
+            # Clearance complete: transition to the next phase.
             next_phase = self._next_phase()
-            logger.info(f"Safety: {reason} -> {next_phase.name}")
-            return {"phase": next_phase, "duration": duration, "reason": reason}
-
-        if self.state == Phase.ALL_RED:
-            duration = self.config.all_red_duration
-            reason = f"All-red clearance enforced for {duration}s"
-            next_phase = self._next_phase()
-            logger.info(f"Safety: {reason} -> {next_phase.name}")
-            return {"phase": next_phase, "duration": duration, "reason": reason}
+            self.state = next_phase
+            self.elapsed = 0.0
+            reason = (
+                f"{self._clearance_phase_name()} clearance complete, "
+                f"transitioning to {next_phase.name}"
+            )
+            logger.info(f"Safety: {reason}")
+            return self.compute_action(step_length)
 
         # Green phase: safety supervisor decides when to end
         if self._can_end_phase(step_length):
-            # End current green phase and transition to clearance
+            # End current green phase and transition to clearance.
+            # Remember which green phase we are leaving so the clearance can
+            # resume the alternating movement.
+            self._clearance_origin = self.state
             self.state = Phase.YELLOW_CLEARANCE
             self.elapsed = 0.0
             elapsed_sec = self._elapsed_in_phase(step_length)

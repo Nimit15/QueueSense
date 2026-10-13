@@ -50,8 +50,8 @@ class TestBenchmarkRunner:
             scenarios=["balanced"],
             gui=False,
         )
-        assert len(results) == 3  # 1 scenario * 3 controllers * 1 seed
-        assert summary["successful_runs"] == 3
+        assert len(results) == 4  # 1 scenario * 4 controllers * 1 seed
+        assert summary["successful_runs"] == 4
         assert summary["failed_runs"] == 0
         assert "metrics" in summary
 
@@ -73,4 +73,4 @@ class TestBenchmarkRunner:
         assert Path("results/benchmark/summary.txt").exists()
         # Check that CSV files exist
         csvs = list(Path("results/benchmark/balanced").glob("*.csv"))
-        assert len(csvs) == 3  # A, B, C
+        assert len(csvs) == 4  # A, B, C, D

@@ -16,6 +16,7 @@ from queuesense.controllers import (
     FixedTimeController,
     ActuatedController,
     QueuePressureController,
+    QueueSenseController,
 )
 
 
@@ -69,6 +70,7 @@ class BenchmarkRunner:
             "A": FixedTimeController(),
             "B": ActuatedController(gap_threshold=3.0),
             "C": QueuePressureController(alpha=0.4, beta=0.4, gamma=0.2, max_wait=90.0),
+            "D": QueueSenseController(alpha=0.4, beta=0.4, gamma=0.2, spillback_threshold=0.85, max_wait=90.0),
         }
 
         logger.info(
