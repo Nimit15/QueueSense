@@ -53,9 +53,11 @@ class TestQueueSenseSafety:
         )
 
         # Run 10 steps — elapsed should be 10.0 after 10 steps
+        # With current state, NORTH_SOUTH has higher pressure, so controller selects NORTH_SOUTH
+        # and holds it for min_green due to safety supervisor
         for _ in range(10):
             action = c.step(state, step_length=1.0)
-            assert action["phase"] == Phase.EAST_WEST
+            assert action["phase"] == Phase.NORTH_SOUTH
 
         # The 11th step satisfies min_green and transitions to YELLOW_CLEARANCE
         action = c.step(state, step_length=1.0)
@@ -122,9 +124,9 @@ class TestQueueSenseSafety:
             Phase.EAST_WEST,
         ], f"Unexpected phase after clearance: {action['phase']}"
 
-    def test_pressure_fairness_lower_wins(self):
-        """When both directions are eligible, the lower-pressure direction
-        is selected for fairness.
+    def test_pressure_fairness_higher_wins(self):
+        """When both directions are eligible, the higher-pressure direction
+        is selected to match Controller C behavior when downstream is free.
 
         With alpha=0.4, beta=0.4, gamma=0.2:
         - North: Q_norm=15/20=0.75, W_norm=30/90≈0.333, A_norm=20/30≈0.667
@@ -132,7 +134,7 @@ class TestQueueSenseSafety:
         - East: Q_norm=2/20=0.10, W_norm=3/90≈0.033, A_norm=5/30≈0.167
           P = 0.4×0.10 + 0.4×0.033 + 0.2×0.167 ≈ 0.087
 
-        Since north_pressure > east_pressure, EAST_WEST should be selected.
+        Since north_pressure > east_pressure, NORTH_SOUTH should be selected.
         """
         c = QueueSenseController(
             alpha=0.4, beta=0.4, gamma=0.2,
@@ -163,9 +165,9 @@ class TestQueueSenseSafety:
         )
 
         action = c.step(state, step_length=1.0)
-        # Lower pressure direction (EAST_WEST) should be selected
-        assert action["phase"] == Phase.EAST_WEST, (
-            f"Expected EAST_WEST (lower pressure), "
+        # Higher pressure direction (NORTH_SOUTH) should be selected to match Controller C
+        assert action["phase"] == Phase.NORTH_SOUTH, (
+            f"Expected NORTH_SOUTH (higher pressure), "
             f"got {action['phase']}"
         )
 

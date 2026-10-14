@@ -7,6 +7,7 @@ import os
 import logging
 from pathlib import Path
 from typing import Optional
+import xml.etree.ElementTree as ET
 
 import traci
 import sumolib
@@ -34,6 +35,7 @@ class SimulationRunner:
         controller=None,
         gui: bool = False,
         csv_prefix: str = "controller",
+        seed: int = 42,
     ):
         """
         Initialize simulation runner.
@@ -47,6 +49,7 @@ class SimulationRunner:
             warmup_time: Warmup period before metrics collection (seconds)
             controller: Controller instance (defaults to FixedTimeController)
             gui: Whether to run with SUMO-GUI
+            seed: Random seed for reproducible SUMO simulation
         """
         self.net_file = net_file
         self.route_files = route_files
@@ -56,34 +59,72 @@ class SimulationRunner:
         self.warmup_time = warmup_time
         self.controller = controller or FixedTimeController()
         self.gui = gui
+        self.csv_prefix = csv_prefix
+        self.seed = seed
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.csv_prefix = csv_prefix
+
+        # Read downstream threshold from config
+        try:
+            import yaml
+            config_path = Path("configs/experiment.yaml")
+            with config_path.open('r') as f:
+                config = yaml.safe_load(f)
+            self.downstream_threshold = float(config.get('spillback_threshold', 0.85))
+        except Exception as e:
+            logger.warning(f"Could not read spillback_threshold from configs/experiment.yaml: {e}. Using default 0.85")
+            self.downstream_threshold = 0.85
+
+        # Build downstream edges mapping from network file
+        self._downstream_edges = {}  # map from edge_id to list of downstream edge_ids
+        try:
+            tree = ET.parse(self.net_file)
+            root = tree.getroot()
+            # Find all connections that have a traffic light (tl attribute not empty)
+            for conn in root.findall('.//connection'):
+                tl_id = conn.get('tl')
+                if tl_id and tl_id.strip():  # if there is a traffic light id
+                    from_edge = conn.get('from')
+                    to_edge = conn.get('to')
+                    if from_edge and to_edge:
+                        if from_edge not in self._downstream_edges:
+                            self._downstream_edges[from_edge] = []
+                        self._downstream_edges[from_edge].append(to_edge)
+        except Exception as e:
+            logger.warning(f"Failed to parse network file for downstream edges: {e}. Downstream eligibility will be disabled.")
+            self._downstream_edges = {}
 
         # Phase mapping: our Phase enum to SUMO phase indices
-        # SUMO program N1: [0=NORTH_SOUTH green, 1=YELLOW, 2=EAST_WEST green, 3=ALL_RED]
-        self._phase_to_sumo = {Phase.NORTH_SOUTH: 0, Phase.YELLOW_CLEARANCE: 1,
-                               Phase.EAST_WEST: 2, Phase.ALL_RED: 3}
-        self._sumo_to_phase = {0: Phase.NORTH_SOUTH, 1: Phase.YELLOW_CLEARANCE,
-                               2: Phase.EAST_WEST, 3: Phase.ALL_RED}
+        # From tlLogic N1:
+        #   Phase 0: state=GGggrrrGGg -> green for in_east and in_west (EAST_WEST)
+        #   Phase 1: state=yyyyrrrGyy -> yellow
+        #   Phase 2: state=rrrrGGgGrr -> green for in_north (NORTH_SOUTH)
+        #   Phase 3: state=rrrryyyGrr -> all-red
+        self._phase_to_sumo = {Phase.NORTH_SOUTH: 2, Phase.YELLOW_CLEARANCE: 1,
+                               Phase.EAST_WEST: 0, Phase.ALL_RED: 3}
+        self._sumo_to_phase = {0: Phase.EAST_WEST, 1: Phase.YELLOW_CLEARANCE,
+                               2: Phase.NORTH_SOUTH, 3: Phase.ALL_RED}
 
         # Set phase mapping on the controller so it can apply decisions
         self.controller._phase_to_sumo = self._phase_to_sumo
 
         # Metrics storage
         self.metrics = []
+        # Cumulative arrivals accumulator
+        self._arrived_cumulative = 0
 
         logger.info(
             f"SimulationRunner initialized: net={net_file}, routes={route_files}, "
-            f"duration={duration}s, warmup={warmup_time}s, gui={gui}"
+            f"duration={duration}s, warmup={warmup_time}s, gui={gui}, seed={seed}"
         )
 
     def _init_simulation(self):
         """Initialize TraCI simulation."""
         sumo_binary = checkBinary("sumo-gui") if self.gui else checkBinary("sumo")
         traci.start(
-            [sumo_binary, "-n", self.net_file, "-r", ",".join(self.route_files), "--step-length", str(self.step_length)],
+            [sumo_binary, "-n", self.net_file, "-r", ",".join(self.route_files),
+             "--step-length", str(self.step_length), "--seed", str(self.seed)],
             label="sim",
         )
         # Map our Phase enum to SUMO phase indices for the static program
@@ -128,19 +169,30 @@ class SimulationRunner:
                 # Arrival rate: vehicles entering the approach in the last step
                 arrival_rate = traci.edge.getLastStepHaltingNumber(edge_id)
 
-                # Downstream available: check if the receiving edge is not jammed
-                # For north/south: receiving edge is the cross street
-                # For east/west: receiving edge is the main arterial
+                # Downstream available: check if any of the downstream edges for this approach is not jammed
+                # An approach is eligible if at least one of its downstream edges has occupancy below threshold
                 downstream_available = True
-                if name in ("north", "south"):
-                    # Receiving edge is the main arterial (east-west)
-                    downstream_available = traci.edge.getLastStepOccupancy("art_east") < 0.85
-                else:
-                    # Receiving edge is the cross street (north-south)
-                    downstream_available = traci.edge.getLastStepOccupancy("out_north") < 0.85
+                if edge_id in self._downstream_edges:
+                    # Check if any downstream edge is below threshold
+                    downstream_occupancies = []
+                    for downstream_edge in self._downstream_edges[edge_id]:
+                        try:
+                            occ = traci.edge.getLastStepOccupancy(downstream_edge)
+                            downstream_occupancies.append(occ)
+                        except:
+                            # If we can't read occupancy, assume it's blocked to be safe
+                            downstream_occupancies.append(1.0)
 
-                # Measurement validity: if edge has vehicles, assume valid
-                measurement_valid = len(veh_ids) > 0 or True  # Always valid for now
+                    # Approach is eligible if at least one downstream edge is below threshold
+                    downstream_available = any(occ < self.downstream_threshold for occ in downstream_occupancies)
+                else:
+                    # No downstream edges found, assume eligible (should not happen in normal network)
+                    downstream_available = True
+
+                # Measurement validity: True if approach state was successfully computed.
+                # A frame with zero vehicles is a valid observation, not a sensor failure.
+                # measurement_valid is only False if an exception prevents state collection.
+                measurement_valid = True
 
                 approaches[name] = ApproachState(
                     queue_count=float(queue_count),
@@ -149,7 +201,6 @@ class SimulationRunner:
                     downstream_available=downstream_available,
                     measurement_valid=measurement_valid,
                 )
-
             except Exception as e:
                 logger.warning(f"Failed to collect state for {name}: {e}")
                 approaches[name] = ApproachState()
@@ -160,7 +211,20 @@ class SimulationRunner:
     def _log_metrics(self, step: int):
         """Log metrics at each step."""
         time = traci.simulation.getTime()
-        completed = traci.simulation.getMinExpectedNumber()
+        # Correct metric semantics per SUMO API
+        # getArrivedNumber() reports vehicles arrived during latest step
+        arrived_this_step = int(traci.simulation.getArrivedNumber())
+        # Accumulate exactly once per step
+        self._arrived_cumulative += arrived_this_step
+        arrived_cumulative = self._arrived_cumulative
+
+        # Remaining vehicles expected (in network + waiting to start)
+        remaining_expected = int(traci.simulation.getMinExpectedNumber())
+
+        # Departed and loaded for additional context
+        departed_this_step = int(traci.simulation.getDepartedNumber())
+        loaded_this_step = int(traci.simulation.getLoadedNumber())
+
         # Queue lengths per approach
         queues = {}
         for name in ["north", "south", "east", "west"]:
@@ -175,10 +239,23 @@ class SimulationRunner:
             "east_west": traci.edge.getLastStepOccupancy("out_north") >= 0.85,
         }
 
+        # Preserve legacy column name for compatibility but document correct meaning.
+        # The old 'completed' column was misused to store getMinExpectedNumber().
+        # We now keep it mapped to arrived_cumulative for backward compatibility,
+        # since arrived_cumulative is the correct count of completed trips.
+        # Consumers should migrate to using arrived_cumulative directly.
+        completed_legacy = arrived_cumulative
+
         # Log to CSV
         self.metrics.append({
             "time": time,
-            "completed": completed,
+            "arrived_this_step": arrived_this_step,
+            "arrived_cumulative": arrived_cumulative,
+            "departed_this_step": departed_this_step,
+            "loaded_this_step": loaded_this_step,
+            "remaining_expected": remaining_expected,
+            # Legacy compatibility
+            "completed": completed_legacy,
             "queue_north": queues.get("north", 0),
             "queue_south": queues.get("south", 0),
             "queue_east": queues.get("east", 0),
@@ -187,7 +264,7 @@ class SimulationRunner:
             "spillback_ew": int(spillback["east_west"]),
         })
 
-        logger.debug(f"Metrics @ t={time}s: queues={queues}, spillback={spillback}")
+        logger.debug(f"Metrics @ t={time}s: arrived_step={arrived_this_step}, cumulative={arrived_cumulative}, remaining={remaining_expected}, queues={queues}, spillback={spillback}")
 
     def _write_metrics(self):
         """Write metrics to CSV file."""
@@ -217,31 +294,45 @@ class SimulationRunner:
 
             logger.info(f"Running simulation for {self.duration}s (warmup until {self.warmup_time}s)")
 
-            step = 0
-            while traci.simulation.getMinExpectedNumber() > 0 and traci.simulation.getTime() <= self.duration:
+            # Log initial state at t=0 before any stepping
+            if 0 < self.duration:
+                # Collect state and log metrics at t=0
+                state = self._collect_traffic_state()
+                self.controller.update_state(state)
+                action = self.controller.step(state, self.step_length)
+                tls_id = "N1"
+                sumo_phase_index = self._phase_to_sumo.get(action["phase"], 0)
+                traci.trafficlight.setPhase(tls_id, sumo_phase_index)
+                self._log_metrics(step=0)
+
+            step = 1
+            # Fixed-horizon simulation: continue until duration is reached.
+            # We step first, then check whether to log. This gives observations
+            # at times 1.0, 2.0, ..., up to the largest time <= duration.
+            while True:
                 traci.simulationStep()
 
                 time = traci.simulation.getTime()
 
-                # Warmup: skip metrics collection
+                # Warmup: skip metrics collection until past warmup_time
                 if time < self.warmup_time:
-                    step += 1
                     continue
 
-                # Collect traffic state
+                # Stop if we have exceeded the configured horizon.
+                # We do not log a row with time > duration.
+                if time > self.duration:
+                    break
+
+                # Collect traffic state and apply controller
                 state = self._collect_traffic_state()
                 self.controller.update_state(state)
 
-                # Compute and apply controller action
                 action = self.controller.step(state, self.step_length)
-                # Apply the controller's phase decision to SUMO traffic lights
                 tls_id = "N1"  # Traffic light ID from the network
                 sumo_phase_index = self._phase_to_sumo.get(action["phase"], 0)
                 traci.trafficlight.setPhase(tls_id, sumo_phase_index)
-                # Log the controller action
-                logger.info(f"Controller action: {action} | Applied SUMO phase={sumo_phase_index} ({action['phase'].name})")
 
-                # Log metrics
+                # Log metrics at this time step
                 self._log_metrics(step)
 
                 step += 1
@@ -266,6 +357,7 @@ def run_fixed_time_simulation(
     warmup_time: int = 300,
     gui: bool = False,
     csv_prefix: str = "controller",
+    seed: int = 42,
 ):
     """Convenience function to run a fixed-time simulation.
 
@@ -288,5 +380,6 @@ def run_fixed_time_simulation(
         controller=FixedTimeController(),
         gui=gui,
         csv_prefix=csv_prefix,
+        seed=seed,
     )
     runner.run()

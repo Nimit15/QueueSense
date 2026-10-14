@@ -39,7 +39,10 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# QueueSense specific
+# # QueueSense data
+/data/
+
+QueueSense specific
 results/raw/*.csv
 results/summary/*.png
 results/summary/*.csv

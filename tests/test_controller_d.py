@@ -98,11 +98,11 @@ class TestQueueSenseController:
         result = self.controller._select_phase_from_pressure(state)
         assert result == Phase.EAST_WEST
 
-    def test__select_phase_from_pressure_both_eligible_lower_pressure(self):
-        """Both directions eligible → selects direction with lower pressure (fairness).
+    def test__select_phase_from_pressure_both_eligible_higher_pressure(self):
+        """Both directions eligible → selects direction with higher pressure.
 
         North approach has high pressure (high queue/wait/arrival), east has low pressure.
-        Expected: select EAST_WEST (lower pressure).
+        Expected: select NORTH_SOUTH (higher pressure).
         """
         state = TrafficState(
             timestamp=0.0,
@@ -117,37 +117,6 @@ class TestQueueSenseController:
                 ),
                 "east": ApproachState(
                     queue_count=2, mean_wait_seconds=3, arrival_rate=5,
-                    downstream_available=True, measurement_valid=True,
-                ),
-                "west": ApproachState(
-                    queue_count=1, mean_wait_seconds=2, arrival_rate=3,
-                    downstream_available=True, measurement_valid=True,
-                ),
-            },
-            all_valid=True,
-        )
-        result = self.controller._select_phase_from_pressure(state)
-        assert result == Phase.EAST_WEST
-
-    def test__select_phase_from_pressure_both_eligible_higher_pressure(self):
-        """Both directions eligible → selects direction with lower pressure (reverse).
-
-        East approach has high pressure, north has low pressure.
-        Expected: select NORTH_SOUTH (lower pressure).
-        """
-        state = TrafficState(
-            timestamp=0.0,
-            approaches={
-                "north": ApproachState(
-                    queue_count=2, mean_wait_seconds=3, arrival_rate=5,
-                    downstream_available=True, measurement_valid=True,
-                ),
-                "south": ApproachState(
-                    queue_count=1, mean_wait_seconds=2, arrival_rate=3,
-                    downstream_available=True, measurement_valid=True,
-                ),
-                "east": ApproachState(
-                    queue_count=15, mean_wait_seconds=30, arrival_rate=20,
                     downstream_available=True, measurement_valid=True,
                 ),
                 "west": ApproachState(
@@ -159,6 +128,37 @@ class TestQueueSenseController:
         )
         result = self.controller._select_phase_from_pressure(state)
         assert result == Phase.NORTH_SOUTH
+
+    def test__select_phase_from_pressure_both_eligible_lower_pressure(self):
+        """Both directions eligible → selects direction with lower pressure (reverse).
+
+        East approach has high pressure, north has low pressure.
+        Expected: select EAST_WEST (lower pressure).
+        """
+        state = TrafficState(
+            timestamp=0.0,
+            approaches={
+                "north": ApproachState(
+                    queue_count=2, mean_wait_seconds=3, arrival_rate=5,
+                    downstream_available=True, measurement_valid=True,
+                ),
+                "south": ApproachState(
+                    queue_count=1, mean_wait_seconds=2, arrival_rate=3,
+                    downstream_available=True, measurement_valid=True,
+                ),
+                "east": ApproachState(
+                    queue_count=15, mean_wait_seconds=30, arrival_rate=20,
+                    downstream_available=True, measurement_valid=True,
+                ),
+                "west": ApproachState(
+                    queue_count=1, mean_wait_seconds=2, arrival_rate=3,
+                    downstream_available=True, measurement_valid=True,
+                ),
+            },
+            all_valid=True,
+        )
+        result = self.controller._select_phase_from_pressure(state)
+        assert result == Phase.EAST_WEST
 
     def test_step_all_exits_blocked_returns_valid_action(self):
         """All-exits-blocked step() returns a valid action dict without crashing."""

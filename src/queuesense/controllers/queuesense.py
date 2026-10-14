@@ -83,32 +83,39 @@ class QueueSenseController(BaseController):
 
         Args:
             state: TrafficState
-            phase: Candidate phase to evaluate
+            phase: Candidate phase to evaluate (NORTH_SOUTH or EAST_WEST)
 
         Returns:
-            Pressure score (higher = more pressure). Returns 0.0 if the
-            approached state is missing.
+            Pressure score (higher = more pressure). Sum of the two opposing approaches.
         """
-        approach_name = "north" if phase == Phase.NORTH_SOUTH else "east"
-        approach = state.get_approach(approach_name)
-        if not approach:
+        # Map phase to its two approaches
+        if phase == Phase.NORTH_SOUTH:
+            approach_names = ["north", "south"]
+        elif phase == Phase.EAST_WEST:
+            approach_names = ["east", "west"]
+        else:
+            # Should not happen
             return 0.0
 
-        # Normalize queue burden: vehicle count
-        queue_norm = min(approach.queue_count / 20.0, 1.0)  # cap at 20 vehicles
+        total_pressure = 0.0
+        for name in approach_names:
+            approach = state.get_approach(name)
+            if not approach:
+                continue
+            # Normalize queue burden: vehicle count
+            queue_norm = min(approach.queue_count / 20.0, 1.0)  # cap at 20 vehicles
 
-        # Normalize waiting time: average waiting time / max_wait
-        wait_norm = min(approach.mean_wait_seconds / self.max_wait, 1.0)
+            # Normalize waiting time: average waiting time / max_wait
+            wait_norm = min(approach.mean_wait_seconds / self.max_wait, 1.0)
 
-        # Normalize arrival rate: vehicles per minute / saturation flow (30 veh/min)
-        arrival_norm = min(approach.arrival_rate / 30.0, 1.0)
+            # Normalize arrival rate: vehicles per minute / saturation flow (assume 1800 veh/hr = 30 veh/min)
+            arrival_norm = min(approach.arrival_rate / 30.0, 1.0)
 
-        pressure = self.alpha * queue_norm + self.beta * wait_norm + self.gamma * arrival_norm
-        logger.debug(
-            f"Pressure for {phase.name}: Q={queue_norm:.2f}, W={wait_norm:.2f}, "
-            f"A={arrival_norm:.2f} -> P={pressure:.2f}"
-        )
-        return pressure
+            pressure = self.alpha * queue_norm + self.beta * wait_norm + self.gamma * arrival_norm
+            total_pressure += pressure
+            logger.debug(f"Pressure for {name}: Q={queue_norm:.2f}, W={wait_norm:.2f}, A={arrival_norm:.2f} -> P={pressure:.2f}")
+        logger.debug(f"Total pressure for {phase.name}: {total_pressure:.2f}")
+        return total_pressure
 
     # ------------------------------------------------------------------
     # Downstream blockage eligibility
@@ -176,8 +183,8 @@ class QueueSenseController(BaseController):
             return Phase.EAST_WEST
 
         # Both directions have eligible approaches: compare pressure and select
-        # the direction with lower pressure to promote fairness.
-        # NORTH_SOUTH pressure uses the north approach; EAST_WEST uses the east.
+        # the direction with higher pressure (to match Controller C when downstream is free).
+        # NORTH_SOUTH pressure uses the north and south approaches; EAST_WEST uses the east and west.
         north_pressure = self._calculate_pressure(state, Phase.NORTH_SOUTH)
         east_pressure = self._calculate_pressure(state, Phase.EAST_WEST)
 
@@ -185,16 +192,16 @@ class QueueSenseController(BaseController):
             logger.info(
                 f"QueueSense: Both directions eligible; NORTH_SOUTH pressure "
                 f"({north_pressure:.2f}) >= EAST_WEST ({east_pressure:.2f}); "
-                f"selecting EAST_WEST (lower pressure)"
+                f"selecting NORTH_SOUTH (higher pressure)"
             )
-            return Phase.EAST_WEST
+            return Phase.NORTH_SOUTH
         else:
             logger.info(
                 f"QueueSense: Both directions eligible; EAST_WEST pressure "
                 f"({east_pressure:.2f}) > NORTH_SOUTH ({north_pressure:.2f}); "
-                f"selecting NORTH_SOUTH (lower pressure)"
+                f"selecting EAST_WEST (higher pressure)"
             )
-            return Phase.NORTH_SOUTH
+            return Phase.EAST_WEST
 
     # ------------------------------------------------------------------
     # Override _should_end_phase from BaseController
