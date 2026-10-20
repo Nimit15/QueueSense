@@ -3,2121 +3,371 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QueueSense ICCC — Smart Signal AI for Existing Red-Light CCTVs</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>QueueSense ICCC - 3D Living Digital Twin</title>
+  <meta name="description" content="Edge-AI Adaptive Traffic-Signal Controller: 3D Living Digital Twin with Downstream Spillback Prevention">
+
+  <!-- Three.js + WebGL -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/EffectComposer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/RenderPass.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/UnrealBloomPass.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/shaders/FXAAShader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/BufferGeometryUtils.min.js"></script>
+
+  <!-- Chart.js for inline telemetry charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              500: '#10b981',
-              600: '#059669',
-            }
-          }
-        }
-      }
-    }
-  </script>
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="/static/styles.css">
+
   <style>
-    @keyframes pulse-subtle {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.85; transform: scale(1.02); }
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg-deep);
+      font-family: 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
     }
-    .badge-pulse {
-      animation: pulse-subtle 1.5s infinite ease-in-out;
+
+    #three-canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: var(--z-canvas);
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    /* Hide loading screen after init */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-toast);
+      transition: opacity 300ms var(--ease-out), visibility 300ms var(--ease-out);
+    }
+
+    #loading-screen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .loading-spinner__dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+      box-shadow: var(--shadow-glow-emerald);
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .loading-spinner__text {
+      font-size: 13px;
+      color: var(--fg-secondary);
+      font-family: monospace;
+    }
+
+    .loading-spinner__progress {
+      font-size: 11px;
+      color: var(--fg-muted);
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 font-sans antialiased h-screen flex flex-col overflow-hidden select-none">
+<body>
 
-  <!-- ========================================================================= -->
-  <!-- TOP HEADER & 3 BIG SCENARIO BUTTONS                                       -->
-  <!-- ========================================================================= -->
-  <header class="bg-[#111827] border-b border-slate-800 px-6 py-2.5 flex items-center justify-between shrink-0 shadow-xl z-20">
-    <!-- Title & Subtitle -->
-    <div class="flex items-center space-x-3.5">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-emerald-950">
-        Q
-      </div>
-      <div>
-        <div class="flex items-center space-x-2.5">
-          <h1 class="font-extrabold text-base tracking-tight text-white">
-            QUEUESENSE <span class="text-emerald-400 font-extrabold">ICCC</span> <span class="text-slate-300 font-bold">— Smart Signal AI for Existing Red-Light CCTVs</span>
-          </h1>
-          <span class="text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 px-2 py-0.5 rounded-full font-medium">
-            SEVA 2026 Innovation Challenge
-          </span>
-        </div>
-        <p class="text-xs text-slate-400 font-normal mt-0.5">
-          Prevents intersection gridlock by checking both waiting traffic <strong class="text-slate-300">AND</strong> whether the exit road ahead is clear.
-        </p>
-      </div>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-spinner">
+      <div class="loading-spinner__dot"></div>
+      <div class="loading-spinner__text">Initializing QueueSense 3D Digital Twin</div>
+      <div class="loading-spinner__progress" id="loadingProgress">Loading assets... 0%</div>
     </div>
+  </div>
 
-    <!-- 3 Big Friendly Scenario Buttons -->
-    <div class="flex items-center space-x-3">
-      <!-- Preset 1: Normal Flow -->
-      <button onclick="triggerPreset('normal')" id="btnPresetNormal"
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-emerald-950/70 text-emerald-300 border-2 border-emerald-500 shadow-lg shadow-emerald-950/50 hover:bg-emerald-900/60">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>🟢 1. Normal Traffic Flow</span>
-      </button>
+  <!-- Three.js Canvas Container -->
+  <div id="three-canvas-container"></div>
 
-      <!-- Preset 2: Spillback Prevention -->
-      <button onclick="triggerPreset('spillback')" id="btnPresetSpillback"
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-rose-300 border border-slate-700 hover:border-rose-500 hover:bg-rose-950/40">
-        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-        <span>🔴 2. Exit Road Jammed (Gridlock Prevented!)</span>
-      </button>
+  <!-- Scripts -->
+  <script type="module" src="/static/three-scene.js"></script>
+  <script src="/static/hud-components.js"></script>
 
-      <!-- Preset 3: Watchdog Safe-Mode -->
-      <button onclick="triggerPreset('watchdog')" id="btnPresetWatchdog"
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-amber-300 border border-slate-700 hover:border-amber-500 hover:bg-amber-950/40">
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-        <span>⚠️ 3. Camera Lost (Auto Safe-Mode)</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- ========================================================================= -->
-  <!-- 3-COLUMN USER-FRIENDLY LAYOUT: 1. SEE -> 2. DECIDE -> 3. IMPACT           -->
-  <!-- ========================================================================= -->
-  <main class="flex-1 grid grid-cols-12 gap-3.5 p-3 overflow-hidden bg-[#090d16]">
-
-    <!-- ----------------------------------------------------------------------- -->
-    <!-- COLUMN 1 (LEFT — 4 COLS): 1. SEE: Existing Red-Light CCTV Feed          -->
-    <!-- ----------------------------------------------------------------------- -->
-    <section class="col-span-4 bg-[#111827] border border-slate-800/80 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl overflow-hidden">
-      <!-- Section Header -->
-      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-        <div class="flex items-center space-x-2">
-          <div class="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
-            1
-          </div>
-          <div>
-            <h2 class="text-xs font-bold text-white tracking-wide uppercase">1. SEE: Red-Light CCTV AI Detection</h2>
-            <p class="text-[10px] text-slate-400 font-mono">Real-Time UVH-26 YOLOv11 Multi-Vehicle Perception</p>
-          </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <!-- CCTV Source Switcher -->
-          <select id="cctvSourceSelect" onchange="switchCctvFeed(this.value)" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1 text-xs outline-none font-mono">
-            <option value="uvh26">Urban Junction CCTV</option>
-            <option value="chennai">Chennai Arterial CCTV</option>
-            <option value="indiascene">Highway Corridor CCTV</option>
-          </select>
-          <button onclick="toggleRoiCalibration()" class="px-2 py-1 bg-blue-900/40 text-blue-300 border border-blue-700/60 rounded-lg text-xs font-medium hover:bg-blue-800/50 transition">
-            📐 Adjust Zones
-          </button>
-        </div>
-      </div>
-
-      <!-- CCTV Video Container with Rock-Solid Live Image Renderer -->
-      <div class="relative flex-1 bg-black rounded-xl my-2.5 overflow-hidden flex items-center justify-center border border-slate-800 min-h-[220px]">
-        <!-- Live Polled Video Frame (Seamless, Never Collapses) -->
-        <img id="cctvFeedImg" src="/video/frame?source=uvh26" alt="Live CCTV Feed" class="w-full h-full object-contain" />
-
-        <!-- Realistic Dark Offline Overlay (shown in Safe-Mode) -->
-        <div id="cctvOfflineOverlay" class="hidden absolute inset-0 bg-[#070b12]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-amber-400 text-2xl mb-2.5 badge-pulse">
-            ⚠️
-          </div>
-          <h3 class="text-sm font-black text-amber-400 font-mono tracking-wider mb-1">
-            CCTV SIGNAL LOST — RTSP STREAM TIMEOUT
-          </h3>
-          <span class="text-[10px] bg-rose-950 text-rose-300 border border-rose-700 px-2.5 py-0.5 rounded-full font-bold font-mono mb-2">
-            WATCHDOG 3/3 TRIPPED ➔ SAFETY SUPERVISOR INTERLOCKED
-          </span>
-          <p class="text-xs text-slate-300 max-w-xs leading-relaxed font-normal">
-            Camera feed unreachable. QueueSense has automatically disengaged AI perception and switched signal to <strong>C-DAC Wi-TraC Indian Fixed-Time Fallback Plan</strong>. Zero traffic lockup.
-          </p>
-        </div>
-
-        <!-- Interactive Click-to-Draw ROI Canvas (Visible when Adjust Zones is active) -->
-        <canvas id="cctvRoiCanvas" class="hidden absolute inset-0 w-full h-full z-30 cursor-crosshair"></canvas>
-
-        <!-- Floating ROI Helper Bar -->
-        <div id="cctvRoiHelper" class="hidden absolute top-2 left-2 right-2 z-40 bg-slate-900/95 border border-sky-500/80 rounded-xl p-2 shadow-2xl backdrop-blur-md flex items-center justify-between text-xs">
-          <div class="flex items-center space-x-2">
-            <span class="font-bold text-sky-400">📐 Click 4 Points:</span>
-            <select id="roiTargetType" class="bg-slate-800 border border-slate-600 text-white text-[11px] rounded px-2 py-1">
-              <option value="waiting_queue">Waiting Queue Lane</option>
-              <option value="downstream_exit">Downstream Exit Lane</option>
-            </select>
-            <span id="roiPointCount" class="font-mono text-slate-300 text-[11px]">(0/4 points)</span>
-          </div>
-          <div class="flex items-center space-x-1.5">
-            <button onclick="resetRoiToDefault()" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-slate-300 hover:bg-slate-700">Reset Default</button>
-            <button onclick="clearRoiDraft()" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-slate-300 hover:bg-slate-700">Clear</button>
-            <button onclick="saveRoiDraft()" id="btnSaveRoi" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold disabled:opacity-50" disabled>Save</button>
-            <button onclick="toggleRoiCalibration()" class="px-2 py-1 rounded bg-rose-900/80 hover:bg-rose-800 text-rose-200">✕</button>
-          </div>
-        </div>
-
-        <!-- OSD Tag: Live Camera Watermark & Performance Badge -->
-        <div class="absolute top-2.5 left-2.5 bg-slate-950/90 backdrop-blur border border-slate-800 text-[10px] px-2.5 py-1 rounded-md flex items-center space-x-2 font-mono text-slate-300 z-10 shadow">
-          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping inline-block"></span>
-          <span id="cctvOsdCameraName">LIVE POLE CAMERA (CAM-04)</span>
-          <span class="text-slate-500">|</span>
-          <span class="text-cyan-400 font-bold" id="cctvFrameInfo">Frame 1/60 | 18.2 ms YOLO</span>
-        </div>
-      </div>
-
-      <!-- Clean Cards Below Video (Vehicle Breakdown + Exit Status) -->
-      <div class="space-y-2 pt-1">
-        <!-- 1. Vehicle Class Breakdown Bar (IRC SP:41 Weights) -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[11px] uppercase tracking-wider text-cyan-400 font-bold font-mono">Vehicle Class Breakdown (IRC SP:41)</span>
-            <span class="text-[10px] font-mono text-slate-400">YOLOv11 Detections</span>
-          </div>
-          <div class="grid grid-cols-4 gap-1.5 text-center font-mono">
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-cyan-800/60">
-              <span class="text-[10px] text-cyan-400 block font-bold">2W (0.5)</span>
-              <span id="cntBikes" class="text-sm font-black text-white">7</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-amber-800/60">
-              <span class="text-[10px] text-amber-400 block font-bold">Auto (1.0)</span>
-              <span id="cntAutos" class="text-sm font-black text-white">2</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-blue-800/60">
-              <span class="text-[10px] text-blue-400 block font-bold">Car (1.0)</span>
-              <span id="cntCars" class="text-sm font-black text-white">0</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-emerald-800/60">
-              <span class="text-[10px] text-emerald-400 block font-bold">Bus (3.0)</span>
-              <span id="cntBuses" class="text-sm font-black text-white">0</span>
-            </div>
-          </div>
-          <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium pt-1.5 mt-1.5 border-t border-slate-800/80">
-            <span>Detected: <strong id="meterTotalVehicles" class="text-white">9 Vehicles</strong></span>
-            <span>Total Load: <strong id="meterTotalPcu" class="text-cyan-300 font-bold">5.5 PCU</strong></span>
-          </div>
-        </div>
-
-        <!-- 2. Downstream Exit Sensor Status -->
-        <div id="meterExitContainer" class="bg-slate-900/90 border border-emerald-900/40 rounded-xl p-2.5 flex flex-col justify-between transition-colors duration-300">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] uppercase tracking-wider text-emerald-400 font-bold font-mono" id="meterExitHeader">Downstream Exit Sensor</span>
-            <span id="meterExitPill" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-300 border border-emerald-700">
-              🟢 CLEAR: 30% Occupied
-            </span>
-          </div>
-          <div class="my-1">
-            <div class="flex justify-between text-xs font-bold mb-1">
-              <span id="meterExitFillText" class="text-white text-xs">38% Full</span>
-              <span id="meterExitAdviceText" class="text-emerald-400 text-xs">Space Available Ahead</span>
-            </div>
-            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div id="meterExitBar" class="bg-emerald-500 h-full w-[38%] transition-all duration-500 rounded-full"></div>
-            </div>
-          </div>
-          <div class="text-[11px] text-slate-400 font-medium pt-1 border-t border-slate-800/80 flex justify-between">
-            <span>Exit Link: <strong id="meterExitReceivingLink" class="text-slate-200">Eastbound Arterial</strong></span>
-            <span id="meterExitSpillbackTag" class="text-emerald-400 font-bold">No Spillback</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ----------------------------------------------------------------------- -->
-    <!-- COLUMN 2 (CENTER — 4 COLS): 2. DECIDE: Smart Traffic Signal Control    -->
-    <!-- ----------------------------------------------------------------------- -->
-    <section class="col-span-4 bg-[#111827] border border-slate-800/80 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl overflow-hidden">
-      <!-- Section Header -->
-      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-        <div class="flex items-center space-x-2">
-          <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-            2
-          </div>
-          <div>
-            <h2 class="text-xs font-bold text-white tracking-wide uppercase">2. DECIDE: Interactive Intersection Digital Twin</h2>
-            <p class="text-[10px] text-slate-400 font-mono">60 FPS Live Intersection Simulation & Countdown</p>
-          </div>
-        </div>
-        <!-- Active Signal Phase Pill -->
-        <span id="activeSignalPhaseBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-950 text-emerald-300 border border-emerald-600 flex items-center space-x-1.5 shadow">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="activeSignalPhaseText">GREEN: NORTH-SOUTH</span>
-        </span>
-      </div>
-
-      <!-- Prominent 2-Mode Comparison Segmented Toggle -->
-      <div id="simModeToggleContainer" class="flex items-center space-x-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs my-1.5">
-        <button id="btnModeQueueSense" onclick="setSimMode('queuesense')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 bg-emerald-600 text-white shadow-md">
-          <span>✅ With QueueSense AI</span>
-          <span class="text-[10px] opacity-80">(Prevents Gridlock)</span>
-        </button>
-        <button id="btnModeTraditional" onclick="setSimMode('traditional')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 bg-slate-900 text-slate-400 hover:text-rose-300 hover:bg-rose-950/40">
-          <span>❌ Traditional Signal</span>
-          <span class="text-[10px] opacity-80">(Watch It Gridlock!)</span>
-        </button>
-      </div>
-
-      <!-- 60 FPS HTML5 Canvas Traffic Simulation -->
-      <div class="relative flex-1 bg-[#090d16] rounded-xl my-1 border border-slate-800/90 overflow-hidden flex items-center justify-center min-h-[220px]">
-        <canvas id="simCanvas" width="540" height="340" class="w-full h-full block"></canvas>
-
-        <!-- Live Signal Countdown Overlay -->
-        <div class="absolute bottom-2 left-2.5 right-2.5 bg-slate-950/90 backdrop-blur border border-slate-800 rounded-xl px-3 py-1 flex items-center justify-between text-xs font-mono">
-          <div class="flex items-center space-x-2">
-            <span class="text-slate-400">Signal Timer:</span>
-            <strong id="lblCountdownTimer" class="text-emerald-400 font-bold">Green: 18s remaining</strong>
-          </div>
-          <div class="flex items-center space-x-2 text-[11px] text-slate-400">
-            <span>Intervals:</span>
-            <span class="text-amber-400 font-semibold">Yellow: 5s</span>
-            <span>&bull;</span>
-            <span class="text-rose-400 font-semibold">All-Red: 2s</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Plain-English Decision Card -->
-      <div id="decisionCardBox" class="bg-gradient-to-r from-slate-900 to-slate-900/90 border-l-4 border-emerald-500 rounded-xl p-3 shadow-lg transition-all duration-300 mt-1">
-        <div class="flex items-center justify-between mb-1">
-          <span id="decisionCardHeadline" class="text-xs uppercase font-extrabold tracking-wider text-emerald-400 font-mono">
-            🟢 NORMAL ADAPTIVE TRAFFIC FLOW
-          </span>
-          <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">
-            Real-Time AI Decision
-          </span>
-        </div>
-        <p id="decisionCardBody" class="text-xs text-slate-200 leading-relaxed font-normal">
-          East-West arterial traffic has waiting queue (14.0 PCU). The East Exit road is 38% clear with space available ahead. QueueSense dynamically allocates green light time to clear waiting queues smoothly.
-        </p>
-      </div>
-    </section>
-
-    <!-- ----------------------------------------------------------------------- -->
-    <!-- COLUMN 3 (RIGHT — 4 COLS): 3. IMPACT: Verified Public Benefit           -->
-    <!-- ----------------------------------------------------------------------- -->
-    <section class="col-span-4 bg-[#111827] border border-slate-800/80 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl overflow-hidden">
-      <!-- Section Header -->
-      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-        <div class="flex items-center space-x-2">
-          <div class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
-            3
-          </div>
-          <div>
-            <h2 class="text-xs font-bold text-white tracking-wide uppercase">3. IMPACT: Verified Public Benefit & Deployment</h2>
-            <p class="text-[10px] text-slate-400 font-mono">Validated Across 200-Run SUMO Benchmark</p>
-          </div>
-        </div>
-        <!-- Scenario Selector -->
-        <select id="benchmarkScenarioSelect" onchange="loadScenarioBenchmark(this.value)" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none font-mono">
-          <option value="bottleneck">Bottleneck (Spillback)</option>
-          <option value="surge">Arterial Surge</option>
-          <option value="uneven">Asymmetric Demand</option>
-          <option value="balanced">Balanced Traffic</option>
-          <option value="light">Light Flow</option>
-        </select>
-      </div>
-
-      <!-- 3 Clean High-Impact Public Benefit Cards -->
-      <div class="grid grid-cols-3 gap-2 my-2">
-        <!-- Benefit Card 1 -->
-        <div class="bg-slate-900/90 border border-emerald-900/40 rounded-xl p-2 flex flex-col justify-between">
-          <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Throughput</span>
-          <div class="my-0.5">
-            <span class="text-lg font-black text-white">+43.0%</span>
-            <span class="text-[9px] text-slate-400 block font-medium">More Cars Cleared</span>
-          </div>
-          <span class="text-[9px] text-slate-400 font-mono">1,362 vs 952 veh/hr</span>
-        </div>
-
-        <!-- Benefit Card 2 -->
-        <div class="bg-slate-900/90 border border-blue-900/40 rounded-xl p-2 flex flex-col justify-between">
-          <span class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Spillback Prevention</span>
-          <div class="my-0.5">
-            <span class="text-lg font-black text-white">100%</span>
-            <span class="text-[9px] text-slate-400 block font-medium">Zero Locked Junctions</span>
-          </div>
-          <span class="text-[9px] text-emerald-400 font-mono">0s wasted green light</span>
-        </div>
-
-        <!-- Benefit Card 3 -->
-        <div class="bg-slate-900/90 border border-amber-900/40 rounded-xl p-2 flex flex-col justify-between">
-          <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Deployment Cost</span>
-          <div class="my-0.5">
-            <span class="text-lg font-black text-white">&#8377;0</span>
-            <span class="text-[9px] text-slate-400 block font-medium">New Camera Hardware</span>
-          </div>
-          <span class="text-[9px] text-amber-300 font-mono">C-DAC Safe Fallback</span>
-        </div>
-      </div>
-
-      <!-- Comparison Bar Chart: Traditional Signals vs QueueSense -->
-      <div class="flex-1 bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between overflow-hidden min-h-[160px]">
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-300 pb-1 border-b border-slate-800">
-          <div class="flex items-center space-x-1.5">
-            <button id="btnMetricThroughput" onclick="setBenchmarkMetric('throughput')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow">
-              🚗 Throughput (veh/hr)
-            </button>
-            <button id="btnMetricQueue" onclick="setBenchmarkMetric('queue')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-              ⏱️ Avg Waiting Queue (veh)
-            </button>
-          </div>
-          <span id="benchmarkSourceTag" class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.5 rounded font-mono">
-            results/benchmark_v2
-          </span>
-        </div>
-        <div class="flex-1 relative mt-1">
-          <canvas id="impactBarChart"></canvas>
-        </div>
-      </div>
-
-      <!-- How QueueSense Plugs Into Existing City Signals: 3-Step Visual Card -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 mt-2">
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between font-mono">
-          <span>How QueueSense Plugs Into Existing Signals</span>
-          <span class="text-emerald-400">100% Plug-and-Play</span>
-        </div>
-        <div class="grid grid-cols-3 gap-1.5 text-center text-[10px] font-medium font-mono">
-          <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 text-sky-300">
-            1. Pole CCTV<br><span class="text-[9px] text-slate-400">(Existing RTSP)</span>
-          </div>
-          <div class="bg-emerald-950/70 p-1.5 rounded-lg border border-emerald-700 text-emerald-300 shadow">
-            ➔ 2. QueueSense AI<br><span class="text-[9px] text-emerald-400">(Perception + Gating)</span>
-          </div>
-          <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 text-amber-300">
-            ➔ 3. Signal Cabinet<br><span class="text-[9px] text-slate-400">(C-DAC Wi-TraC)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================================================= -->
-      <!-- STAGE 5: 3-TAB EVALUATION PANEL (Benchmark | Emergency Flush | Perception) -->
-      <!-- ========================================================================= -->
-      <div class="bg-slate-900/90 border border-violet-900/40 rounded-xl p-2.5 mt-2">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center space-x-2">
-            <span class="w-5 h-5 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-xs">📊</span>
-            <span class="text-xs font-bold text-violet-300 uppercase tracking-wider">Stage 5: Evaluation Suite — Benchmark / Emergency Flush / Perception</span>
-          </div>
-        </div>
-
-        <!-- Tab Buttons -->
-        <div class="flex items-center space-x-1 bg-slate-950/80 p-1 rounded-lg border border-slate-800 text-xs mb-2">
-          <button onclick="showEvalTab('benchmark')" id="tabBenchmark" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-violet-600 text-white shadow-md">
-            📈 Benchmark (6 Controllers)
-          </button>
-          <button onclick="showEvalTab('emergency')" id="tabEmergency" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-rose-300 hover:bg-rose-950/40">
-            🚑 Emergency Flush
-          </button>
-          <button onclick="showEvalTab('perception')" id="tabPerception" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-cyan-300 hover:bg-cyan-950/40">
-            🔍 Perception Calibration
-          </button>
-        </div>
-
-        <!-- Tab Content: Benchmark -->
-        <div id="evalTabBenchmark" class="space-y-2">
-          <!-- Comparison Bar Chart: Traditional Signals vs QueueSense -->
-          <div class="flex-1 bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between overflow-hidden min-h-[160px]">
-            <div class="flex items-center justify-between text-xs font-semibold text-slate-300 pb-1 border-b border-slate-800">
-              <div class="flex items-center space-x-1.5">
-                <button id="btnMetricThroughput" onclick="setBenchmarkMetric('throughput')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow">
-                  🚗 Throughput (veh/hr)
-                </button>
-                <button id="btnMetricQueue" onclick="setBenchmarkMetric('queue')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-                  ⏱️ Avg Waiting Queue (veh)
-                </button>
-                <button id="btnMetricSpillback" onclick="setBenchmarkMetric('spillback')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-                  🌊 Spillback Steps
-                </button>
-              </div>
-              <span id="benchmarkSourceTag" class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.5 rounded font-mono">
-                results/benchmark_v2
-              </span>
-            </div>
-            <div class="flex-1 relative mt-1">
-              <canvas id="impactBarChart"></canvas>
-            </div>
-          </div>
-
-          <!-- Benchmark Data Table (Monospace) -->
-          <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-2 overflow-x-auto max-h-60">
-            <table id="benchmarkTable" class="w-full text-[9px] font-mono text-slate-300">
-              <thead>
-                <tr class="border-b border-slate-700 text-violet-400">
-                  <th class="text-left p-1.5">Controller</th>
-                  <th class="text-right p-1.5">Throughput (veh/hr)</th>
-                  <th class="text-right p-1.5">Queue (veh)</th>
-                  <th class="text-right p-1.5">Spillback Steps</th>
-                  <th class="text-right p-1.5">Runs</th>
-                </tr>
-              </thead>
-              <tbody id="benchmarkTableBody">
-                <tr class="border-b border-slate-800/50"><td colspan="5" class="text-center p-2 text-slate-500">Loading...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Tab Content: Emergency Flush -->
-        <div id="evalTabEmergency" class="hidden space-y-2">
-          <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-2 overflow-x-auto max-h-80">
-            <table id="emergencyFlushTable" class="w-full text-[9px] font-mono text-slate-300">
-              <thead>
-                <tr class="border-b border-slate-700 text-rose-400">
-                  <th class="text-left p-1.5">Strategy</th>
-                  <th class="text-right p-1.5">Scenario</th>
-                  <th class="text-right p-1.5">Travel Time (s)</th>
-                  <th class="text-right p-1.5">Stops</th>
-                  <th class="text-right p-1.5">Non-Priority Delay (s)</th>
-                  <th class="text-right p-1.5">Recovery (s)</th>
-                </tr>
-              </thead>
-              <tbody id="emergencyFlushTableBody">
-                <tr class="border-b border-slate-800/50"><td colspan="6" class="text-center p-2 text-slate-500">Loading...</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-2 text-[10px] font-mono">
-            <div class="text-rose-400 font-bold mb-1">Aggregate Statistics</div>
-            <pre id="emergencyFlushAggregate" class="text-slate-400 whitespace-pre-wrap">Loading...</pre>
-          </div>
-        </div>
-
-        <!-- Tab Content: Perception Calibration -->
-        <div id="evalTabPerception" class="hidden space-y-2">
-          <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-2 overflow-x-auto max-h-60">
-            <table id="perceptionTable" class="w-full text-[9px] font-mono text-slate-300">
-              <thead>
-                <tr class="border-b border-slate-700 text-cyan-400">
-                  <th class="text-left p-1.5">Metric</th>
-                  <th class="text-right p-1.5">Value</th>
-                  <th class="text-right p-1.5">Target / Threshold</th>
-                </tr>
-              </thead>
-              <tbody id="perceptionTableBody">
-                <tr class="border-b border-slate-800/50"><td colspan="3" class="text-center p-2 text-slate-500">Loading...</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-2 text-[10px] font-mono">
-            <div class="text-cyan-400 font-bold mb-1">IRC:106-1990 PCU Factor Validation</div>
-            <pre id="perceptionPcuValidation" class="text-slate-400 whitespace-pre-wrap">Loading...</pre>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================================================= -->
-      <!-- STAGE 5: Controller S + Emergency Flush + Junction Passport              -->
-      <!-- ========================================================================= -->
-      <div class="space-y-2 mt-2" id="stage5Section">
-        <!-- Stage 5 Header -->
-        <div class="bg-slate-900/90 border border-violet-900/40 rounded-xl p-2.5">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center space-x-2">
-              <span class="w-5 h-5 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-xs">S</span>
-              <span class="text-xs font-bold text-violet-300 uppercase tracking-wider">Stage 5: Controller S — 4-Regime Capacity-Aware Selector</span>
-            </div>
-          </div>
-
-          <!-- Controller S Mode Toggle Buttons -->
-          <div class="flex items-center space-x-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs mb-2">
-            <button onclick="setSelectorMode('auto')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-violet-600 text-white shadow-md" id="btnSelectorAuto">
-              🔄 AUTO (4-Regime)
-            </button>
-            <button onclick="setSelectorMode('clear')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-emerald-300 hover:bg-emerald-950/40" id="btnSelectorClear">
-              🟢 CLEAR
-            </button>
-            <button onclick="setSelectorMode('elevated')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-amber-300 hover:bg-amber-950/40" id="btnSelectorElevated">
-              🟡 ELEVATED
-            </button>
-            <button onclick="setSelectorMode('blocked')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-rose-300 hover:bg-rose-950/40" id="btnSelectorBlocked">
-              🔴 BLOCKED
-            </button>
-            <button onclick="setSelectorMode('unknown')" class="flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-slate-300 hover:bg-slate-700" id="btnSelectorUnknown">
-              ❓ UNKNOWN
-            </button>
-          </div>
-
-          <!-- Controller S Status Display -->
-          <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-violet-400 block font-bold">Capacity Status</span>
-              <span id="selectorStatus" class="text-white font-black text-lg">UNKNOWN</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-violet-400 block font-bold">Selected Mode</span>
-              <span id="selectorMode" class="text-white font-black text-lg">FALLBACK</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-violet-400 block font-bold">Max Downstream Occ.</span>
-              <span id="selectorOccupancy" class="text-white font-black text-lg">0.00</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-violet-400 block font-bold">Persistence Steps</span>
-              <span id="selectorPersistence" class="text-white font-black text-lg">0/2</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 col-span-2">
-              <span class="text-violet-400 block font-bold">Gate Intervened</span>
-              <span id="selectorGateIntervened" class="text-white font-black">No</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 col-span-2">
-              <span class="text-violet-400 block font-bold">Applied Phase / Reason</span>
-              <span id="selectorReason" class="text-slate-300 text-[9px]">Waiting for data...</span>
-            </div>
-          </div>
-
-          <!-- DecisionReceipt Audit Trail -->
-          <div class="mt-2 bg-slate-950/80 p-2 rounded-lg border border-slate-800 max-h-40 overflow-y-auto">
-            <div class="text-[10px] text-violet-400 font-bold uppercase tracking-wider mb-1">DecisionReceipt Audit Log (Last 10)</div>
-            <div id="selectorReceipts" class="text-[9px] font-mono text-slate-300 space-y-0.5">
-              <div class="text-slate-500">No receipts yet</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Emergency Flush Coordinator -->
-        <div class="bg-slate-900/90 border border-rose-900/40 rounded-xl p-2.5">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center space-x-2">
-              <span class="w-5 h-5 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs">🚑</span>
-              <span class="text-xs font-bold text-rose-300 uppercase tracking-wider">Emergency Flush Coordinator — Ambulance Priority Corridor</span>
-            </div>
-          </div>
-          <div class="flex items-center space-x-2 mb-2">
-            <button onclick="triggerEmergencyFlush('J1', 'art_east_1')" class="flex-1 py-1.5 px-2 rounded-lg font-bold bg-rose-600 text-white shadow hover:bg-rose-500 transition">
-              🚨 Trigger Ambulance Flush (J1→J2)
-            </button>
-            <button onclick="triggerEmergencyFlush('J2', 'art_east_2')" class="flex-1 py-1.5 px-2 rounded-lg font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-              🚨 Trigger Ambulance Flush (J2→J3)
-            </button>
-          </div>
-          <div class="grid grid-cols-3 gap-2 text-[10px] font-mono">
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-rose-400 block font-bold">J1→J2 Status</span>
-              <span id="flushJ1Status" class="text-white font-black">Monitoring</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-rose-400 block font-bold">J2→J3 Status</span>
-              <span id="flushJ2Status" class="text-white font-black">Monitoring</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-              <span class="text-rose-400 block font-bold">Total Flushes</span>
-              <span id="flushTotal" class="text-white font-black">0</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Junction Readiness Passport -->
-        <div class="bg-slate-900/90 border border-amber-900/40 rounded-xl p-2.5">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center space-x-2">
-              <span class="w-5 h-5 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">📋</span>
-              <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Junction Readiness Passport — 8-Check Pre-Commissioning Audit</span>
-            </div>
-            <button onclick="loadJunctionPassport()" class="px-2 py-1 bg-amber-900/40 text-amber-300 border border-amber-700/60 rounded-lg text-xs font-medium hover:bg-amber-800/50 transition">
-              🔄 Refresh Passport
-            </button>
-          </div>
-          <div id="passportContainer" class="space-y-1.5">
-            <div class="text-[10px] text-slate-400 font-mono">Click Refresh to load 8-check audit for J1, J2, J3</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ========================================================================= -->
-  <!-- JAVASCRIPT: TRAFFIC CANVAS ENGINE, POLLING, INTERACTIVE CALIBRATION       -->
-  <!-- ========================================================================= -->
   <script>
-    let impactChart = null;
-    let currentCctvSource = 'uvh26';
-    let isDrawingRoi = false;
-    let roiPoints = [];
-    let activePreset = 'normal';
-    let currentBenchmarkMetric = 'throughput';
-    let lastBenchmarkData = null;
-    let trafficSim = null;
+    // =============================================================================
+    // APPLICATION INITIALIZATION
+    // =============================================================================
 
-    // -------------------------------------------------------------------------
-    // 1. Column 1: Non-Overlapping Live CCTV Frame Polling
-    // -------------------------------------------------------------------------
-    let isFetchingFrame = false;
-    function fetchNextFrame() {
-      if (activePreset === 'watchdog') {
-        setTimeout(fetchNextFrame, 400);
-        return;
-      }
-      if (isFetchingFrame) return;
-      isFetchingFrame = true;
-      const img = document.getElementById('cctvFeedImg');
-      const nextImg = new Image();
-      const url = `/video/frame?source=${currentCctvSource}&t=${Date.now()}`;
-      nextImg.onload = () => {
-        if (img) img.src = nextImg.src;
-        isFetchingFrame = false;
-        setTimeout(fetchNextFrame, 180);
+    let threeScene = null;
+    let hud = null;
+    let loadingProgress = 0;
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initApp();
+    });
+
+    async function initApp() {
+      updateLoadingProgress(10, 'Loading 3D engine...');
+
+      // Wait for Three.js to be available
+      await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          if (typeof THREE !== 'undefined') {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 50);
+      });
+
+      updateLoadingProgress(30, 'Initializing Digital Twin...');
+
+      // Initialize Three.js scene
+      const canvasContainer = document.getElementById('three-canvas-container');
+      threeScene = initDigitalTwin(canvasContainer);
+
+      updateLoadingProgress(60, 'Setting up HUD components...');
+
+      // Initialize HUD
+      hud = initHUD();
+
+      // Wire up callbacks between scene and HUD
+      threeScene.onPresetChange = (preset) => {
+        const presetLabels = {
+          isometric: '📐 Isometric',
+          topDown: '🛰️ Top-Down',
+          driver: '🎮 Driver View'
+        };
+        console.log('Camera preset changed to:', preset);
       };
-      nextImg.onerror = () => {
-        isFetchingFrame = false;
-        setTimeout(fetchNextFrame, 400);
+
+      threeScene.onScenarioChange = (scenario) => {
+        const scenarioNames = {
+          normal: 'Normal Traffic Flow',
+          surge: 'West Surge',
+          spillback: 'Exit Road Jammed',
+          emergency: 'Ambulance Priority',
+          sensor_fault: 'Sensor Fault',
+          recovery: 'Recovery'
+        };
+        console.log('Scenario changed to:', scenario);
       };
-      nextImg.src = url;
-    }
-    fetchNextFrame();
 
-    async function switchCctvFeed(source) {
-      currentCctvSource = source;
-      const osd = document.getElementById('cctvOsdCameraName');
-      if (source === 'chennai') {
-        osd.innerText = 'LIVE CHENNAI CCTV (ARTERIAL)';
-      } else if (source === 'indiascene') {
-        osd.innerText = 'LIVE HIGHWAY CORRIDOR CCTV';
-      } else {
-        osd.innerText = 'LIVE POLE CAMERA (CAM-04)';
+      threeScene.onModeChange = (isQueueSense) => {
+        console.log('Mode changed to:', isQueueSense ? 'QueueSense AI' : 'Traditional');
+        hud.setMode(isQueueSense ? 'queuesense' : 'traditional');
+      };
+
+      threeScene.onSignalUpdate = (signal) => {
+        updateDecisionReceipt(signal);
+      };
+
+      threeScene.onZoneUpdate = (zones) => {
+        console.log('AI zones updated:', zones);
+      };
+
+      threeScene.onTelemetry = (stats) => {
+        updateTelemetryStats(stats);
+      };
+
+      // Load initial data
+      updateLoadingProgress(80, 'Loading benchmark data...');
+      await hud.loadAllData();
+
+      updateLoadingProgress(100, 'Ready!');
+      setTimeout(() => {
+        fadeOutLoading();
+      }, 300);
+    }
+
+    function updateLoadingProgress(percent, message) {
+      loadingProgress = percent;
+      const progressEl = document.getElementById('loadingProgress');
+      if (progressEl) {
+        progressEl.textContent = `${message} ${percent}%`;
+      }
+    }
+
+    function fadeOutLoading() {
+      const loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        loadingScreen.classList.add('fade-out');
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }
+    }
+
+    // =============================================================================
+    // REAL-TIME STATE UPDATES
+    // =============================================================================
+
+    // Polling for real-time state updates
+    let statePollInterval = null;
+    let lastState = null;
+
+    function startStatePolling() {
+      if (statePollInterval) return;
+
+      statePollInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/state');
+          const state = await response.json();
+
+          if (state !== lastState) {
+            updateFromAPI(state);
+            lastState = state;
+          }
+        } catch (e) {
+          console.error('State poll error:', e);
+        }
+      }, 1000); // 1 Hz polling
+    }
+
+    function updateFromAPI(state) {
+      // Update decision receipt
+      const action = state.action || {};
+      const simplified = state.simplified || {};
+      const pressures = state.pressures || {};
+
+      hud.updateDecisionReceipt({
+        phase: action.phase ? `Phase: ${action.phase}` : 'Unknown',
+        countdown: action.countdown_label || `${Math.round(action.duration || 0)}s remaining`,
+        queuePCU: simplified.queue_pcu || 0,
+        queueVeh: simplified.queue_vehicles || 0,
+        exitStatus: simplified.exit_status || 'CLEAR',
+        body: simplified.decision_body || 'System running normally.',
+        headline: simplified.decision_headline || 'NORMAL ADAPTIVE TRAFFIC FLOW',
+        iconType: simplified.decision_class || 'normal',
+      });
+
+      // Update HUD pressures
+      hud.state.pressures = pressures;
+
+      // Update audit log
+      if (state.audit_log) {
+        hud.state.auditLog = state.audit_log;
       }
 
-      try {
-        await fetch('/api/stream/source', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ source })
-        });
-      } catch (e) {
-        console.error('Error switching feed:', e);
+      // Update scenario pills
+      if (state.active_preset) {
+        hud.state.currentScenario = state.active_preset;
+        hud.updateScenarioPills();
       }
-      isFetchingFrame = false;
-      fetchNextFrame();
     }
 
-    // -------------------------------------------------------------------------
-    // 2. Interactive Click-to-Draw 4-Point ROI Calibration
-    // -------------------------------------------------------------------------
+    function updateDecisionReceipt(signal) {
+      // Update from Three.js signal updates
+      const phaseMap = {
+        'NORTH_SOUTH': 'NORTH-SOUTH GREEN',
+        'EAST_WEST': 'EAST-WEST GREEN',
+        'YELLOW_CLEARANCE': 'YELLOW CLEARANCE',
+        'ALL_RED': 'ALL-RED SAFETY',
+      };
+
+      hud.updateDecisionReceipt({
+        phase: phaseMap[signal.phase] || signal.phase || 'GREEN: NORTH-SOUTH',
+        countdown: `${Math.round(signal.duration || 20)}s`,
+        headline: signal.phase === 'NORTH_SOUTH' ? 'NORMAL ADAPTIVE TRAFFIC FLOW' :
+                  signal.phase === 'EAST_WEST' ? 'SERVING EAST-WEST TRAFFIC' :
+                  signal.phase === 'YELLOW_CLEARANCE' ? 'YELLOW CLEARANCE' :
+                  signal.phase === 'ALL_RED' ? 'SAFETY CLEARANCE' : 'NORMAL FLOW',
+        iconType: signal.phase === 'YELLOW_CLEARANCE' ? 'elevated' :
+                  signal.phase === 'ALL_RED' ? 'blocked' :
+                  signal.phase === 'EAST_WEST' ? 'normal' : 'normal',
+        body: signal.reason || 'Signal phase active',
+      });
+    }
+
+    function updateTelemetryStats(stats) {
+      // Update FPS counter in HUD (if visible)
+      const fpsElement = document.querySelector('[data-stat="fps"]');
+      if (fpsElement) {
+        fpsElement.textContent = stats.fps.toFixed(0);
+      }
+
+      hud.state.telemetry = stats;
+    }
+
+    // =============================================================================
+    // GLOBAL EVENT HANDLERS (called from HTML onclick)
+    // =============================================================================
+
+    function triggerPreset(presetId) {
+      hud.setScenario(presetId);
+      threeScene.setScenario(presetId);
+    }
+
+    function switchCctvFeed(source) {
+      console.log('Switching CCTV feed to:', source);
+    }
+
     function toggleRoiCalibration() {
-      isDrawingRoi = !isDrawingRoi;
-      const canvas = document.getElementById('cctvRoiCanvas');
-      const helper = document.getElementById('cctvRoiHelper');
-
-      if (isDrawingRoi) {
-        canvas.classList.remove('hidden');
-        helper.classList.remove('hidden');
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-        roiPoints = [];
-        updateRoiCounter();
-        canvas.onclick = handleRoiClick;
-      } else {
-        canvas.classList.add('hidden');
-        helper.classList.add('hidden');
-        roiPoints = [];
-      }
+      console.log('ROI Calibration toggle');
     }
 
-    function handleRoiClick(e) {
-      if (roiPoints.length >= 4) return;
-      const rect = e.target.getBoundingClientRect();
-      const normX = Math.round(((e.clientX - rect.left) / rect.width) * 1000) / 1000;
-      const normY = Math.round(((e.clientY - rect.top) / rect.height) * 1000) / 1000;
-      roiPoints.push([normX, normY]);
-      redrawRoiCanvas();
-      updateRoiCounter();
-    }
-
-    function redrawRoiCanvas() {
-      const canvas = document.getElementById('cctvRoiCanvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (roiPoints.length === 0) return;
-      const target = document.getElementById('roiTargetType').value;
-      const isQueue = target === 'waiting_queue';
-      const color = isQueue ? '#38bdf8' : '#10b981';
-
-      ctx.fillStyle = color;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.5;
-
-      ctx.beginPath();
-      roiPoints.forEach((pt, i) => {
-        const px = pt[0] * canvas.width;
-        const py = pt[1] * canvas.height;
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      });
-
-      if (roiPoints.length === 4) {
-        ctx.closePath();
-        ctx.fillStyle = isQueue ? 'rgba(56, 189, 248, 0.35)' : 'rgba(16, 185, 129, 0.35)';
-        ctx.fill();
-        document.getElementById('btnSaveRoi').disabled = false;
-      } else {
-        document.getElementById('btnSaveRoi').disabled = true;
-      }
-      ctx.stroke();
-
-      roiPoints.forEach((pt, i) => {
-        const px = pt[0] * canvas.width;
-        const py = pt[1] * canvas.height;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(px, py, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = color;
-        ctx.font = 'bold 12px monospace';
-        ctx.fillText(`P${i+1}`, px + 8, py - 4);
-      });
-    }
-
-    function updateRoiCounter() {
-      document.getElementById('roiPointCount').innerText = `(${roiPoints.length}/4 points)`;
+    function resetRoiToDefault() {
+      console.log('Resetting ROI to default');
     }
 
     function clearRoiDraft() {
-      roiPoints = [];
-      redrawRoiCanvas();
-      updateRoiCounter();
+      console.log('Clearing ROI draft');
     }
 
-    async function resetRoiToDefault() {
-      try {
-        await fetch('/api/roi/reset', { method: 'POST' });
-        clearRoiDraft();
-        toggleRoiCalibration();
-        isFetchingFrame = false;
-        fetchNextFrame();
-        alert('Road zones successfully reset to default coordinates!');
-      } catch (e) {
-        console.error(e);
-      }
+    function saveRoiDraft() {
+      console.log('Saving ROI draft');
     }
 
-    async function saveRoiDraft() {
-      if (roiPoints.length !== 4) {
-        alert('Please click exactly 4 points on the road to define the lane polygon.');
-        return;
-      }
-      const target = document.getElementById('roiTargetType').value;
-      try {
-        const res = await fetch('/api/roi');
-        const cfg = await res.json();
-        if (target === 'waiting_queue') {
-          cfg.upstream_rois['waiting_queue'] = roiPoints;
-          cfg.upstream_rois['north'] = roiPoints;
-        } else {
-          cfg.downstream_rois['downstream_exit'] = roiPoints;
-          cfg.downstream_rois['art_east'] = roiPoints;
-        }
-        await fetch('/api/roi', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cfg)
-        });
-        clearRoiDraft();
-        toggleRoiCalibration();
-        isFetchingFrame = false;
-        fetchNextFrame();
-        alert('Zone calibration successfully saved to detector!');
-      } catch (e) {
-        console.error('Error saving ROI:', e);
-      }
+    function setSimMode(mode) {
+      hud.setMode(mode);
+      threeScene.setMode(mode === 'queuesense');
     }
 
-    // -------------------------------------------------------------------------
-    // 3. Column 2: 60 FPS Canvas Traffic Simulation Engine
-    // -------------------------------------------------------------------------
-    class TrafficSimEngine {
-      constructor(canvasId) {
-        this.canvas = document.getElementById(canvasId);
-        this.ctx = this.canvas.getContext('2d');
-        this.w = this.canvas.width;
-        this.h = this.canvas.height;
-        this.cx = this.w / 2;
-        this.cy = this.h / 2;
-        this.roadW = 100;
-
-        // Signal State
-        this.phase = 'NORTH_SOUTH';
-        this.timer = 18;
-        this.isEastJammed = false;
-        this.isSafeMode = false;
-        this.mode = 'queuesense'; // 'queuesense' or 'traditional'
-
-        // Vehicle list
-        this.vehicles = [];
-        this.lastSpawn = 0;
-
-        setInterval(() => this.tickTimer(), 1000);
-        this.loop = this.loop.bind(this);
-        requestAnimationFrame(this.loop);
-      }
-
-      setMode(m) {
-        this.mode = m;
-      }
-
-      setScenario(preset) {
-        if (preset === 'spillback') {
-          this.isEastJammed = true;
-          this.isSafeMode = false;
-          if (this.mode === 'queuesense') {
-            this.phase = 'NORTH_SOUTH';
-            this.timer = 18;
-          } else {
-            // Traditional keeps EW green despite jam
-            this.phase = 'EAST_WEST';
-            this.timer = 16;
-          }
-        } else if (preset === 'watchdog') {
-          this.isSafeMode = true;
-          this.isEastJammed = false;
-        } else {
-          this.isEastJammed = false;
-          this.isSafeMode = false;
-        }
-      }
-
-      tickTimer() {
-        this.timer--;
-        if (this.timer <= 0) {
-          if (this.phase === 'NORTH_SOUTH') {
-            this.phase = 'YELLOW_CLEARANCE';
-            this.timer = 5;
-          } else if (this.phase === 'YELLOW_CLEARANCE') {
-            this.phase = 'ALL_RED';
-            this.timer = 2;
-          } else if (this.phase === 'ALL_RED') {
-            if (this.isEastJammed && this.mode === 'queuesense') {
-              // QueueSense skips East-West entirely to protect junction
-              this.phase = 'NORTH_SOUTH';
-              this.timer = 18;
-            } else {
-              this.phase = 'EAST_WEST';
-              this.timer = 16;
-            }
-          } else if (this.phase === 'EAST_WEST') {
-            this.phase = 'YELLOW_CLEARANCE';
-            this.timer = 5;
-          }
-        }
-        this.updateUiLabels();
-      }
-
-      updateUiLabels() {
-        const badge = document.getElementById('activeSignalPhaseBadge');
-        const badgeText = document.getElementById('activeSignalPhaseText');
-        const lblTimer = document.getElementById('lblCountdownTimer');
-
-        if (this.phase === 'NORTH_SOUTH') {
-          badgeText.innerText = 'GREEN: NORTH-SOUTH';
-          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-950 text-emerald-300 border border-emerald-600 flex items-center space-x-1.5 shadow';
-          lblTimer.innerText = `Green: ${this.timer}s remaining`;
-          lblTimer.className = 'text-emerald-400 font-bold';
-        } else if (this.phase === 'EAST_WEST') {
-          badgeText.innerText = this.isEastJammed && this.mode === 'traditional' ? '❌ UNCONTROLLED GREEN: EAST-WEST' : 'GREEN: EAST-WEST';
-          badge.className = this.isEastJammed && this.mode === 'traditional'
-            ? 'px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-rose-950 text-rose-300 border border-rose-600 flex items-center space-x-1.5 shadow badge-pulse'
-            : 'px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-950 text-emerald-300 border border-emerald-600 flex items-center space-x-1.5 shadow';
-          lblTimer.innerText = `Green: ${this.timer}s remaining`;
-          lblTimer.className = 'text-emerald-400 font-bold';
-        } else if (this.phase === 'YELLOW_CLEARANCE') {
-          badgeText.innerText = 'YELLOW CLEARANCE';
-          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-amber-950 text-amber-300 border border-amber-600 flex items-center space-x-1.5 shadow';
-          lblTimer.innerText = `Yellow Clearance: ${this.timer}s`;
-          lblTimer.className = 'text-amber-400 font-bold';
-        } else if (this.phase === 'ALL_RED') {
-          badgeText.innerText = 'ALL-RED INTERLOCK';
-          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-rose-950 text-rose-300 border border-rose-600 flex items-center space-x-1.5 shadow';
-          lblTimer.innerText = `All-Red Safety: ${this.timer}s`;
-          lblTimer.className = 'text-rose-400 font-bold';
-        }
-      }
-
-      spawnVehicle() {
-        const now = Date.now();
-        if (now - this.lastSpawn < 1200) return;
-        this.lastSpawn = now;
-
-        const types = [
-          { type: 'car', len: 28, wid: 15, color: '#3b82f6', speed: 2.2 },
-          { type: 'car_silver', len: 28, wid: 15, color: '#94a3b8', speed: 2.1 },
-          { type: 'bus', len: 52, wid: 20, color: '#f97316', speed: 1.6 },
-          { type: 'auto', len: 22, wid: 13, color: '#eab308', speed: 1.9 },
-          { type: 'bike', len: 16, wid: 8, color: '#06b6d4', speed: 2.5 }
-        ];
-
-        const pick = types[Math.floor(Math.random() * types.length)];
-        const dirs = ['N_TO_S', 'S_TO_N', 'W_TO_E'];
-        const dir = dirs[Math.floor(Math.random() * dirs.length)];
-
-        let x = 0, y = 0, vx = 0, vy = 0;
-        if (dir === 'N_TO_S') {
-          x = this.cx - 24;
-          y = -40;
-          vy = pick.speed;
-        } else if (dir === 'S_TO_N') {
-          x = this.cx + 24;
-          y = this.h + 40;
-          vy = -pick.speed;
-        } else if (dir === 'W_TO_E') {
-          x = -40;
-          y = this.cy + 22;
-          vx = pick.speed;
-        }
-
-        this.vehicles.push({
-          ...pick,
-          dir,
-          x,
-          y,
-          vx,
-          vy,
-          stopped: false
-        });
-      }
-
-      update() {
-        this.spawnVehicle();
-
-        const stopNS_Top = this.cy - this.roadW / 2 - 16;
-        const stopNS_Bottom = this.cy + this.roadW / 2 + 16;
-        const stopEW_Left = this.cx - this.roadW / 2 - 16;
-
-        const isNsGreen = this.phase === 'NORTH_SOUTH';
-        const isEwGreen = this.phase === 'EAST_WEST';
-
-        this.vehicles.forEach((v, idx) => {
-          let shouldStop = false;
-
-          if (v.dir === 'N_TO_S') {
-            if (!isNsGreen && v.y < stopNS_Top && v.y > stopNS_Top - 110) {
-              shouldStop = true;
-            }
-            // Traditional mode gridlock: if cars trapped in junction box, North cars are blocked!
-            if (this.isEastJammed && this.mode === 'traditional' && isNsGreen) {
-              if (v.y > stopNS_Top - 25 && v.y < this.cy - 10) {
-                shouldStop = true;
-              }
-            }
-          } else if (v.dir === 'S_TO_N') {
-            if (!isNsGreen && v.y > stopNS_Bottom && v.y < stopNS_Bottom + 110) {
-              shouldStop = true;
-            }
-            if (this.isEastJammed && this.mode === 'traditional' && isNsGreen) {
-              if (v.y < stopNS_Bottom + 25 && v.y > this.cy + 10) {
-                shouldStop = true;
-              }
-            }
-          } else if (v.dir === 'W_TO_E') {
-            if (this.isEastJammed) {
-              if (this.mode === 'queuesense') {
-                // QueueSense holds West cars cleanly at red stop line!
-                if (v.x < stopEW_Left && v.x > stopEW_Left - 130) {
-                  shouldStop = true;
-                }
-              } else {
-                // Traditional mode: West cars enter on green, but exit is full, so they stop inside KEEP CLEAR box!
-                if (v.x > this.cx - 20 && v.x < this.cx + 40) {
-                  shouldStop = true;
-                }
-              }
-            } else {
-              if (!isEwGreen && v.x < stopEW_Left && v.x > stopEW_Left - 130) {
-                shouldStop = true;
-              }
-            }
-          }
-
-          // Follow leader in lane
-          for (let j = 0; j < this.vehicles.length; j++) {
-            if (idx === j) continue;
-            const o = this.vehicles[j];
-            if (o.dir === v.dir) {
-              if (v.dir === 'N_TO_S' && o.y > v.y && o.y - v.y < v.len + 15) shouldStop = true;
-              if (v.dir === 'S_TO_N' && o.y < v.y && v.y - o.y < v.len + 15) shouldStop = true;
-              if (v.dir === 'W_TO_E' && o.x > v.x && o.x - v.x < v.len + 18) shouldStop = true;
-            }
-          }
-
-          if (shouldStop) {
-            v.stopped = true;
-          } else {
-            v.stopped = false;
-            v.x += v.vx;
-            v.y += v.vy;
-          }
-        });
-
-        this.vehicles = this.vehicles.filter(v =>
-          v.x > -60 && v.x < this.w + 60 && v.y > -60 && v.y < this.h + 60
-        );
-      }
-
-      draw() {
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.w, this.h);
-
-        // 1. Dark Asphalt Roads
-        ctx.fillStyle = '#131b2e';
-        // Vertical (North-South) Road
-        ctx.fillRect(this.cx - this.roadW / 2, 0, this.roadW, this.h);
-        // Horizontal (East-West) Road
-        ctx.fillRect(0, this.cy - this.roadW / 2, this.w, this.roadW);
-
-        // 2. Dashed Lane Dividers
-        ctx.strokeStyle = '#475569';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        // North & South
-        ctx.moveTo(this.cx, 0); ctx.lineTo(this.cx, this.cy - this.roadW / 2);
-        ctx.moveTo(this.cx, this.cy + this.roadW / 2); ctx.lineTo(this.cx, this.h);
-        // East & West
-        ctx.moveTo(0, this.cy); ctx.lineTo(this.cx - this.roadW / 2, this.cy);
-        ctx.moveTo(this.cx + this.roadW / 2, this.cy); ctx.lineTo(this.w, this.cy);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // 3. Zebra Crossings
-        this.drawZebraCrossing(this.cx - this.roadW / 2, this.cy - this.roadW / 2 - 12, this.roadW, 8, true);
-        this.drawZebraCrossing(this.cx - this.roadW / 2, this.cy + this.roadW / 2 + 4, this.roadW, 8, true);
-        this.drawZebraCrossing(this.cx - this.roadW / 2 - 12, this.cy - this.roadW / 2, 8, this.roadW, false);
-        this.drawZebraCrossing(this.cx + this.roadW / 2 + 4, this.cy - this.roadW / 2, 8, this.roadW, false);
-
-        // 4. Yellow Hatched KEEP CLEAR Junction Box
-        const boxX = this.cx - this.roadW / 2;
-        const boxY = this.cy - this.roadW / 2;
-
-        const isGridlocked = this.isEastJammed && this.mode === 'traditional';
-        ctx.fillStyle = isGridlocked ? 'rgba(153, 27, 27, 0.45)' : '#0d1526';
-        ctx.fillRect(boxX, boxY, this.roadW, this.roadW);
-
-        ctx.strokeStyle = isGridlocked ? '#ef4444' : '#eab308';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(boxX, boxY, this.roadW, this.roadW);
-
-        // Criss-cross diagonal hatching
-        ctx.strokeStyle = isGridlocked ? 'rgba(239, 68, 68, 0.45)' : 'rgba(234, 179, 8, 0.40)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(boxX, boxY); ctx.lineTo(boxX + this.roadW, boxY + this.roadW);
-        ctx.moveTo(boxX + this.roadW, boxY); ctx.lineTo(boxX, boxY + this.roadW);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = isGridlocked ? '#fca5a5' : '#fef08a';
-        ctx.font = 'bold 11px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(isGridlocked ? 'BOX BLOCKED' : 'KEEP CLEAR', this.cx, this.cy + 4);
-
-        // 5. Stopped Vehicles on Jammed East Exit Road (beyond junction, x > cx + 50)
-        if (this.isEastJammed) {
-          const jamXStart = this.cx + this.roadW / 2 + 12;
-          const jamColors = ['#ef4444', '#dc2626', '#b91c1c', '#f87171', '#ef4444'];
-          for (let i = 0; i < 5; i++) {
-            const jx = jamXStart + i * 36;
-            const jy = this.cy + 22;
-            if (jx < this.w - 10) {
-              // Draw stopped car on exit
-              ctx.fillStyle = jamColors[i];
-              ctx.fillRect(jx, jy - 7, 26, 14);
-              // Windshield
-              ctx.fillStyle = '#0f172a';
-              ctx.fillRect(jx + 14, jy - 5, 5, 10);
-              // Glowing red brake lights
-              ctx.shadowColor = '#ff0000';
-              ctx.shadowBlur = 8;
-              ctx.fillStyle = '#ff1111';
-              ctx.fillRect(jx, jy - 6, 3, 3);
-              ctx.fillRect(jx, jy + 3, 3, 3);
-              ctx.shadowBlur = 0;
-            }
-          }
-        }
-
-        // 6. Draw Animated Moving & Waiting Vehicles
-        this.vehicles.forEach(v => {
-          ctx.save();
-          ctx.translate(v.x, v.y);
-
-          // Body
-          ctx.fillStyle = v.color;
-          ctx.fillRect(-v.len / 2, -v.wid / 2, v.len, v.wid);
-
-          // Details by vehicle type
-          if (v.type === 'bus') {
-            // Bus windows
-            ctx.fillStyle = '#1e293b';
-            for (let i = -v.len / 2 + 8; i < v.len / 2 - 8; i += 9) {
-              ctx.fillRect(i, -v.wid / 2 + 2, 6, 2);
-              ctx.fillRect(i, v.wid / 2 - 4, 6, 2);
-            }
-          } else if (v.type.startsWith('car')) {
-            // Car windshield
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(-2, -v.wid / 2 + 2, 7, v.wid - 4);
-          } else if (v.type === 'auto') {
-            // Auto-rickshaw canopy
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(-v.len / 2 + 4, -v.wid / 2 + 1, v.len - 8, v.wid - 2);
-          } else if (v.type === 'bike') {
-            // Rider helmet
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(0, 0, 3, 0, Math.PI * 2);
-            ctx.fill();
-          }
-
-          // Lights
-          if (v.dir === 'N_TO_S') {
-            // Headlights front
-            ctx.fillStyle = '#fef08a';
-            ctx.fillRect(-v.wid / 2 + 1, v.len / 2 - 2, 3, 2);
-            ctx.fillRect(v.wid / 2 - 4, v.len / 2 - 2, 3, 2);
-            // Brake lights rear
-            if (v.stopped) {
-              ctx.shadowColor = '#ff0000';
-              ctx.shadowBlur = 8;
-              ctx.fillStyle = '#ff1111';
-            } else {
-              ctx.shadowBlur = 0;
-              ctx.fillStyle = '#7f1d1d';
-            }
-            ctx.fillRect(-v.wid / 2 + 1, -v.len / 2, 3, 2);
-            ctx.fillRect(v.wid / 2 - 4, -v.len / 2, 3, 2);
-          } else if (v.dir === 'S_TO_N') {
-            ctx.fillStyle = '#fef08a';
-            ctx.fillRect(-v.wid / 2 + 1, -v.len / 2, 3, 2);
-            ctx.fillRect(v.wid / 2 - 4, -v.len / 2, 3, 2);
-            if (v.stopped) {
-              ctx.shadowColor = '#ff0000';
-              ctx.shadowBlur = 8;
-              ctx.fillStyle = '#ff1111';
-            } else {
-              ctx.shadowBlur = 0;
-              ctx.fillStyle = '#7f1d1d';
-            }
-            ctx.fillRect(-v.wid / 2 + 1, v.len / 2 - 2, 3, 2);
-            ctx.fillRect(v.wid / 2 - 4, v.len / 2 - 2, 3, 2);
-          } else if (v.dir === 'W_TO_E') {
-            ctx.fillStyle = '#fef08a';
-            ctx.fillRect(v.len / 2 - 2, -v.wid / 2 + 1, 2, 3);
-            ctx.fillRect(v.len / 2 - 2, v.wid / 2 - 4, 2, 3);
-            if (v.stopped) {
-              ctx.shadowColor = '#ff0000';
-              ctx.shadowBlur = 8;
-              ctx.fillStyle = '#ff1111';
-            } else {
-              ctx.shadowBlur = 0;
-              ctx.fillStyle = '#7f1d1d';
-            }
-            ctx.fillRect(-v.len / 2, -v.wid / 2 + 1, 2, 3);
-            ctx.fillRect(-v.len / 2, v.wid / 2 - 4, 2, 3);
-          }
-          ctx.restore();
-        });
-
-        // 7. 4 Traffic Light Signal Heads at Junction Corners
-        const isNsG = this.phase === 'NORTH_SOUTH';
-        const isEwG = this.phase === 'EAST_WEST';
-        const isY = this.phase === 'YELLOW_CLEARANCE';
-
-        // Signal Heads (NE, NW, SW, SE)
-        this.drawSignalHead(this.cx + this.roadW / 2 + 6, this.cy - this.roadW / 2 - 44, isNsG ? 'G' : (isY ? 'Y' : 'R'));
-        this.drawSignalHead(this.cx - this.roadW / 2 - 24, this.cy - this.roadW / 2 - 44, isEwG ? 'G' : (isY ? 'Y' : 'R'));
-        this.drawSignalHead(this.cx - this.roadW / 2 - 24, this.cy + this.roadW / 2 + 6, isNsG ? 'G' : (isY ? 'Y' : 'R'));
-        this.drawSignalHead(this.cx + this.roadW / 2 + 6, this.cy + this.roadW / 2 + 6, isEwG ? 'G' : (isY ? 'Y' : 'R'));
-
-        // 8. CORNER HUD PANELS (OUTSIDE THE ROAD PAVEMENT - ZERO OVERLAY ON ROAD!)
-        // Top-Left Corner: North Inflow Status
-        this.drawCornerHud(8, 8, 160, 42, 'NORTH INFLOW', 'Waiting Queue: 6 veh', '#38bdf8');
-
-        // Bottom-Left Corner: South Inflow Status
-        this.drawCornerHud(8, this.h - 50, 160, 42, 'SOUTH INFLOW', 'Waiting Queue: 5 veh', '#38bdf8');
-
-        // Top-Right Corner: East Exit Road Status
-        if (this.isEastJammed) {
-          this.drawCornerHud(this.w - 188, 8, 180, 42, 'EAST EXIT ROAD', '⛔ 90% FULL (JAMMED)', '#ef4444', true);
-        } else {
-          this.drawCornerHud(this.w - 188, 8, 180, 42, 'EAST EXIT ROAD', '🟢 CLEAR: Free Flow', '#10b981');
-        }
-
-        // Bottom-Right Corner: Protection or Gridlock Status Banner
-        if (this.isEastJammed) {
-          if (this.mode === 'queuesense') {
-            this.drawCornerHud(this.w - 200, this.h - 52, 192, 44, '🛡️ QUEUESENSE GATING', 'West HELD AT RED | Box CLEAR', '#10b981', true);
-          } else {
-            this.drawCornerHud(this.w - 200, this.h - 52, 192, 44, '🚨 JUNCTION GRIDLOCKED!', 'Cars Trapped in Box — 0 MPH', '#ef4444', true);
-          }
-        } else {
-          this.drawCornerHud(this.w - 188, this.h - 50, 180, 42, 'JUNCTION STATUS', 'Normal Adaptive Cycle', '#10b981');
-        }
-      }
-
-      drawCornerHud(x, y, w, h, title, desc, color, pulse = false) {
-        const ctx = this.ctx;
-        ctx.fillStyle = 'rgba(10, 15, 26, 0.90)';
-        ctx.fillRect(x, y, w, h);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(x, y, w, h);
-
-        ctx.fillStyle = color;
-        ctx.font = 'bold 9px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText(title, x + 8, y + 14);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 11px monospace';
-        ctx.fillText(desc, x + 8, y + 31);
-      }
-
-      drawZebraCrossing(x, y, w, h, isHoriz) {
-        const ctx = this.ctx;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.40)';
-        if (isHoriz) {
-          const count = 9;
-          const stripeW = w / (count * 2);
-          for (let i = 0; i < count; i++) {
-            ctx.fillRect(x + i * stripeW * 2, y, stripeW, h);
-          }
-        } else {
-          const count = 9;
-          const stripeH = h / (count * 2);
-          for (let i = 0; i < count; i++) {
-            ctx.fillRect(x, y + i * stripeH * 2, w, stripeH);
-          }
-        }
-      }
-
-      drawSignalHead(x, y, state) {
-        const ctx = this.ctx;
-        ctx.fillStyle = '#0a0e17';
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 1.5;
-        ctx.fillRect(x, y, 18, 42);
-        ctx.strokeRect(x, y, 18, 42);
-
-        const rColor = state === 'R' ? '#ef4444' : '#3b0f0f';
-        const yColor = state === 'Y' ? '#f59e0b' : '#3b300f';
-        const gColor = state === 'G' ? '#10b981' : '#0f3b1f';
-
-        this.drawBulb(x + 9, y + 8, rColor, state === 'R');
-        this.drawBulb(x + 9, y + 21, yColor, state === 'Y');
-        this.drawBulb(x + 9, y + 34, gColor, state === 'G');
-      }
-
-      drawBulb(x, y, color, isLit) {
-        const ctx = this.ctx;
-        ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        if (isLit) {
-          ctx.shadowColor = color;
-          ctx.shadowBlur = 8;
-        } else {
-          ctx.shadowBlur = 0;
-        }
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-
-      loop() {
-        this.update();
-        this.draw();
-        requestAnimationFrame(this.loop);
-      }
+    function startSimulation() {
+      console.log('Starting simulation');
     }
 
-    // -------------------------------------------------------------------------
-    // 4. Comparison Segmented Toggle (QueueSense vs Traditional)
-    // -------------------------------------------------------------------------
-    function setSimMode(m) {
-      if (!trafficSim) return;
-      trafficSim.setMode(m);
-
-      const btnQ = document.getElementById('btnModeQueueSense');
-      const btnT = document.getElementById('btnModeTraditional');
-      const cardHead = document.getElementById('decisionCardHeadline');
-      const cardBody = document.getElementById('decisionCardBody');
-      const cardBox = document.getElementById('decisionCardBox');
-
-      if (m === 'queuesense') {
-        btnQ.className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 bg-emerald-600 text-white shadow-md';
-        btnT.className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 bg-slate-900 text-slate-400 hover:text-rose-300 hover:bg-rose-950/40';
-
-        if (trafficSim.isEastJammed) {
-          trafficSim.phase = 'NORTH_SOUTH';
-          trafficSim.timer = 18;
-          cardBox.className = 'bg-gradient-to-r from-emerald-950/80 to-slate-900 border-l-4 border-emerald-500 rounded-xl p-3 shadow-lg transition-all duration-300';
-          cardHead.className = 'text-xs uppercase font-extrabold tracking-wider text-emerald-400 font-mono';
-          cardHead.innerText = '🛡️ INTERSECTION GRIDLOCK PREVENTED!';
-          cardBody.innerText = 'East Exit road ahead is 90% full. QueueSense holds East-West signal at RED to stop cars from entering and blocking the junction box, and gives GREEN light to North-South traffic instead!';
-        }
-      } else {
-        btnT.className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 bg-rose-600 text-white shadow-md';
-        btnQ.className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 bg-slate-900 text-slate-400 hover:text-emerald-300 hover:bg-emerald-950/40';
-
-        if (trafficSim.isEastJammed) {
-          trafficSim.phase = 'EAST_WEST';
-          trafficSim.timer = 15;
-          cardBox.className = 'bg-gradient-to-r from-rose-950/80 to-slate-900 border-l-4 border-rose-500 rounded-xl p-3 shadow-lg transition-all duration-300';
-          cardHead.className = 'text-xs uppercase font-extrabold tracking-wider text-rose-400 font-mono';
-          cardHead.innerText = '❌ TRADITIONAL SIGNAL FAILURE: INTERSECTION GRIDLOCKED!';
-          cardBody.innerText = 'Traditional controller is blind to downstream exit jam! It turned East-West GREEN. Vehicles entered the intersection, got trapped inside the yellow KEEP CLEAR box, and completely blocked North-South traffic. Total 0 MPH deadlock!';
-        }
-      }
+    function resetSimulation() {
+      console.log('Resetting simulation');
     }
 
-    // -------------------------------------------------------------------------
-    // 5. Preset Handlers
-    // -------------------------------------------------------------------------
-    function syncPresetButtons(presetId) {
-      activePreset = presetId;
-      const bNormal = document.getElementById('btnPresetNormal');
-      const bSpill = document.getElementById('btnPresetSpillback');
-      const bWatch = document.getElementById('btnPresetWatchdog');
-
-      const normalActive = 'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-emerald-950/70 text-emerald-300 border-2 border-emerald-500 shadow-lg shadow-emerald-950/50 hover:bg-emerald-900/60';
-      const normalInactive = 'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-slate-300 border border-slate-700 hover:border-emerald-500 hover:bg-emerald-950/40';
-
-      const spillActive = 'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-rose-950/70 text-rose-300 border-2 border-rose-500 shadow-lg shadow-rose-950/50 hover:bg-rose-900/60';
-      const spillInactive = 'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-rose-300 border border-slate-700 hover:border-rose-500 hover:bg-rose-950/40';
-
-      const watchActive = 'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-amber-950/70 text-amber-300 border-2 border-amber-500 shadow-lg shadow-amber-950/50 hover:bg-amber-900/60';
-      const watchInactive = 'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-amber-300 border border-slate-700 hover:border-amber-500 hover:bg-amber-950/40';
-
-      if (presetId === 'normal') {
-        bNormal.className = normalActive;
-        bSpill.className = spillInactive;
-        bWatch.className = watchInactive;
-      } else if (presetId === 'spillback') {
-        bNormal.className = normalInactive;
-        bSpill.className = spillActive;
-        bWatch.className = watchInactive;
-      } else if (presetId === 'watchdog') {
-        bNormal.className = normalInactive;
-        bSpill.className = spillInactive;
-        bWatch.className = watchActive;
-      }
+    function toggleSimulation() {
+      console.log('Toggling simulation');
     }
 
-    function applyScenarioSynchronous(presetId) {
-      syncPresetButtons(presetId);
-      if (trafficSim) trafficSim.setScenario(presetId);
-
-      const offlineOverlay = document.getElementById('cctvOfflineOverlay');
-      const exitBar = document.getElementById('meterExitBar');
-      const exitFillText = document.getElementById('meterExitFillText');
-      const exitAdvice = document.getElementById('meterExitAdviceText');
-      const exitPill = document.getElementById('meterExitPill');
-      const exitContainer = document.getElementById('meterExitContainer');
-      const exitSpillTag = document.getElementById('meterExitSpillbackTag');
-      const cardBox = document.getElementById('decisionCardBox');
-      const cardHead = document.getElementById('decisionCardHeadline');
-      const cardBody = document.getElementById('decisionCardBody');
-
-      if (presetId === 'spillback') {
-        offlineOverlay.classList.add('hidden');
-        if (exitBar) { exitBar.style.width = '92%'; exitBar.className = 'bg-rose-500 h-full transition-all duration-500 rounded-full'; }
-        if (exitFillText) exitFillText.innerText = '92% Full';
-        if (exitAdvice) { exitAdvice.innerText = 'JAMMED (Cannot accept more cars)'; exitAdvice.className = 'text-rose-400 text-xs font-bold'; }
-        if (exitPill) { exitPill.innerText = '🛑 JAMMED: 90% Occupied — Spillback Lock Active'; exitPill.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-950 text-rose-300 border border-rose-700 badge-pulse'; }
-        if (exitContainer) exitContainer.className = 'bg-slate-900/90 border border-rose-800/80 rounded-xl p-2.5 flex flex-col justify-between';
-        if (exitSpillTag) { exitSpillTag.innerText = 'Spillback Lock Active'; exitSpillTag.className = 'text-rose-400 font-bold'; }
-
-        if (cardBox) cardBox.className = 'bg-gradient-to-r from-rose-950/80 to-slate-900 border-l-4 border-rose-500 rounded-xl p-3 shadow-lg transition-all duration-300 mt-1';
-        if (cardHead) { cardHead.className = 'text-xs uppercase font-extrabold tracking-wider text-rose-400 font-mono'; cardHead.innerText = '🛑 INTERSECTION GRIDLOCK PREVENTED!'; }
-        if (cardBody) cardBody.innerText = 'East Exit road ahead is 92% full and cannot take more vehicles. QueueSense holds East-West signal at RED to stop cars from entering and blocking the junction box, and gives GREEN light to North-South traffic instead!';
-      } else if (presetId === 'watchdog') {
-        offlineOverlay.classList.remove('hidden');
-        if (exitBar) { exitBar.style.width = '50%'; exitBar.className = 'bg-amber-500 h-full transition-all duration-500 rounded-full'; }
-        if (exitFillText) exitFillText.innerText = 'UNKNOWN';
-        if (exitAdvice) { exitAdvice.innerText = 'Camera Offline ➔ C-DAC Safe Fixed-Time Plan Active'; exitAdvice.className = 'text-amber-400 text-xs font-bold'; }
-        if (exitPill) { exitPill.innerText = '⚠️ SENSOR LOST'; exitPill.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-950 text-amber-300 border border-amber-700'; }
-        if (exitContainer) exitContainer.className = 'bg-amber-950/30 border border-amber-700/80 rounded-xl p-2.5 flex flex-col justify-between';
-        if (exitSpillTag) { exitSpillTag.innerText = 'Fail-Safe Baseline'; exitSpillTag.className = 'text-amber-400 font-bold'; }
-
-        if (cardBox) cardBox.className = 'bg-gradient-to-r from-amber-950/80 to-slate-900 border-l-4 border-amber-500 rounded-xl p-3 shadow-lg transition-all duration-300 mt-1';
-        if (cardHead) { cardHead.className = 'text-xs uppercase font-extrabold tracking-wider text-amber-400 font-mono'; cardHead.innerText = '⚠️ AUTO SAFE-MODE ACTIVE (CAMERA OFFLINE)'; }
-        if (cardBody) cardBody.innerText = 'CCTV camera signal lost or sensor fault detected. QueueSense 3-Strike Safety Watchdog has safely fallen back to Fixed-Time Signal Plan (C-DAC Indian Standards). Traffic moves safely with zero AI lockup.';
-      } else {
-        offlineOverlay.classList.add('hidden');
-        if (exitBar) { exitBar.style.width = '30%'; exitBar.className = 'bg-emerald-500 h-full transition-all duration-500 rounded-full'; }
-        if (exitFillText) exitFillText.innerText = '30% Full';
-        if (exitAdvice) { exitAdvice.innerText = 'Space Available Ahead'; exitAdvice.className = 'text-emerald-400 text-xs font-bold'; }
-        if (exitPill) { exitPill.innerText = '🟢 CLEAR: 30% Occupied'; exitPill.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-300 border border-emerald-700'; }
-        if (exitContainer) exitContainer.className = 'bg-slate-900/90 border border-emerald-900/40 rounded-xl p-2.5 flex flex-col justify-between';
-        if (exitSpillTag) { exitSpillTag.innerText = 'No Spillback'; exitSpillTag.className = 'text-emerald-400 font-bold'; }
-
-        if (cardBox) cardBox.className = 'bg-gradient-to-r from-slate-900 to-slate-900/90 border-l-4 border-emerald-500 rounded-xl p-3 shadow-lg transition-all duration-300 mt-1';
-        if (cardHead) { cardHead.className = 'text-xs uppercase font-extrabold tracking-wider text-emerald-400 font-mono'; cardHead.innerText = '🟢 NORMAL ADAPTIVE TRAFFIC FLOW'; }
-        if (cardBody) cardBody.innerText = 'East-West arterial traffic has waiting queue (14.0 PCU). The East Exit road is 30% clear with space available ahead. QueueSense dynamically allocates green light time to clear waiting queues smoothly.';
-      }
-    }
-
-    async function triggerPreset(presetId) {
-      applyScenarioSynchronous(presetId);
-      try {
-        await fetch(`/api/preset/${presetId}`, { method: 'POST' });
-        const res = await fetch('/api/state');
-        const state = await res.json();
-        updateSimplifiedUI(state);
-      } catch (e) {
-        console.error('Error triggering preset:', e);
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 6. Telemetry State Sync
-    // -------------------------------------------------------------------------
-    function updateSimplifiedUI(data) {
-      const s = data.simplified || {};
-      if (s.is_offline) {
-        applyScenarioSynchronous('watchdog');
-        return;
-      }
-
-      // Update vehicle class breakdown
-      const brk = data.class_breakdown || { bikes: 7, autos: 2, cars: 0, buses: 0, total_pcu: 5.5 };
-      document.getElementById('cntBikes').innerText = brk.bikes;
-      document.getElementById('cntAutos').innerText = brk.autos;
-      document.getElementById('cntCars').innerText = brk.cars;
-      document.getElementById('cntBuses').innerText = brk.buses;
-
-      const qVeh = (brk.bikes + brk.autos + brk.cars + brk.buses) || data.detection_count || 9;
-      const qPcu = brk.total_pcu !== undefined ? brk.total_pcu : 5.5;
-      document.getElementById('meterTotalVehicles').innerText = `${qVeh} Vehicles`;
-      document.getElementById('meterTotalPcu').innerText = `${Number(qPcu).toFixed(1)} PCU`;
-
-      // Update frame OSD
-      const fInfo = data.frame_info || { frame_idx: 1, total_frames: 60, inference_ms: 22.4 };
-      document.getElementById('cctvFrameInfo').innerText = `Frame ${fInfo.frame_idx}/${fInfo.total_frames} | ${fInfo.inference_ms} ms YOLO`;
-
-      const exitFill = s.exit_fill_pct !== undefined ? s.exit_fill_pct : 30;
-      const isJammed = s.is_jammed || exitFill >= 85;
-
-      const exitBar = document.getElementById('meterExitBar');
-      const exitFillText = document.getElementById('meterExitFillText');
-      const exitAdvice = document.getElementById('meterExitAdviceText');
-      const exitPill = document.getElementById('meterExitPill');
-      const exitContainer = document.getElementById('meterExitContainer');
-      const exitSpillTag = document.getElementById('meterExitSpillbackTag');
-
-      if (exitBar) exitBar.style.width = `${exitFill}%`;
-      if (exitFillText) exitFillText.innerText = `${exitFill}% Full`;
-
-      if (isJammed) {
-        if (exitBar) exitBar.className = 'bg-rose-500 h-full transition-all duration-500 rounded-full';
-        if (exitAdvice) { exitAdvice.innerText = 'JAMMED (Cannot accept more cars)'; exitAdvice.className = 'text-rose-400 text-xs font-bold'; }
-        if (exitPill) { exitPill.innerText = '🛑 JAMMED: 90% Occupied — Spillback Lock Active'; exitPill.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-950 text-rose-300 border border-rose-700 badge-pulse'; }
-        if (exitContainer) exitContainer.className = 'bg-slate-900/90 border border-rose-800/80 rounded-xl p-2.5 flex flex-col justify-between';
-        if (exitSpillTag) { exitSpillTag.innerText = 'Spillback Lock Active'; exitSpillTag.className = 'text-rose-400 font-bold'; }
-      } else {
-        if (exitBar) exitBar.className = 'bg-emerald-500 h-full transition-all duration-500 rounded-full';
-        if (exitAdvice) { exitAdvice.innerText = 'Space Available Ahead'; exitAdvice.className = 'text-emerald-400 text-xs font-bold'; }
-        if (exitPill) { exitPill.innerText = '🟢 CLEAR: 30% Occupied'; exitPill.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-300 border border-emerald-700'; }
-        if (exitContainer) exitContainer.className = 'bg-slate-900/90 border border-emerald-900/40 rounded-xl p-2.5 flex flex-col justify-between';
-        if (exitSpillTag) { exitSpillTag.innerText = 'No Spillback'; exitSpillTag.className = 'text-emerald-400 font-bold'; }
-      }
-
-      if (data.active_preset) {
-        syncPresetButtons(data.active_preset);
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 7. Dynamic Benchmark Chart.js Loader
-    // -------------------------------------------------------------------------
-    function initImpactChart() {
-      const ctx = document.getElementById('impactBarChart').getContext('2d');
-      impactChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Fixed-Time', 'Actuated (Loops)', 'Standard Pressure', 'QueueSense AI'],
-          datasets: [{
-            label: 'Throughput (veh/hr)',
-            data: [952.4, 962.1, 418.1, 1361.5],
-            backgroundColor: [
-              'rgba(148, 163, 184, 0.65)',
-              'rgba(56, 189, 248, 0.65)',
-              'rgba(244, 63, 94, 0.65)',
-              'rgba(16, 185, 129, 0.90)'
-            ],
-            borderColor: ['#94a3b8', '#38bdf8', '#f43f5e', '#10b981'],
-            borderWidth: 1.5,
-            borderRadius: 6,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8', font: { family: 'monospace', size: 10 } }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#cbd5e1', font: { family: 'sans-serif', size: 10, weight: 'bold' } }
-            }
-          }
-        }
-      });
-    }
-
-    function setBenchmarkMetric(m) {
-      currentBenchmarkMetric = m;
-      const btnT = document.getElementById('btnMetricThroughput');
-      const btnQ = document.getElementById('btnMetricQueue');
-      const btnS = document.getElementById('btnMetricSpillback');
-
-      if (m === 'throughput') {
-        btnT.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white shadow';
-        btnQ.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
-        btnS.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
-      } else if (m === 'queue') {
-        btnQ.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-600 text-white shadow';
-        btnT.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
-        btnS.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
-      } else {
-        btnS.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white shadow';
-        btnT.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
-        btnQ.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
-      }
-      updateChartWithData(lastBenchmarkData);
-      updateBenchmarkTable(lastBenchmarkData);
-    }
-
-    function updateChartWithData(data) {
-      if (!impactChart || !data || !data.controllers) return;
-      lastBenchmarkData = data;
-      document.getElementById('benchmarkSourceTag').innerText = data.active_source;
-
-      const controllers = data.controllers;
-
-      if (currentBenchmarkMetric === 'throughput') {
-        impactChart.data.datasets[0].label = 'Vehicles Cleared / Hour';
-        impactChart.data.datasets[0].data = controllers.map(c => c.throughput_mean);
-        impactChart.data.datasets[0].backgroundColor = controllers.map((c, i) => {
-          const colors = [
-            'rgba(148, 163, 184, 0.65)',
-            'rgba(56, 189, 248, 0.65)',
-            'rgba(244, 63, 94, 0.65)',
-            'rgba(16, 185, 129, 0.90)',
-            'rgba(139, 92, 246, 0.90)',
-            'rgba(236, 72, 153, 0.90)'
-          ];
-          return colors[i % colors.length];
-        });
-        impactChart.data.datasets[0].borderColor = controllers.map((c, i) => {
-          const colors = ['#94a3b8', '#38bdf8', '#f43f5e', '#10b981', '#8b5cf6', '#ec4899'];
-          return colors[i % colors.length];
-        });
-        impactChart.data.labels = controllers.map(c => c.controller_name);
-      } else if (currentBenchmarkMetric === 'queue') {
-        impactChart.data.datasets[0].label = 'Avg Waiting Queue (veh)';
-        impactChart.data.datasets[0].data = controllers.map(c => c.queue_mean || 10.0);
-        impactChart.data.datasets[0].backgroundColor = controllers.map((c, i) => {
-          const colors = [
-            'rgba(244, 63, 94, 0.65)',
-            'rgba(251, 146, 60, 0.65)',
-            'rgba(239, 68, 68, 0.75)',
-            'rgba(6, 182, 212, 0.90)',
-            'rgba(139, 92, 246, 0.90)',
-            'rgba(236, 72, 153, 0.90)'
-          ];
-          return colors[i % colors.length];
-        });
-        impactChart.data.datasets[0].borderColor = controllers.map((c, i) => {
-          const colors = ['#f43f5e', '#fb923c', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899'];
-          return colors[i % colors.length];
-        });
-        impactChart.data.labels = controllers.map(c => c.controller_name);
-      } else {
-        impactChart.data.datasets[0].label = 'Spillback Steps (lower is better)';
-        impactChart.data.datasets[0].data = controllers.map(c => c.spillback_mean || 0);
-        impactChart.data.datasets[0].backgroundColor = controllers.map((c, i) => {
-          const colors = [
-            'rgba(251, 146, 60, 0.65)',
-            'rgba(239, 68, 68, 0.75)',
-            'rgba(244, 63, 94, 0.85)',
-            'rgba(6, 182, 212, 0.90)',
-            'rgba(139, 92, 246, 0.90)',
-            'rgba(16, 185, 129, 0.90)'
-          ];
-          return colors[i % colors.length];
-        });
-        impactChart.data.datasets[0].borderColor = controllers.map((c, i) => {
-          const colors = ['#fb923c', '#ef4444', '#f43f5e', '#06b6d4', '#8b5cf6', '#10b981'];
-          return colors[i % colors.length];
-        });
-        impactChart.data.labels = controllers.map(c => c.controller_name);
-      }
-      impactChart.update();
-      updateBenchmarkTable(data);
-    }
-
-    function updateBenchmarkTable(data) {
-      if (!data || !data.controllers) return;
-      const tbody = document.getElementById('benchmarkTableBody');
-      if (!tbody) return;
-
-      const controllers = data.controllers;
-      let html = '';
-      for (const c of controllers) {
-        const isQueueSense = c.controller_id === 'D' || c.controller_id === 'D1' || c.controller_id === 'D2' || c.controller_id === 'S';
-        const rowClass = isQueueSense ? 'bg-emerald-950/30' : '';
-        html += `
-          <tr class="border-b border-slate-800/50 hover:bg-slate-900/50 ${rowClass}">
-            <td class="text-left p-1.5 font-medium ${isQueueSense ? 'text-emerald-400' : ''}">${c.controller_name}</td>
-            <td class="text-right p-1.5 font-bold">${c.throughput_mean.toFixed(1)}</td>
-            <td class="text-right p-1.5">${(c.queue_mean || 0).toFixed(1)}</td>
-            <td class="text-right p-1.5 ${(c.spillback_mean || 0) === 0 ? 'text-emerald-400' : (c.spillback_mean || 0) > 20 ? 'text-rose-400' : 'text-amber-400'} font-bold">${c.spillback_mean || 0}</td>
-            <td class="text-right p-1.5 text-slate-500">${c.runs || 10}</td>
-          </tr>
-        `;
-      }
-      tbody.innerHTML = html;
-    }
-
-    async function loadScenarioBenchmark(scenario) {
-      try {
-        const res = await fetch(`/api/benchmark/${scenario}`);
-        const data = await res.json();
-        updateChartWithData(data);
-      } catch (e) {
-        console.error('Error loading benchmark:', e);
-      }
-    }
-
-    // ============================================================================
-    // STAGE 5: Controller S + Emergency Flush + Junction Passport
-    // ============================================================================
-
-    // Controller S Mode Toggle
-    function setSelectorMode(mode) {
-      const btns = {
-        'auto': document.getElementById('btnSelectorAuto'),
-        'clear': document.getElementById('btnSelectorClear'),
-        'elevated': document.getElementById('btnSelectorElevated'),
-        'blocked': document.getElementById('btnSelectorBlocked'),
-        'unknown': document.getElementById('btnSelectorUnknown'),
-      };
-
-      // Reset all buttons
-      Object.values(btns).forEach(btn => {
-        if (btn) btn.className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:bg-slate-700';
-      });
-
-      // Highlight active
-      const activeBtn = btns[mode];
-      if (activeBtn) {
-        const colors = {
-          'auto': 'bg-violet-600 text-white shadow-md',
-          'clear': 'bg-emerald-600 text-white shadow-md',
-          'elevated': 'bg-amber-600 text-white shadow-md',
-          'blocked': 'bg-rose-600 text-white shadow-md',
-          'unknown': 'bg-slate-600 text-white shadow-md',
-        };
-        activeBtn.className = `flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 ${colors[mode]}`;
-      }
-
-      // Send to backend
-      fetch('/api/selector/mode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode }),
-      }).catch(e => console.error('Error setting selector mode:', e));
-    }
-
-    // Fetch and update Controller S status
-    async function updateSelectorStatus() {
-      try {
-        const res = await fetch('/api/selector/status');
-        if (!res.ok) return;
-        const data = await res.json();
-
-        // Update status displays
-        const statusEl = document.getElementById('selectorStatus');
-        const modeEl = document.getElementById('selectorMode');
-        const occEl = document.getElementById('selectorOccupancy');
-        const persEl = document.getElementById('selectorPersistence');
-        const gateEl = document.getElementById('selectorGateIntervened');
-        const reasonEl = document.getElementById('selectorReason');
-
-        if (statusEl) {
-          const statusColors = {
-            'CLEAR': 'text-emerald-400',
-            'ELEVATED_RISK': 'text-amber-400',
-            'BLOCKED': 'text-rose-400',
-            'UNKNOWN': 'text-slate-400',
-          };
-          statusEl.innerText = data.capacity_status || 'UNKNOWN';
-          statusEl.className = `text-white font-black text-lg ${statusColors[data.capacity_status] || ''}`;
-        }
-        if (modeEl) modeEl.innerText = data.selected_mode || 'FALLBACK';
-        if (occEl) occEl.innerText = (data.max_downstream_occupancy || 0).toFixed(2);
-        if (persEl) persEl.innerText = `${data.mode_persistence_steps || 0}/2`;
-        if (gateEl) gateEl.innerText = data.gate_intervened ? 'YES ⚠️' : 'No';
-        if (reasonEl) reasonEl.innerText = `${data.applied_phase || 'N/A'} — ${data.reason || data.reason_code || 'No reason'}`;
-      } catch (e) {
-        console.error('Error fetching selector status:', e);
-      }
-    }
-
-    // Fetch and update DecisionReceipts
-    async function updateSelectorReceipts() {
-      try {
-        const res = await fetch('/api/selector/receipts?limit=10');
-        if (!res.ok) return;
-        const data = await res.json();
-        const container = document.getElementById('selectorReceipts');
-        if (!container) return;
-
-        if (!data.receipts || data.receipts.length === 0) {
-          container.innerHTML = '<div class="text-slate-500">No receipts yet</div>';
-          return;
-        }
-
-        container.innerHTML = data.receipts.slice(-10).reverse().map(r => `
-          <div class="bg-slate-900/50 p-1 rounded border-l-2 border-violet-500/50">
-            <span class="text-violet-300">${r.timestamp ? new Date(r.timestamp*1000).toLocaleTimeString() : ''}</span>
-            <span class="mx-1 text-slate-500">|</span>
-            <span class="${r.capacity_status === 'CLEAR' ? 'text-emerald-400' : r.capacity_status === 'BLOCKED' ? 'text-rose-400' : r.capacity_status === 'ELEVATED_RISK' ? 'text-amber-400' : 'text-slate-400'} font-bold">${r.capacity_status}</span>
-            <span class="mx-1 text-slate-500">|</span>
-            <span class="text-sky-300">${r.selected_mode}</span>
-            <span class="mx-1 text-slate-500">|</span>
-            <span class="text-slate-300">${r.applied_phase}</span>
-            <span class="mx-1 text-slate-500">|</span>
-            <span class="text-slate-400">${r.reason_code}</span>
-            ${r.gate_intervened ? '<span class="ml-1 text-rose-400 font-bold">⚠️ GATE</span>' : ''}
-            ${r.safety_override ? '<span class="ml-1 text-amber-400 font-bold">⚠️ SAFETY</span>' : ''}
-          </div>
-        `).join('');
-      } catch (e) {
-        console.error('Error fetching receipts:', e);
-      }
-    }
-
-    // Emergency Flush
-    async function triggerEmergencyFlush(junction, flushLink) {
-      try {
-        const res = await fetch('/api/emergency-flush/trigger', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ junction, flush_link: flushLink }),
-        });
-        const data = await res.json();
-
-        if (data.status === 'flush_issued') {
-          document.getElementById('flushJ1Status').innerText = `Flush Issued: ${data.target_phase}`;
-          document.getElementById('flushTotal').innerText = data.total_flushes_issued || 1;
-        } else {
-          document.getElementById('flushJ1Status').innerText = data.reason || 'No flush needed';
-        }
-      } catch (e) {
-        console.error('Error triggering emergency flush:', e);
-      }
-    }
-
-    // Fetch Emergency Flush Status
-    async function updateEmergencyFlushStatus() {
-      try {
-        const res = await fetch('/api/emergency-flush/status');
-        if (!res.ok) return;
-        const data = await res.json();
-
-        if (data.total_flushes_issued !== undefined) {
-          document.getElementById('flushTotal').innerText = data.total_flushes_issued;
-        }
-      } catch (e) {
-        console.error('Error fetching flush status:', e);
-      }
-    }
-
-    // Junction Readiness Passport
-    async function loadJunctionPassport() {
-      try {
-        const container = document.getElementById('passportContainer');
-        container.innerHTML = '<div class="text-[10px] text-amber-400 font-mono">Loading passport audit...</div>';
-
-        const res = await fetch('/api/passport/status');
-        if (!res.ok) throw new Error('Failed to load passport');
-        const data = await res.json();
-
-        const summary = data.summary;
-        container.innerHTML = `
-          <div class="grid grid-cols-3 gap-1.5 mb-2 text-[10px] font-mono">
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 text-center">
-              <span class="text-amber-400 block font-bold">Total Junctions</span>
-              <span class="text-white font-black text-lg">${summary.total_junctions}</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 text-center">
-              <span class="text-emerald-400 block font-bold">Fully Passed</span>
-              <span class="text-white font-black text-lg">${summary.fully_passed}</span>
-            </div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800 text-center">
-              <span class="text-sky-400 block font-bold">Checks/Junction</span>
-              <span class="text-white font-black text-lg">${summary.checks_per_junction}</span>
-            </div>
-          </div>
-          <div class="space-y-1 max-h-60 overflow-y-auto">
-            ${data.passports.map(p => `
-              <div class="bg-slate-950/80 p-2 rounded-lg border ${p.overall_pass ? 'border-emerald-800/60' : 'border-rose-800/60'}">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-bold ${p.overall_pass ? 'text-emerald-400' : 'text-rose-400'}">${p.junction_id} — ${p.overall_pass ? '✅ PASS' : '❌ FAIL'} (${p.pass_count}/8)</span>
-                </div>
-                <div class="grid grid-cols-2 gap-1 text-[9px] font-mono">
-                  ${p.checks.map(c => `
-                    <div class="flex items-center space-x-1 ${c.passed ? 'text-emerald-300' : 'text-rose-300'}">
-                      <span class="w-1.5 h-1.5 rounded-full ${c.passed ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
-                      <span>${c.name}</span>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      } catch (e) {
-        console.error('Error loading junction passport:', e);
-        document.getElementById('passportContainer').innerHTML = `<div class="text-rose-400 text-[10px] font-mono">Error loading passport: ${e.message}</div>`;
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 7. Stage 5: 3-Tab Evaluation Panel Functions
-    // -------------------------------------------------------------------------
-    function showEvalTab(tabName) {
-      // Hide all tabs
-      document.getElementById('evalTabBenchmark').classList.add('hidden');
-      document.getElementById('evalTabEmergency').classList.add('hidden');
-      document.getElementById('evalTabPerception').classList.add('hidden');
-
-      // Reset all buttons
-      document.getElementById('tabBenchmark').className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-emerald-300 hover:bg-emerald-950/40';
-      document.getElementById('tabEmergency').className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-rose-300 hover:bg-rose-950/40';
-      document.getElementById('tabPerception').className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-slate-900 text-slate-400 hover:text-cyan-300 hover:bg-cyan-950/40';
-
-      // Show selected tab
-      if (tabName === 'benchmark') {
-        document.getElementById('evalTabBenchmark').classList.remove('hidden');
-        document.getElementById('tabBenchmark').className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-violet-600 text-white shadow-md';
-        loadScenarioBenchmark(document.getElementById('benchmarkScenarioSelect').value);
-      } else if (tabName === 'emergency') {
-        document.getElementById('evalTabEmergency').classList.remove('hidden');
-        document.getElementById('tabEmergency').className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-rose-600 text-white shadow-md';
-        loadEmergencyFlushEval();
-      } else if (tabName === 'perception') {
-        document.getElementById('evalTabPerception').classList.remove('hidden');
-        document.getElementById('tabPerception').className = 'flex-1 py-1.5 px-2 rounded-lg font-bold flex items-center justify-center transition-all duration-200 bg-cyan-600 text-white shadow-md';
-        loadPerceptionEval();
-      }
-    }
-
-    async function loadEmergencyFlushEval() {
-      try {
-        const res = await fetch('/api/emergency-flush/eval');
-        if (!res.ok) throw new Error('Failed to load emergency flush eval');
-        const data = await res.json();
-
-        // Populate table
-        const tbody = document.getElementById('emergencyFlushTableBody');
-        if (!data.results) {
-          tbody.innerHTML = '<tr class="border-b border-slate-800/50"><td colspan="6" class="text-center p-2 text-slate-500">No data available</td></tr>';
-          return;
-        }
-
-        const strategies = ['no_preemption', 'naive_local_preemption', 'queuesense_downstream_flush'];
-        const scenarios = ['bottleneck', 'clear_downstream'];
-        const strategyLabels = {
-          'no_preemption': 'No Preemption',
-          'naive_local_preemption': 'Naive Local Preemption',
-          'queuesense_downstream_flush': 'QueueSense Downstream Flush'
-        };
-
-        let html = '';
-        for (const strat of strategies) {
-          for (const scen of scenarios) {
-            if (data.results[strat] && data.results[strat][scen]) {
-              const r = data.results[strat][scen];
-              html += `
-                <tr class="border-b border-slate-800/50 hover:bg-slate-900/50">
-                  <td class="text-left p-1.5 font-medium ${strat === 'queuesense_downstream_flush' ? 'text-emerald-400' : ''}">${strategyLabels[strat]}</td>
-                  <td class="text-right p-1.5">${scen}</td>
-                  <td class="text-right p-1.5 font-bold ${r.emergency_travel_time_s > 60 ? 'text-rose-400' : r.emergency_travel_time_s > 30 ? 'text-amber-400' : 'text-emerald-400'}">${r.emergency_travel_time_s.toFixed(1)}</td>
-                  <td class="text-right p-1.5">${r.emergency_stops}</td>
-                  <td class="text-right p-1.5">${r.non_priority_delay_s.toFixed(1)}</td>
-                  <td class="text-right p-1.5">${r.recovery_time_s.toFixed(1)}</td>
-                </tr>
-              `;
-            }
-          }
-        }
-        tbody.innerHTML = html;
-
-        // Populate aggregate stats
-        if (data.results) {
-          let aggHtml = '';
-          for (const strat of strategies) {
-            let travelTimes = [];
-            let stops = [];
-            let delays = [];
-            let recoveries = [];
-            for (const scen of scenarios) {
-              if (data.results[strat] && data.results[strat][scen]) {
-                const r = data.results[strat][scen];
-                travelTimes.push(r.emergency_travel_time_s);
-                stops.push(r.emergency_stops);
-                delays.push(r.non_priority_delay_s);
-                recoveries.push(r.recovery_time_s);
-              }
-            }
-            if (travelTimes.length > 0) {
-              const meanTT = travelTimes.reduce((a,b)=>a+b,0)/travelTimes.length;
-              const meanStops = stops.reduce((a,b)=>a+b,0)/stops.length;
-              const meanDelay = delays.reduce((a,b)=>a+b,0)/delays.length;
-              const meanRecovery = recoveries.reduce((a,b)=>a+b,0)/recoveries.length;
-              aggHtml += `${strategyLabels[strat]}: Travel=${meanTT.toFixed(1)}s Stops=${meanStops.toFixed(1)} Delay=${meanDelay.toFixed(1)}s Recovery=${meanRecovery.toFixed(1)}s\n`;
-            }
-          }
-          document.getElementById('emergencyFlushAggregate').textContent = aggHtml;
-        }
-      } catch (e) {
-        console.error('Error loading emergency flush eval:', e);
-        document.getElementById('emergencyFlushTableBody').innerHTML = '<tr class="border-b border-slate-800/50"><td colspan="6" class="text-center p-2 text-rose-400">Error loading data</td></tr>';
-        document.getElementById('emergencyFlushAggregate').textContent = `Error: ${e.message}`;
-      }
-    }
-
-    async function loadPerceptionEval() {
-      try {
-        const res = await fetch('/api/perception/eval');
-        if (!res.ok) throw new Error('Failed to load perception eval');
-        const data = await res.json();
-
-        // Populate main metrics table
-        const tbody = document.getElementById('perceptionTableBody');
-        if (!data.perception_evaluation) {
-          tbody.innerHTML = '<tr class="border-b border-slate-800/50"><td colspan="3" class="text-center p-2 text-slate-500">No data available</td></tr>';
-          return;
-        }
-
-        const pe = data.perception_evaluation;
-        const metrics = [
-          ['Total Frames Tested', pe.total_frames || 0, '—'],
-          ['Avg Detection Latency', '0.0 ms', '< 50 ms'],
-          ['Classification Accuracy (BLOCKED)', '85.0%', '> 80%'],
-          ['Classification Accuracy (CLEAR)', '0.0%', '> 80%'],
-          ['Classification Accuracy (UNKNOWN)', '0.0%', '> 80%'],
-          ['Avg PCU Estimation Error', '0.0%', '< 10%'],
-          ['PCU Test Cases Passed', '3/3', 'All < 10% error'],
-        ];
-
-        let html = '';
-        for (const [metric, value, target] of metrics) {
-          html += `
-            <tr class="border-b border-slate-800/50 hover:bg-slate-900/50">
-              <td class="text-left p-1.5">${metric}</td>
-              <td class="text-right p-1.5 font-bold">${value}</td>
-              <td class="text-right p-1.5 text-slate-500">${target}</td>
-            </tr>
-          `;
-        }
-        tbody.innerHTML = html;
-
-        // PCU Validation detail
-        let pcuHtml = '';
-        if (data.perception_evaluation && data.perception_evaluation.pcu_validation) {
-          const pcu = data.perception_evaluation.pcu_validation;
-          for (const test of pcu.test_cases || []) {
-            pcuHtml += `${test.name}: Expected ${test.expected_pcu} PCU, Actual ${test.actual_pcu} PCU, Error ${test.error_pct}%\n`;
-          }
-          pcuHtml += `\nOverall: ${pcu.overall_score || '0.0%'} avg error, ${pcu.passed_cases || 3}/${pcu.total_cases || 3} passed`;
-        } else {
-          pcuHtml = `Test Case 1: Urban mixed (10% two-wheelers) — Expected 0.95 PCU, Actual 0.95 PCU, Error 0.0%\n`;
-          pcuHtml += `Test Case 2: Rural mixed (20% buses) — Expected 1.24 PCU, Actual 1.24 PCU, Error 0.0%\n`;
-          pcuHtml += `Test Case 3: Dense urban (40% auto-rickshaws) — Expected 0.75 PCU, Actual 0.75 PCU, Error 0.0%\n\n`;
-          pcuHtml += `Overall: 0.0% avg error, 3/3 passed (< 10% threshold)`;
-        }
-        document.getElementById('perceptionPcuValidation').textContent = pcuHtml;
-      } catch (e) {
-        console.error('Error loading perception eval:', e);
-        document.getElementById('perceptionTableBody').innerHTML = '<tr class="border-b border-slate-800/50"><td colspan="3" class="text-center p-2 text-rose-400">Error loading data</td></tr>';
-        document.getElementById('perceptionPcuValidation').textContent = `Error: ${e.message}`;
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 8. Window Initialization
-    // -------------------------------------------------------------------------
-    window.addEventListener('DOMContentLoaded', async () => {
-      initImpactChart();
-      trafficSim = new TrafficSimEngine('simCanvas');
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const initialPreset = urlParams.get('scenario') || urlParams.get('preset');
-      if (initialPreset && ['normal', 'spillback', 'watchdog'].includes(initialPreset)) {
-        applyScenarioSynchronous(initialPreset);
-        try {
-          await fetch(`/api/preset/${initialPreset}`, { method: 'POST' });
-        } catch (e) { console.error(e); }
-      }
-
-      const initialMode = urlParams.get('mode');
-      if (initialMode && ['queuesense', 'traditional'].includes(initialMode)) {
-        setSimMode(initialMode);
-      }
-
-      const initialSource = urlParams.get('source');
-      if (initialSource && ['uvh26', 'chennai', 'indiascene'].includes(initialSource)) {
-        const sel = document.getElementById('cctvSourceSelect');
-        if (sel) sel.value = initialSource;
-        switchCctvFeed(initialSource);
-      }
-
-      loadScenarioBenchmark('bottleneck');
-
-      // Fetch initial state
-      try {
-        const res = await fetch('/api/state');
-        const data = await res.json();
-        updateSimplifiedUI(data);
-        if (initialPreset) syncPresetButtons(initialPreset);
-      } catch (e) {
-        console.error(e);
-      }
-
-      // Initial Stage 5 loads
-      updateSelectorStatus();
-      updateSelectorReceipts();
-      updateEmergencyFlushStatus();
-      loadJunctionPassport();
-
-      // Continuous telemetry polling every 1000ms
-      setInterval(async () => {
-        try {
-          const res = await fetch('/api/state');
-          if (res.ok) {
-            const data = await res.json();
-            updateSimplifiedUI(data);
-          }
-        } catch (e) {}
-      }, 1000);
-
-      // Stage 5 polling every 2000ms
-      setInterval(async () => {
-        updateSelectorStatus();
-        updateSelectorReceipts();
-        updateEmergencyFlushStatus();
-      }, 2000);
+    // =============================================================================
+    // AUTO-START SIMULATION
+    // =============================================================================
+
+    window.addEventListener('load', () => {
+      startStatePolling();
     });
+
+    // Export for external access
+    window.app = {
+      threeScene,
+      hud,
+      startStatePolling,
+    };
   </script>
+
 </body>
 </html>

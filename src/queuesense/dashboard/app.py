@@ -2,14 +2,20 @@
 
 FastAPI + WebSocket + MJPEG Streaming server for the Smart City ICCC Command Center.
 Features:
+- 3D Living Digital Twin with Three.js WebGL corridor scene (J1 to J2)
+- 3 camera presets: Isometric, Top-Down, Driver View
+- Autonomous scenario cycling (Normal, Surge, Spillback, Emergency, Recovery)
+- Mode toggle: QueueSense AI vs Traditional (shows gridlock)
+- Live Decision Receipt HUD with plain-English AI rationale
+- Floating camera preset pills, scenario trigger pills, and mode toggle
+- Expandable telemetry drawer with 4 tabs: Benchmark, Emergency Flush, Passport, Perception
+- Brownfield Traffic Cabinet (C-DAC Wi-TraC / CoSiCoSt) Hardware Telemetry
 - Live UVH-26 Indian CCTV Perception stream with high-contrast color-coded BBoxes & PCU tags
 - Interactive playback controls: Play/Pause, Next Frame, Confidence Slider
-- 3 Realistic Judge Walkthrough Presets with dynamic non-zero telemetry (never P = 0.00)
+- 3 Judge Walkthrough Presets with dynamic non-zero telemetry (never P = 0.00)
 - Interactive Operator Overrides: EW Queue Slider, NS Queue Slider, art_east Occupancy Slider
-- Redesigned 2D Digital Twin SVG with glowing 3-bulb signal heads and no text clipping
 - Dynamic Benchmark Reload prioritizing results/benchmark_v2/ across 3 metric tabs:
   Throughput, Avg Queue, and Spillback Steps
-- Brownfield Traffic Cabinet (C-DAC Wi-TraC / CoSiCoSt) Hardware Telemetry
 """
 
 from __future__ import annotations
@@ -28,6 +34,7 @@ import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from queuesense.state import ApproachState, TrafficState, DecisionReceipt
 from queuesense.controllers.base import Phase
@@ -639,6 +646,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files (Three.js, CSS, HUD components)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 engine = SimEngine()
 

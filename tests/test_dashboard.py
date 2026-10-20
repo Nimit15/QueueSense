@@ -27,8 +27,23 @@ def test_index_page_serves_html(client):
     """GET / should serve index.html with 200 OK."""
     response = client.get("/")
     assert response.status_code == 200
-    assert "QUEUESENSE" in response.text
+    assert "QueueSense" in response.text
     assert "ICCC" in response.text
+    assert "3D" in response.text or "Digital Twin" in response.text, (
+        "Index page should serve the new 3D digital twin UI"
+    )
+    assert "three-canvas-container" in response.text, (
+        "Index page should include the Three.js canvas container"
+    )
+    assert "styles.css" in response.text, (
+        "Index page should link to the design system CSS"
+    )
+    assert "three-scene.js" in response.text, (
+        "Index page should load the Three.js scene script"
+    )
+    assert "hud-components.js" in response.text, (
+        "Index page should load the HUD components script"
+    )
 
 
 def test_api_state_returns_valid_telemetry(client):
