@@ -1,0 +1,2300 @@
+{
+  "experiment_info": {
+    "name": "Emergency Flush Comparison (Corrected)",
+    "version": "2.0",
+    "description": "Comparison of emergency downstream-flush strategies in multi-junction corridor with proper corridor traversal simulation",
+    "coordinators_tested": [
+      "no_preemption",
+      "naive_local_preemption",
+      "queuesense_downstream_flush"
+    ],
+    "scenarios_tested": [
+      "bottleneck",
+      "clear_downstream"
+    ],
+    "corridor_distance": "J1_entry_to_J2_exit",
+    "created_at": "2026-10-21 02:15:26"
+  },
+  "results": {
+    "no_preemption": {
+      "bottleneck": {
+        "coordinator_class": "no_preemption",
+        "scenario_type": "bottleneck",
+        "emergency_travel_time_s": 76.0,
+        "emergency_stops": 2,
+        "non_priority_delay_s": 0.0,
+        "recovery_time_s": 66.0,
+        "total_steps": 76,
+        "timeline": [
+          {
+            "step": 0,
+            "ambulance_pos": 0.0,
+            "ambulance_started": false,
+            "ambulance_exited": false,
+            "emergency_travel_time": 0.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 1,
+            "ambulance_pos": 0.013,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 1.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 2,
+            "ambulance_pos": 0.026,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 2.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 3,
+            "ambulance_pos": 0.039,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 3.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 4,
+            "ambulance_pos": 0.053,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 4.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 5,
+            "ambulance_pos": 0.066,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 5.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 6,
+            "ambulance_pos": 0.079,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 6.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 7,
+            "ambulance_pos": 0.092,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 7.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 8,
+            "ambulance_pos": 0.105,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 8.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 9,
+            "ambulance_pos": 0.118,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 9.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 10,
+            "ambulance_pos": 0.132,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 10.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 11,
+            "ambulance_pos": 0.145,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 11.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 12,
+            "ambulance_pos": 0.158,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 12.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 13,
+            "ambulance_pos": 0.171,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 13.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 14,
+            "ambulance_pos": 0.184,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 14.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 15,
+            "ambulance_pos": 0.197,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 15.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 16,
+            "ambulance_pos": 0.211,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 16.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 17,
+            "ambulance_pos": 0.224,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 17.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 18,
+            "ambulance_pos": 0.237,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 18.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 19,
+            "ambulance_pos": 0.25,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 19.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 20,
+            "ambulance_pos": 0.263,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 20.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 21,
+            "ambulance_pos": 0.276,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 21.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 22,
+            "ambulance_pos": 0.289,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 22.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 23,
+            "ambulance_pos": 0.303,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 23.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 24,
+            "ambulance_pos": 0.316,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 24.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 25,
+            "ambulance_pos": 0.329,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 25.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 26,
+            "ambulance_pos": 0.342,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 26.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 27,
+            "ambulance_pos": 0.355,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 27.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 28,
+            "ambulance_pos": 0.368,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 28.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 29,
+            "ambulance_pos": 0.382,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 29.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 30,
+            "ambulance_pos": 0.395,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 30.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 31,
+            "ambulance_pos": 0.408,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 31.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 32,
+            "ambulance_pos": 0.421,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 32.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 33,
+            "ambulance_pos": 0.434,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 33.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 34,
+            "ambulance_pos": 0.447,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 34.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 35,
+            "ambulance_pos": 0.461,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 35.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 36,
+            "ambulance_pos": 0.474,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 36.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 37,
+            "ambulance_pos": 0.487,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 37.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 38,
+            "ambulance_pos": 0.5,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 38.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 39,
+            "ambulance_pos": 0.513,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 39.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 40,
+            "ambulance_pos": 0.526,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 40.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 41,
+            "ambulance_pos": 0.539,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 41.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 42,
+            "ambulance_pos": 0.553,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 42.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 43,
+            "ambulance_pos": 0.566,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 43.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 44,
+            "ambulance_pos": 0.579,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 44.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 45,
+            "ambulance_pos": 0.592,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 45.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 46,
+            "ambulance_pos": 0.605,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 46.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 47,
+            "ambulance_pos": 0.618,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 47.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 48,
+            "ambulance_pos": 0.632,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 48.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 49,
+            "ambulance_pos": 0.645,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 49.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 50,
+            "ambulance_pos": 0.658,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 50.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 51,
+            "ambulance_pos": 0.671,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 51.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 52,
+            "ambulance_pos": 0.684,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 52.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 53,
+            "ambulance_pos": 0.697,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 53.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 54,
+            "ambulance_pos": 0.711,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 54.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 55,
+            "ambulance_pos": 0.724,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 55.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 56,
+            "ambulance_pos": 0.737,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 56.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 57,
+            "ambulance_pos": 0.75,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 57.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 58,
+            "ambulance_pos": 0.763,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 58.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 59,
+            "ambulance_pos": 0.776,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 59.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 60,
+            "ambulance_pos": 0.789,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 60.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 61,
+            "ambulance_pos": 0.803,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 61.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 62,
+            "ambulance_pos": 0.816,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 62.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 63,
+            "ambulance_pos": 0.829,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 63.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 64,
+            "ambulance_pos": 0.842,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 64.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 65,
+            "ambulance_pos": 0.855,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 65.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 66,
+            "ambulance_pos": 0.868,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 66.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 67,
+            "ambulance_pos": 0.882,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 67.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 68,
+            "ambulance_pos": 0.895,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 68.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 69,
+            "ambulance_pos": 0.908,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 69.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 70,
+            "ambulance_pos": 0.921,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 70.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 71,
+            "ambulance_pos": 0.934,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 71.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 72,
+            "ambulance_pos": 0.947,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 72.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 73,
+            "ambulance_pos": 0.961,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 73.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 74,
+            "ambulance_pos": 0.974,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 74.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 75,
+            "ambulance_pos": 0.987,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 75.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 76,
+            "ambulance_pos": 1.0,
+            "ambulance_started": true,
+            "ambulance_exited": true,
+            "emergency_travel_time": 76.0,
+            "emergency_stops": 2
+          }
+        ]
+      },
+      "clear_downstream": {
+        "coordinator_class": "no_preemption",
+        "scenario_type": "clear_downstream",
+        "emergency_travel_time_s": 42.0,
+        "emergency_stops": 1,
+        "non_priority_delay_s": 0.0,
+        "recovery_time_s": 32.0,
+        "total_steps": 42,
+        "timeline": [
+          {
+            "step": 0,
+            "ambulance_pos": 0.0,
+            "ambulance_started": false,
+            "ambulance_exited": false,
+            "emergency_travel_time": 0.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 1,
+            "ambulance_pos": 0.024,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 1.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 2,
+            "ambulance_pos": 0.048,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 2.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 3,
+            "ambulance_pos": 0.071,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 3.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 4,
+            "ambulance_pos": 0.095,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 4.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 5,
+            "ambulance_pos": 0.119,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 5.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 6,
+            "ambulance_pos": 0.143,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 6.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 7,
+            "ambulance_pos": 0.167,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 7.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 8,
+            "ambulance_pos": 0.19,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 8.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 9,
+            "ambulance_pos": 0.214,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 9.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 10,
+            "ambulance_pos": 0.238,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 10.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 11,
+            "ambulance_pos": 0.262,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 11.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 12,
+            "ambulance_pos": 0.286,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 12.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 13,
+            "ambulance_pos": 0.31,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 13.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 14,
+            "ambulance_pos": 0.333,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 14.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 15,
+            "ambulance_pos": 0.357,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 15.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 16,
+            "ambulance_pos": 0.381,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 16.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 17,
+            "ambulance_pos": 0.405,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 17.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 18,
+            "ambulance_pos": 0.429,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 18.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 19,
+            "ambulance_pos": 0.452,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 19.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 20,
+            "ambulance_pos": 0.476,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 20.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 21,
+            "ambulance_pos": 0.5,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 21.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 22,
+            "ambulance_pos": 0.524,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 22.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 23,
+            "ambulance_pos": 0.548,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 23.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 24,
+            "ambulance_pos": 0.571,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 24.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 25,
+            "ambulance_pos": 0.595,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 25.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 26,
+            "ambulance_pos": 0.619,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 26.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 27,
+            "ambulance_pos": 0.643,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 27.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 28,
+            "ambulance_pos": 0.667,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 28.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 29,
+            "ambulance_pos": 0.69,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 29.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 30,
+            "ambulance_pos": 0.714,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 30.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 31,
+            "ambulance_pos": 0.738,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 31.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 32,
+            "ambulance_pos": 0.762,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 32.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 33,
+            "ambulance_pos": 0.786,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 33.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 34,
+            "ambulance_pos": 0.81,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 34.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 35,
+            "ambulance_pos": 0.833,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 35.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 36,
+            "ambulance_pos": 0.857,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 36.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 37,
+            "ambulance_pos": 0.881,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 37.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 38,
+            "ambulance_pos": 0.905,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 38.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 39,
+            "ambulance_pos": 0.929,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 39.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 40,
+            "ambulance_pos": 0.952,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 40.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 41,
+            "ambulance_pos": 0.976,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 41.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 42,
+            "ambulance_pos": 1.0,
+            "ambulance_started": true,
+            "ambulance_exited": true,
+            "emergency_travel_time": 42.0,
+            "emergency_stops": 1
+          }
+        ]
+      }
+    },
+    "naive_local_preemption": {
+      "bottleneck": {
+        "coordinator_class": "naive_local_preemption",
+        "scenario_type": "bottleneck",
+        "emergency_travel_time_s": 52.0,
+        "emergency_stops": 1,
+        "non_priority_delay_s": 0.0,
+        "recovery_time_s": 42.0,
+        "total_steps": 52,
+        "timeline": [
+          {
+            "step": 0,
+            "ambulance_pos": 0.0,
+            "ambulance_started": false,
+            "ambulance_exited": false,
+            "emergency_travel_time": 0.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 1,
+            "ambulance_pos": 0.019,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 1.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 2,
+            "ambulance_pos": 0.038,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 2.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 3,
+            "ambulance_pos": 0.058,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 3.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 4,
+            "ambulance_pos": 0.077,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 4.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 5,
+            "ambulance_pos": 0.096,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 5.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 6,
+            "ambulance_pos": 0.115,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 6.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 7,
+            "ambulance_pos": 0.135,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 7.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 8,
+            "ambulance_pos": 0.154,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 8.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 9,
+            "ambulance_pos": 0.173,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 9.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 10,
+            "ambulance_pos": 0.192,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 10.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 11,
+            "ambulance_pos": 0.212,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 11.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 12,
+            "ambulance_pos": 0.231,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 12.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 13,
+            "ambulance_pos": 0.25,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 13.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 14,
+            "ambulance_pos": 0.269,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 14.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 15,
+            "ambulance_pos": 0.288,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 15.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 16,
+            "ambulance_pos": 0.308,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 16.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 17,
+            "ambulance_pos": 0.327,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 17.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 18,
+            "ambulance_pos": 0.346,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 18.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 19,
+            "ambulance_pos": 0.365,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 19.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 20,
+            "ambulance_pos": 0.385,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 20.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 21,
+            "ambulance_pos": 0.404,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 21.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 22,
+            "ambulance_pos": 0.423,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 22.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 23,
+            "ambulance_pos": 0.442,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 23.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 24,
+            "ambulance_pos": 0.462,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 24.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 25,
+            "ambulance_pos": 0.481,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 25.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 26,
+            "ambulance_pos": 0.5,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 26.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 27,
+            "ambulance_pos": 0.519,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 27.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 28,
+            "ambulance_pos": 0.538,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 28.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 29,
+            "ambulance_pos": 0.558,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 29.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 30,
+            "ambulance_pos": 0.577,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 30.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 31,
+            "ambulance_pos": 0.596,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 31.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 32,
+            "ambulance_pos": 0.615,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 32.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 33,
+            "ambulance_pos": 0.635,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 33.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 34,
+            "ambulance_pos": 0.654,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 34.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 35,
+            "ambulance_pos": 0.673,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 35.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 36,
+            "ambulance_pos": 0.692,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 36.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 37,
+            "ambulance_pos": 0.712,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 37.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 38,
+            "ambulance_pos": 0.731,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 38.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 39,
+            "ambulance_pos": 0.75,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 39.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 40,
+            "ambulance_pos": 0.769,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 40.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 41,
+            "ambulance_pos": 0.788,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 41.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 42,
+            "ambulance_pos": 0.808,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 42.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 43,
+            "ambulance_pos": 0.827,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 43.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 44,
+            "ambulance_pos": 0.846,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 44.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 45,
+            "ambulance_pos": 0.865,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 45.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 46,
+            "ambulance_pos": 0.885,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 46.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 47,
+            "ambulance_pos": 0.904,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 47.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 48,
+            "ambulance_pos": 0.923,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 48.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 49,
+            "ambulance_pos": 0.942,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 49.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 50,
+            "ambulance_pos": 0.962,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 50.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 51,
+            "ambulance_pos": 0.981,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 51.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 52,
+            "ambulance_pos": 1.0,
+            "ambulance_started": true,
+            "ambulance_exited": true,
+            "emergency_travel_time": 52.0,
+            "emergency_stops": 1
+          }
+        ]
+      },
+      "clear_downstream": {
+        "coordinator_class": "naive_local_preemption",
+        "scenario_type": "clear_downstream",
+        "emergency_travel_time_s": 42.0,
+        "emergency_stops": 1,
+        "non_priority_delay_s": 0.0,
+        "recovery_time_s": 32.0,
+        "total_steps": 42,
+        "timeline": [
+          {
+            "step": 0,
+            "ambulance_pos": 0.0,
+            "ambulance_started": false,
+            "ambulance_exited": false,
+            "emergency_travel_time": 0.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 1,
+            "ambulance_pos": 0.024,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 1.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 2,
+            "ambulance_pos": 0.048,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 2.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 3,
+            "ambulance_pos": 0.071,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 3.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 4,
+            "ambulance_pos": 0.095,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 4.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 5,
+            "ambulance_pos": 0.119,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 5.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 6,
+            "ambulance_pos": 0.143,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 6.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 7,
+            "ambulance_pos": 0.167,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 7.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 8,
+            "ambulance_pos": 0.19,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 8.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 9,
+            "ambulance_pos": 0.214,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 9.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 10,
+            "ambulance_pos": 0.238,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 10.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 11,
+            "ambulance_pos": 0.262,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 11.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 12,
+            "ambulance_pos": 0.286,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 12.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 13,
+            "ambulance_pos": 0.31,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 13.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 14,
+            "ambulance_pos": 0.333,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 14.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 15,
+            "ambulance_pos": 0.357,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 15.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 16,
+            "ambulance_pos": 0.381,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 16.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 17,
+            "ambulance_pos": 0.405,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 17.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 18,
+            "ambulance_pos": 0.429,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 18.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 19,
+            "ambulance_pos": 0.452,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 19.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 20,
+            "ambulance_pos": 0.476,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 20.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 21,
+            "ambulance_pos": 0.5,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 21.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 22,
+            "ambulance_pos": 0.524,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 22.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 23,
+            "ambulance_pos": 0.548,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 23.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 24,
+            "ambulance_pos": 0.571,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 24.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 25,
+            "ambulance_pos": 0.595,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 25.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 26,
+            "ambulance_pos": 0.619,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 26.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 27,
+            "ambulance_pos": 0.643,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 27.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 28,
+            "ambulance_pos": 0.667,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 28.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 29,
+            "ambulance_pos": 0.69,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 29.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 30,
+            "ambulance_pos": 0.714,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 30.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 31,
+            "ambulance_pos": 0.738,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 31.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 32,
+            "ambulance_pos": 0.762,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 32.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 33,
+            "ambulance_pos": 0.786,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 33.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 34,
+            "ambulance_pos": 0.81,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 34.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 35,
+            "ambulance_pos": 0.833,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 35.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 36,
+            "ambulance_pos": 0.857,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 36.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 37,
+            "ambulance_pos": 0.881,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 37.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 38,
+            "ambulance_pos": 0.905,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 38.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 39,
+            "ambulance_pos": 0.929,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 39.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 40,
+            "ambulance_pos": 0.952,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 40.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 41,
+            "ambulance_pos": 0.976,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 41.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 42,
+            "ambulance_pos": 1.0,
+            "ambulance_started": true,
+            "ambulance_exited": true,
+            "emergency_travel_time": 42.0,
+            "emergency_stops": 1
+          }
+        ]
+      }
+    },
+    "queuesense_downstream_flush": {
+      "bottleneck": {
+        "coordinator_class": "queuesense_downstream_flush",
+        "scenario_type": "bottleneck",
+        "emergency_travel_time_s": 28.5,
+        "emergency_stops": 0,
+        "non_priority_delay_s": 0.0,
+        "recovery_time_s": 18.5,
+        "total_steps": 28,
+        "timeline": [
+          {
+            "step": 0,
+            "ambulance_pos": 0.0,
+            "ambulance_started": false,
+            "ambulance_exited": false,
+            "emergency_travel_time": 0.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 1,
+            "ambulance_pos": 0.035,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 1.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 2,
+            "ambulance_pos": 0.07,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 2.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 3,
+            "ambulance_pos": 0.105,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 3.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 4,
+            "ambulance_pos": 0.14,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 4.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 5,
+            "ambulance_pos": 0.175,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 5.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 6,
+            "ambulance_pos": 0.211,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 6.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 7,
+            "ambulance_pos": 0.246,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 7.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 8,
+            "ambulance_pos": 0.281,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 8.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 9,
+            "ambulance_pos": 0.316,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 9.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 10,
+            "ambulance_pos": 0.351,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 10.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 11,
+            "ambulance_pos": 0.386,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 11.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 12,
+            "ambulance_pos": 0.421,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 12.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 13,
+            "ambulance_pos": 0.456,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 13.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 14,
+            "ambulance_pos": 0.491,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 14.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 15,
+            "ambulance_pos": 0.526,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 15.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 16,
+            "ambulance_pos": 0.561,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 16.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 17,
+            "ambulance_pos": 0.596,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 17.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 18,
+            "ambulance_pos": 0.632,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 18.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 19,
+            "ambulance_pos": 0.667,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 19.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 20,
+            "ambulance_pos": 0.702,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 20.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 21,
+            "ambulance_pos": 0.737,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 21.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 22,
+            "ambulance_pos": 0.772,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 22.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 23,
+            "ambulance_pos": 0.807,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 23.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 24,
+            "ambulance_pos": 0.842,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 24.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 25,
+            "ambulance_pos": 0.877,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 25.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 26,
+            "ambulance_pos": 0.912,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 26.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 27,
+            "ambulance_pos": 0.947,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 27.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 28,
+            "ambulance_pos": 0.982,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 28.0,
+            "emergency_stops": 0
+          }
+        ]
+      },
+      "clear_downstream": {
+        "coordinator_class": "queuesense_downstream_flush",
+        "scenario_type": "clear_downstream",
+        "emergency_travel_time_s": 30.0,
+        "emergency_stops": 0,
+        "non_priority_delay_s": 0.0,
+        "recovery_time_s": 20.0,
+        "total_steps": 30,
+        "timeline": [
+          {
+            "step": 0,
+            "ambulance_pos": 0.0,
+            "ambulance_started": false,
+            "ambulance_exited": false,
+            "emergency_travel_time": 0.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 1,
+            "ambulance_pos": 0.033,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 1.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 2,
+            "ambulance_pos": 0.067,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 2.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 3,
+            "ambulance_pos": 0.1,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 3.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 4,
+            "ambulance_pos": 0.133,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 4.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 5,
+            "ambulance_pos": 0.167,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 5.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 6,
+            "ambulance_pos": 0.2,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 6.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 7,
+            "ambulance_pos": 0.233,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 7.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 8,
+            "ambulance_pos": 0.267,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 8.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 9,
+            "ambulance_pos": 0.3,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 9.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 10,
+            "ambulance_pos": 0.333,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 10.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 11,
+            "ambulance_pos": 0.367,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 11.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 12,
+            "ambulance_pos": 0.4,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 12.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 13,
+            "ambulance_pos": 0.433,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 13.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 14,
+            "ambulance_pos": 0.467,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 14.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 15,
+            "ambulance_pos": 0.5,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 15.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 16,
+            "ambulance_pos": 0.533,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 16.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 17,
+            "ambulance_pos": 0.567,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 17.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 18,
+            "ambulance_pos": 0.6,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 18.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 19,
+            "ambulance_pos": 0.633,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 19.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 20,
+            "ambulance_pos": 0.667,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 20.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 21,
+            "ambulance_pos": 0.7,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 21.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 22,
+            "ambulance_pos": 0.733,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 22.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 23,
+            "ambulance_pos": 0.767,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 23.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 24,
+            "ambulance_pos": 0.8,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 24.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 25,
+            "ambulance_pos": 0.833,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 25.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 26,
+            "ambulance_pos": 0.867,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 26.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 27,
+            "ambulance_pos": 0.9,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 27.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 28,
+            "ambulance_pos": 0.933,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 28.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 29,
+            "ambulance_pos": 0.967,
+            "ambulance_started": true,
+            "ambulance_exited": false,
+            "emergency_travel_time": 29.0,
+            "emergency_stops": 0
+          },
+          {
+            "step": 30,
+            "ambulance_pos": 1.0,
+            "ambulance_started": true,
+            "ambulance_exited": true,
+            "emergency_travel_time": 30.0,
+            "emergency_stops": 0
+          }
+        ]
+      }
+    }
+  }
+}
