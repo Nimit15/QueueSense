@@ -1,0 +1,79 @@
+#!/usr/bin
+python3
+import os
+import sys
+from pathlib import Path
+
+# Change to the working directory
+os.chdir('D:/QueueSense')
+sys.path.insert(0, str(Path('src')))
+
+# Check route files
+scenarios = ['light', 'bottleneck', 'surge', 'uneven']
+for s in scenarios:
+    path = f'sumo/{s}.rou.xml'
+    if os.path.exists(path):
+        print(f'{s}: EXISTS{path} - OK')
+    else:
+        print(f'{s}:{path} - MISSING')
+
+# Check if output dir exists
+output_dir = 'results/benchmark_valid'
+os.makedirs(output_dir, exist=True)
+
+# Try to import and run
+try:
+    from queuesense.benchmark.runner import
+    from queuesense.controllers import
+
+    route_files = {}
+    for scenario in ['light']:
+]:
+        route_path = f'sumo/{scenario}.rou.xml'
+        if os.path.exists(route_path):
+            route_files[scenario] = [route_path]
+
+    runner =
+    RunnerRunner(
+        net_file='sumo/network/corridor.net.xml',
+        route_files=route_files,
+        output_dir=output_dir,
+        step_length=1.0,
+        duration=3600,
+        warmup_time=300,
+        seeds=[42, 43, 44, 45],
+        scenarios=list(route_files.keys()),
+        gui=False,
+    )
+
+    results = runner.run_benchmark()
+    summary = runner
+    write
+    mary)
+
+    print(f
+    runs: {summary.get
+total_runs, 0)}')
+    print(f
+    uccessful: {summary.get('
+successful_runs, 0)}')
+    print(f
+    ailed: {summary.get
+    __runs, 0)}')
+
+    import csv
+    for f in sorted(os.listdir(output_dir)):
+        if f
+'.csv'):
+            with open(os.path.join(output_dir, f)) as fh:
+                reader = csv.DictReader(fh)
+                rows = list
+            )
+        times = [float(r['time']) for r in rows]
+        arrived = [int(r.get('arrived_cumulative', 0)) for r in rows]
+        print(f
+f}: {len(rows)} rows, time {min(times):.0f}-{max(times):.0f}, arrived={max(arrived)}')
+except Exception as e:
+    print(f"Error: {e}")
+    import traceback
+    traceback.print_exc()

@@ -1,0 +1,17 @@
+<routes>
+    <!-- Scenario designed to create spillback: bottleneck at the exit of art_east -->
+    <vType id="car" vClass="passenger" speedDev="0.1" sigma="0.5" />
+    <!-- Main arterial routes -->
+    <route id="west_east" edges="in_west art_east out_east"/>
+    <route id="east_west" edges="in_east art_east out_east"/>
+    <route id="north_south" edges="in_north out_north"/>
+
+    <!-- High demand on east-west to saturate the bottleneck -->
+    <flow id="flow_west_east" type="car" route="west_east" begin="0" end="3600" number="2000" departSpeed="max" departLane="best"/>
+    <flow id="flow_east_west" type="car" route="east_west" begin="0" end="3600" number="2000" departSpeed="max" departLane="best"/>
+    <flow id="flow_north_south" type="car" route="north_south" begin="0" end="3600" number="500" departSpeed="max" departLane="best"/>
+
+    <!-- Additional flow that will congest out_east, causing spillback on art_east -->
+    <route id="exit_east" edges="out_east"/>  <!-- This creates a sink at the end of out_east -->
+    <flow id="flow_exit_east" type="car" route="exit_east" begin="0" end="3600" number="1000" departSpeed="max" departLane="best"/>
+</routes>

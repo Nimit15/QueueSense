@@ -1,0 +1,22 @@
+<edges>
+    <!-- Main arterial West to East (3 signalized junctions: J1, J2, J3) -->
+    <edge id="in_west" from="WS" to="J1" priority="2" numLanes="2" speed="13.9"/>
+    <edge id="art_east_1" from="J1" to="J2" priority="2" numLanes="1" speed="13.9" friction="0.9"/>  <!-- Bottleneck: 1 lane -->
+    <edge id="art_east_2" from="J2" to="J3" priority="2" numLanes="2" speed="13.9"/>
+    <edge id="out_east" from="J3" to="ES" priority="2" numLanes="2" speed="13.9"/>
+
+    <!-- Return arterial East to West -->
+    <edge id="in_east" from="ES" to="J3" priority="2" numLanes="2" speed="13.9"/>
+    <edge id="art_west_2" from="J3" to="J2" priority="2" numLanes="2" speed="13.9"/>
+    <edge id="art_west_1" from="J2" to="J1" priority="2" numLanes="2" speed="13.9"/>
+    <edge id="out_west" from="J1" to="WSink" priority="2" numLanes="2" speed="13.9"/>
+
+    <!-- Cross street North-South -->
+    <!-- North to South: NS -> J1/J2/J3 -> SS -->
+    <edge id="in_north_1" from="NS" to="J1" priority="1" numLanes="1" speed="11.1"/>
+    <edge id="in_north_2" from="NS" to="J2" priority="1" numLanes="1" speed="11.1"/>
+    <edge id="in_north_3" from="NS" to="J3" priority="1" numLanes="1" speed="11.1"/>
+    <edge id="out_north_1" from="J1" to="SS" priority="1" numLanes="1" speed="11.1"/>
+    <edge id="out_north_2" from="J2" to="SS" priority="1" numLanes="1" speed="11.1"/>
+    <edge id="out_north_3" from="J3" to="SS" priority="1" numLanes="1" speed="11.1"/>
+</edges>

@@ -122,12 +122,13 @@ class BaseController:
         elif self.state == Phase.YELLOW_CLEARANCE:
             # Yellow is a fixed-duration clearance phase
             return elapsed >= self.config.yellow_duration
-        else:
+        elif self.state in (Phase.NORTH_SOUTH, Phase.EAST_WEST):
             # For green phases, enforce min/max green times
             return (
                 elapsed >= self.config.min_green
                 and (elapsed >= self.config.max_green or self._should_end_phase())
             )
+        return False
 
     def _clearance_expired(self, step_length: float) -> bool:
         """Return True when the current clearance phase has run its full duration.

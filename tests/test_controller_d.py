@@ -272,3 +272,151 @@ class TestQueueSenseController:
         assert self.controller.consecutive_invalid == 0
         # State should still be NORTH_SOUTH (or whatever the fixed plan dictates)
         assert self.controller.state == Phase.NORTH_SOUTH
+
+
+class TestD1D2GateDecisionPath:
+    """End-to-end gate decision-path regression test.
+
+    Same valid traffic state is fed to D1 (spillback_gate_enabled=False) and
+    D2 (spillback_gate_enabled=True).  EAST_WEST's mapped receiving link is
+    blocked above the 0.30 threshold; NORTH_SOUTH is clear.  The ungated
+    pressure policy favours EAST_WEST, and minimum-green / clearance
+    conditions permit a safe transition.
+
+    Expected:
+      - D1 (gate OFF) ignores downstream blockage and selects EAST_WEST.
+      - D2 (gate ON) suppresses the blocked EAST_WEST movement and selects
+        NORTH_SOUTH instead.
+
+    This test fails if the gate only logs congestion without changing the
+    applied control decision.
+    """
+
+    @staticmethod
+    def _blocked_ew_clear_ns_state():
+        """EAST_WEST receiving links blocked; NORTH_SOUTH clear; EW higher pressure."""
+        return TrafficState(
+            timestamp=0.0,
+            approaches={
+                "north": ApproachState(
+                    queue_count=2, mean_wait_seconds=3, arrival_rate=5,
+                    downstream_available=True, measurement_valid=True,
+                ),
+                "south": ApproachState(
+                    queue_count=1, mean_wait_seconds=2, arrival_rate=3,
+                    downstream_available=True, measurement_valid=True,
+                ),
+                "east": ApproachState(
+                    queue_count=15, mean_wait_seconds=30, arrival_rate=20,
+                    downstream_available=False, measurement_valid=True,
+                ),
+                "west": ApproachState(
+                    queue_count=1, mean_wait_seconds=2, arrival_rate=3,
+                    downstream_available=False, measurement_valid=True,
+                ),
+            },
+            all_valid=True,
+        )
+
+    def test_d1_selects_ungated_east_west(self):
+        """D1 (gate OFF) must retain the ungated EAST_WEST choice."""
+        d1 = QueueSenseController(
+            alpha=0.4, beta=0.4, gamma=0.2,
+            spillback_threshold=0.30, max_wait=90.0,
+            spillback_gate_enabled=False,
+        )
+        state = self._blocked_ew_clear_ns_state()
+
+        # Advance past min_green (10s) so a transition is permitted.
+        for _ in range(20):
+            action = d1.step(state, step_length=1.0)
+
+        assert d1.state == Phase.EAST_WEST, (
+            f"D1 (gate OFF) should select ungated EAST_WEST, got {d1.state}"
+        )
+
+    def test_d2_selects_north_south_when_ew_blocked(self):
+        """D2 (gate ON) must suppress blocked EAST_WEST and select NORTH_SOUTH."""
+        d2 = QueueSenseController(
+            alpha=0.4, beta=0.4, gamma=0.2,
+            spillback_threshold=0.30, max_wait=90.0,
+            spillback_gate_enabled=True,
+        )
+        state = self._blocked_ew_clear_ns_state()
+
+        for _ in range(20):
+            action = d2.step(state, step_length=1.0)
+
+        assert d2.state == Phase.NORTH_SOUTH, (
+            f"D2 (gate ON) should suppress blocked EAST_WEST and select "
+            f"NORTH_SOUTH, got {d2.state}"
+        )
+
+    def test_d1_and_d2_diverge_on_identical_state(self):
+        """D1 and D2 must make different phase choices on identical state."""
+        d1 = QueueSenseController(
+            alpha=0.4, beta=0.4, gamma=0.2,
+            spillback_threshold=0.30, max_wait=90.0,
+            spillback_gate_enabled=False,
+        )
+        d2 = QueueSenseController(
+            alpha=0.4, beta=0.4, gamma=0.2,
+            spillback_threshold=0.30, max_wait=90.0,
+            spillback_gate_enabled=True,
+        )
+        state = self._blocked_ew_clear_ns_state()
+
+        for _ in range(20):
+            d1.step(state, step_length=1.0)
+            d2.step(state, step_length=1.0)
+
+        assert d1.state != d2.state, (
+            f"D1 ({d1.state}) and D2 ({d2.state}) must diverge when the "
+            f"gate is the only differing configuration"
+        )
+        assert d1.state == Phase.EAST_WEST
+        assert d2.state == Phase.NORTH_SOUTH
+
+    def test_d2_gate_tags_intervention_when_ew_blocked(self):
+        """D2 must record a gate intervention, not silently hold the phase."""
+        d2 = QueueSenseController(
+            alpha=0.4, beta=0.4, gamma=0.2,
+            spillback_threshold=0.30, max_wait=90.0,
+            spillback_gate_enabled=True,
+        )
+        state = self._blocked_ew_clear_ns_state()
+
+        gate_events = []
+        reasons = []
+        for _ in range(20):
+            action = d2.step(state, step_length=1.0)
+            gate_events.append(action.get("gate_event"))
+            reasons.append(str(action.get("reason", "")))
+
+        assert any(e in ("phase_change", "hold") for e in gate_events), (
+            f"D2 must record at least one gate intervention "
+            f"(phase_change/hold), got {gate_events}"
+        )
+        assert any("GATE_INTERVENTION" in r for r in reasons), (
+            "D2 reason string must carry the GATE_INTERVENTION marker"
+        )
+
+    def test_d1_gate_does_not_tag_intervention(self):
+        """D1 (gate OFF) must never record a gate intervention."""
+        d1 = QueueSenseController(
+            alpha=0.4, beta=0.4, gamma=0.2,
+            spillback_threshold=0.30, max_wait=90.0,
+            spillback_gate_enabled=False,
+        )
+        state = self._blocked_ew_clear_ns_state()
+
+        gate_events = []
+        for _ in range(20):
+            action = d1.step(state, step_length=1.0)
+            gate_events.append(action.get("gate_event"))
+
+        # gate_event is absent (None) during clearance phases; the only
+        # acceptable values for D1 are "none" and None.
+        assert all(e in ("none", None) for e in gate_events), (
+            f"D1 (gate OFF) must never record a gate intervention, got {gate_events}"
+        )

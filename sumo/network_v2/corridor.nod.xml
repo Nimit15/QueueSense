@@ -1,0 +1,14 @@
+<nodes>
+    <!-- Sources and sinks -->
+    <node id="WS" x="-200.0" y="200.0" type="priority"/>   <!-- West source -->
+    <node id="ES" x="800.0" y="200.0" type="priority"/>     <!-- East sink -->
+    <node id="WE" x="800.0" y="200.0" type="priority"/>     <!-- East source (for return flow) -->
+    <node id="WSink" x="-200.0" y="200.0" type="priority"/>  <!-- West sink -->
+    <node id="NS" x="0.0" y="400.0" type="priority"/>        <!-- North source -->
+    <node id="SS" x="0.0" y="0.0" type="priority"/>          <!-- South sink -->
+
+    <!-- Signalized junctions -->
+    <node id="J1" x="0.0" y="200.0" type="traffic_light"/>   <!-- Western junction -->
+    <node id="J2" x="300.0" y="200.0" type="traffic_light"/> <!-- Central junction (bottleneck) -->
+    <node id="J3" x="600.0" y="200.0" type="traffic_light"/> <!-- Eastern junction -->
+</nodes>

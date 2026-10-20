@@ -1,0 +1,25 @@
+<routes>
+    <!-- Balanced traffic scenario: moderate demand -->
+    <vType id="car" vClass="passenger" speedDev="0.1" sigma="0.5" />
+
+    <!-- Routes through the three-junction corridor -->
+    <!-- West to East: WS -> J1 -> J2 -> J3 -> ES -->
+    <route id="west_east" edges="in_west art_east_1 art_east_2 out_east"/>
+    <!-- East to West: ES -> J3 -> J2 -> J1 -> Wsink -->
+    <route id="east_west" edges="in_east art_west_2 art_west_1 out_west"/>
+
+    <!-- North-South cross street movements -->
+    <!-- North to South at J1: NS -> J1 -> SS -->
+    <route id="north_south_j1" edges="in_north_1 out_north_1"/>
+    <!-- North to South at J2: NS -> J2 -> SS -->
+    <route id="north_south_j2" edges="in_north_2 out_north_2"/>
+    <!-- North to South at J3: NS -> J3 -> SS -->
+    <route id="north_south_j3" edges="in_north_3 out_north_3"/>
+
+    <!-- Balanced flows -->
+    <flow id="flow_west_east" type="car" route="west_east" begin="0" end="3600" number="600" departSpeed="max" departLane="best"/>
+    <flow id="flow_east_west" type="car" route="east_west" begin="0" end="3600" number="400" departSpeed="max" departLane="best"/>
+    <flow id="flow_north_south_j1" type="car" route="north_south_j1" begin="0" end="3600" number="150" departSpeed="max" departLane="best"/>
+    <flow id="flow_north_south_j2" type="car" route="north_south_j2" begin="0" end="3600" number="150" departSpeed="max" departLane="best"/>
+    <flow id="flow_north_south_j3" type="car" route="north_south_j3" begin="0" end="3600" number="150" departSpeed="max" departLane="best"/>
+</routes>

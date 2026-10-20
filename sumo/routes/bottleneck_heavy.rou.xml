@@ -1,0 +1,11 @@
+<routes>
+    <!-- Heavy bottleneck scenario: very high demand on east-west and west-east to cause spillback on art_east -->
+    <vType id="car" vClass="passenger" speedDev="0.1" sigma="0.5" />
+    <route id="west_east" edges="in_west art_east out_east"/>
+    <route id="east_west" edges="in_east art_east out_east"/>
+    <route id="north_south" edges="in_north out_north"/>
+
+    <flow id="flow_west_east" type="car" route="west_east" begin="0" end="3600" number="2400" departSpeed="max" departLane="best"/>
+    <flow id="flow_east_west" type="car" route="east_west" begin="0" end="3600" number="2400" departSpeed="max" departLane="best"/>
+    <flow id="flow_north_south" type="car" route="north_south" begin="0" end="3600" number="600" departSpeed="max" departLane="best"/>
+</routes>

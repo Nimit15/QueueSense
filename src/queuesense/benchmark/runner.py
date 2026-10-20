@@ -95,7 +95,7 @@ class BenchmarkRunner:
 
         Args:
             scenario: Scenario name
-            controller_id: Controller identifier (A, B, C)
+            controller_id: Controller identifier (A, B, C, D)
             seed: Random seed for reproducibility
 
         Returns:
@@ -108,6 +108,46 @@ class BenchmarkRunner:
         scenario_dir = self.output_dir / scenario
         scenario_dir.mkdir(exist_ok=True)
 
+        # Check for existing valid output to make the run resumable
+        # We look for files matching the pattern and check if they have reasonable data.
+        # We consider a run valid if the CSV has at least 1000 rows (simulation runs for 3600s with step 1.0 -> 3600 rows, plus header)
+        # and the last time is close to the duration.
+        import glob
+        existing_files = list(scenario_dir.glob(f"{controller_id}_seed{seed}_*.csv"))
+        if existing_files:
+            # Take the most recent file
+            latest_existing = max(existing_files, key=lambda p: p.stat().st_mtime)
+            try:
+                with open(latest_existing, "r") as f:
+                    reader = csv.DictReader(f)
+                    rows = list(reader)
+                    if len(rows) >= 1000:  # arbitrary threshold to avoid empty or corrupt files
+                        last_row = rows[-1]
+                        last_time = float(last_row.get("time", 0.0))
+                        if abs(last_time - self.duration) < 10:  # within 10 seconds of target duration
+                            logger.info(f"Skipping {scenario}/{controller_id}/seed={seed}: existing valid output found at {latest_existing}")
+                            return {
+                                "scenario": scenario,
+                                "controller": controller_id,
+                                "seed": seed,
+                                "status": "success",
+                                "time": last_time,
+                                "arrived_cumulative": int(last_row.get("arrived_cumulative", 0)),
+                                "arrived_this_step": int(last_row.get("arrived_this_step", 0)),
+                                "remaining_expected": int(last_row.get("remaining_expected", 0)),
+                                "completed": int(last_row.get("arrived_cumulative", last_row.get("completed", 0))),
+                                "queue_north": int(last_row.get("queue_north", 0)),
+                                "queue_south": int(last_row.get("queue_south", 0)),
+                                "queue_east": int(last_row.get("queue_east", 0)),
+                                "queue_west": int(last_row.get("queue_west", 0)),
+                                "spillback_ns": int(last_row.get("spillback_ns", 0)),
+                                "spillback_ew": int(last_row.get("spillback_ew", 0)),
+                                "output_file": str(latest_existing),
+                            }
+            except Exception as e:
+                logger.warning(f"Could not validate existing file {latest_existing}: {e}. Will re-run.")
+
+        # If we reach here, we need to run the simulation.
         # Unique output filename with scenario, controller, and seed
         import datetime
         ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -123,6 +163,7 @@ class BenchmarkRunner:
             controller=controller,
             gui=self.gui,
             csv_prefix=f"{controller_id}_seed{seed}",
+            seed=seed,
         )
 
         try:
@@ -166,7 +207,12 @@ class BenchmarkRunner:
                 "seed": seed,
                 "status": "success",
                 "time": float(last_row.get("time", 0.0)),
-                "completed": int(last_row.get("completed", 0)),
+                # New correct metrics
+                "arrived_cumulative": int(last_row.get("arrived_cumulative", 0)),
+                "arrived_this_step": int(last_row.get("arrived_this_step", 0)),
+                "remaining_expected": int(last_row.get("remaining_expected", 0)),
+                # Legacy compatibility field: maps to arrived_cumulative (completed trips)
+                "completed": int(last_row.get("arrived_cumulative", last_row.get("completed", 0))),
                 "queue_north": int(last_row.get("queue_north", 0)),
                 "queue_south": int(last_row.get("queue_south", 0)),
                 "queue_east": int(last_row.get("queue_east", 0)),
@@ -234,10 +280,14 @@ class BenchmarkRunner:
         }
 
         # Compute mean/std per scenario/controller for key metrics
-        for metric in ["completed", "queue_north", "queue_south", "queue_east", "queue_west", "spillback_ns", "spillback_ew"]:
+        for metric in ["arrived_cumulative", "remaining_expected", "queue_north", "queue_south", "queue_east", "queue_west", "spillback_ns", "spillback_ew"]:
             if metric in df_success.columns:
                 agg_df = df_success.groupby(["scenario", "controller"])[metric].agg(["mean", "std", "min", "max"])
                 summary["metrics"][metric] = agg_df.reset_index().to_dict(orient="records")
+        # Keep legacy completed metric for compatibility
+        if "completed" in df_success.columns:
+            agg_df = df_success.groupby(["scenario", "controller"])["completed"].agg(["mean", "std", "min", "max"])
+            summary["metrics"]["completed"] = agg_df.reset_index().to_dict(orient="records")
 
         return summary
 

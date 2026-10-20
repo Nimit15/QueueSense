@@ -1,0 +1,17 @@
+<routes>
+    <!-- Scenario designed to create congestion on art_east, art_west, and out_north to test gate activation -->
+    <vType id="car" vClass="passenger" speedDev="0.1" sigma="0.5" />
+    <!-- Main arterial East-West -->
+    <route id="west_east" edges="in_west art_east out_east"/>          <!-- West to East -->
+    <route id="east_west" edges="in_east art_east out_east"/>        <!-- East to West to East (U-turn) -->
+    <!-- North-South diagonal via W1 -->
+    <route id="north_south" edges="in_north out_north"/>              <!-- Southwest to Northeast to Southwest (U-turn) -->
+    <!-- Additional flow to congest art_west: East to West and terminate -->
+    <route id="west_extra" edges="in_east art_west :N0_0"/>           <!-- East to West to internal west -->
+
+    <!-- Flows -->
+    <flow id="flow_west_east" type="car" route="west_east" begin="0" end="3600" number="1800" departSpeed="max" departLane="best"/>
+    <flow id="flow_east_west" type="car" route="east_west" begin="0" end="3600" number="1800" departSpeed="max" departLane="best"/>
+    <flow id="flow_north_south" type="car" route="north_south" begin="0" end="3600" number="3600" departSpeed="max" departLane="best"/>
+    <flow id="flow_west_extra" type="car" route="west_extra" begin="0" end="3600" number="1800" departSpeed="max" departLane="best"/>
+</routes>

@@ -80,6 +80,33 @@ class QueuePressureController(BaseController):
         logger.debug(f"Total pressure for {phase.name}: {total_pressure:.2f}")
         return total_pressure
 
+    def _select_phase_from_pressure(self, state: TrafficState) -> Phase:
+        """Select the phase with the higher queue-pressure score.
+
+        Pure pressure comparison (no downstream blockage awareness).  This is
+        the phase-selection policy Controller C uses; Controller D reuses the
+        same pressure formula but filters blocked approaches first.
+
+        Args:
+            state: TrafficState to evaluate.
+
+        Returns:
+            The Phase with the higher pressure (ties go to NORTH_SOUTH).
+        """
+        north_pressure = self._calculate_pressure(state, Phase.NORTH_SOUTH)
+        east_pressure = self._calculate_pressure(state, Phase.EAST_WEST)
+        if north_pressure >= east_pressure:
+            logger.info(
+                f"QueuePressure: NORTH_SOUTH pressure ({north_pressure:.2f}) >= "
+                f"EAST_WEST ({east_pressure:.2f}); selecting NORTH_SOUTH"
+            )
+            return Phase.NORTH_SOUTH
+        logger.info(
+            f"QueuePressure: EAST_WEST pressure ({east_pressure:.2f}) > "
+            f"NORTH_SOUTH ({north_pressure:.2f}); selecting EAST_WEST"
+        )
+        return Phase.EAST_WEST
+
     def _should_end_phase(self) -> bool:
         """Decide whether to end the current green phase early based on pressure comparison.
 

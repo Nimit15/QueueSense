@@ -1,0 +1,16 @@
+import os
+import sys
+from pathlib import Path
+
+os.chdir('D:/QueueSense')
+sys.path.insert(0, str(Path('src')))
+
+print('Path set up:', sys.path[0])
+print('Current dir:', os.getcwd())
+
+# Check route files
+scenarios = ['light', 'bottleneck', 'surge', 'uneven']
+for s in scenarios:
+    path = f'sumo/{s}.rou.xml'
+    exists = os.path.exists(path)
+    print(f'{s}: {path} - {\"OK\" if exists else \"MISSING\"}')

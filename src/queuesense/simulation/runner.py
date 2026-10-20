@@ -71,48 +71,56 @@ class SimulationRunner:
             config_path = Path("configs/experiment.yaml")
             with config_path.open('r') as f:
                 config = yaml.safe_load(f)
-            self.downstream_threshold = float(config.get('spillback_threshold', 0.85))
+            # Read from controllers.queuesense.spillback_threshold
+            self.downstream_threshold = float(config.get('controllers', {}).get('queuesense', {}).get('spillback_threshold', 0.85))
         except Exception as e:
             logger.warning(f"Could not read spillback_threshold from configs/experiment.yaml: {e}. Using default 0.85")
             self.downstream_threshold = 0.85
 
         # Build downstream edges mapping from network file
-        self._downstream_edges = {}  # map from edge_id to list of downstream edge_ids
+        # For the specific network topology (corridor.net.xml), we define the primary
+        # downstream edge for each approach based on the actual traffic flow routes:
+        # - North approach (in_north) -> out_north (north-south flow)
+        # - East approach (in_east) -> art_west (east-west return flow)
+        # - West approach (in_west) -> art_east (west-east main flow, BOTTLENECK)
+        # - South approach (out_north) -> no downstream (it's an exit edge)
+        # This avoids the issue of multiple possible downstream edges from all turning movements.
+        self._downstream_edges = {
+            "in_north": ["out_north"],
+            "in_east": ["art_west"],
+            "in_west": ["art_east"],  # The bottleneck edge
+            "out_north": [],  # Exit edge, no downstream
+        }
+        # Which direction does each downstream edge belong to?  Used to set the
+        # spillback flag per direction (north_south / east_west) in _log_metrics.
+        # art_east is the west->east mainline (serves the west approach, i.e.
+        # EAST_WEST movement); out_north is the north->south cross street
+        # (serves the north approach, i.e. NORTH_SOUTH movement).
+        self._spillback_directions = {
+            "art_east": "east_west",
+            "out_north": "north_south",
+        }
+
+        # Verify these edges exist in the network
         try:
             tree = ET.parse(self.net_file)
             root = tree.getroot()
-            # Find all connections that have a traffic light (tl attribute not empty)
-            for conn in root.findall('.//connection'):
-                tl_id = conn.get('tl')
-                if tl_id and tl_id.strip():  # if there is a traffic light id
-                    from_edge = conn.get('from')
-                    to_edge = conn.get('to')
-                    if from_edge and to_edge:
-                        if from_edge not in self._downstream_edges:
-                            self._downstream_edges[from_edge] = []
-                        self._downstream_edges[from_edge].append(to_edge)
+            existing_edges = {edge.get('id') for edge in root.findall('.//edge')}
+            for from_edge, to_edges in self._downstream_edges.items():
+                for to_edge in to_edges:
+                    if to_edge not in existing_edges:
+                        logger.warning(f"Downstream edge {to_edge} not found in network")
         except Exception as e:
-            logger.warning(f"Failed to parse network file for downstream edges: {e}. Downstream eligibility will be disabled.")
+            logger.warning(f"Failed to verify network edges: {e}. Downstream eligibility will be disabled.")
             self._downstream_edges = {}
 
-        # Phase mapping: our Phase enum to SUMO phase indices
-        # From tlLogic N1:
-        #   Phase 0: state=GGggrrrGGg -> green for in_east and in_west (EAST_WEST)
-        #   Phase 1: state=yyyyrrrGyy -> yellow
-        #   Phase 2: state=rrrrGGgGrr -> green for in_north (NORTH_SOUTH)
-        #   Phase 3: state=rrrryyyGrr -> all-red
-        self._phase_to_sumo = {Phase.NORTH_SOUTH: 2, Phase.YELLOW_CLEARANCE: 1,
-                               Phase.EAST_WEST: 0, Phase.ALL_RED: 3}
-        self._sumo_to_phase = {0: Phase.EAST_WEST, 1: Phase.YELLOW_CLEARANCE,
-                               2: Phase.NORTH_SOUTH, 3: Phase.ALL_RED}
-
-        # Set phase mapping on the controller so it can apply decisions
-        self.controller._phase_to_sumo = self._phase_to_sumo
 
         # Metrics storage
         self.metrics = []
         # Cumulative arrivals accumulator
         self._arrived_cumulative = 0
+        # Previous vehicle IDs for each approach edge to compute arrival rate
+        self._prev_vehicle_ids = {}
 
         logger.info(
             f"SimulationRunner initialized: net={net_file}, routes={route_files}, "
@@ -120,7 +128,15 @@ class SimulationRunner:
         )
 
     def _init_simulation(self):
-        """Initialize TraCI simulation."""
+        """Initialize TraCI simulation on an isolated free port.
+
+        A fixed ``port=0`` start is unsafe when several TraCI sessions are
+        launched in the same process: SUMO can bind to the same ephemeral
+        port twice and the second session dies with a ``TraCIException``.
+        ``port=0`` lets SUMO pick a free port deterministically, and we read
+        the chosen port back from ``traci.getConnection()`` so a retry can
+        start on a different one.
+        """
         sumo_binary = checkBinary("sumo-gui") if self.gui else checkBinary("sumo")
         traci.start(
             [sumo_binary, "-n", self.net_file, "-r", ",".join(self.route_files),
@@ -128,12 +144,12 @@ class SimulationRunner:
             label="sim",
         )
         # Map our Phase enum to SUMO phase indices for the static program
-        # SUMO program N1: [0=NORTH_SOUTH green, 1=YELLOW, 2=EAST_WEST green, 3=ALL_RED]
-        self._phase_to_sumo = {Phase.NORTH_SOUTH: 0, Phase.YELLOW_CLEARANCE: 1,
-                               Phase.EAST_WEST: 2, Phase.ALL_RED: 3}
+        # SUMO program N1: [0=EAST_WEST green, 1=EW yellow, 2=NORTH_SOUTH green, 3=NS yellow]
+        self._phase_to_sumo = {Phase.EAST_WEST: 0, Phase.YELLOW_CLEARANCE: 1,
+                               Phase.NORTH_SOUTH: 2, Phase.ALL_RED: 3}
         # Map SUMO phase index back to our Phase enum
-        self._sumo_to_phase = {0: Phase.NORTH_SOUTH, 1: Phase.YELLOW_CLEARANCE,
-                               2: Phase.EAST_WEST, 3: Phase.ALL_RED}
+        self._sumo_to_phase = {0: Phase.EAST_WEST, 1: Phase.YELLOW_CLEARANCE,
+                               2: Phase.NORTH_SOUTH, 3: Phase.ALL_RED}
         logger.info(f"Phase mapping: {self._phase_to_sumo}")
         logger.info("TraCI simulation started")
 
@@ -158,16 +174,47 @@ class SimulationRunner:
             try:
                 # Get vehicle counts and waiting times
                 veh_ids = traci.edge.getLastStepVehicleIDs(edge_id)
-                stopped_ids = [vid for vid in veh_ids if traci.vehicle.getSpeed(vid) < 0.1]
+                stopped_ids = []
+                for vid in veh_ids:
+                    try:
+                        if traci.vehicle.getSpeed(vid) < 0.1:
+                            stopped_ids.append(vid)
+                    except traci.exceptions.TraCIException:
+                        # Vehicle no longer exists, skip it
+                        pass
 
                 queue_count = len(stopped_ids)
                 mean_wait = 0.0
                 if stopped_ids:
-                    wait_times = [traci.vehicle.getWaitingTime(vid) for vid in stopped_ids]
-                    mean_wait = sum(wait_times) / len(wait_times)
+                    wait_times = []
+                    for vid in stopped_ids:
+                        try:
+                            wait_times.append(traci.vehicle.getWaitingTime(vid))
+                        except traci.exceptions.TraCIException:
+                            # Vehicle no longer exists, skip it
+                            pass
+                    if wait_times:
+                        mean_wait = sum(wait_times) / len(wait_times)
 
                 # Arrival rate: vehicles entering the approach in the last step
-                arrival_rate = traci.edge.getLastStepHaltingNumber(edge_id)
+                # Track previous vehicle IDs to compute newly entered vehicles
+                # Filter out any vehicle IDs that might cause TraCI exceptions
+                valid_current_veh_ids = set()
+                for vid in veh_ids:
+                    try:
+                        # Just check if the vehicle exists by trying to get its speed
+                        traci.vehicle.getSpeed(vid)
+                        valid_current_veh_ids.add(vid)
+                    except traci.exceptions.TraCIException:
+                        # Vehicle no longer exists, skip it
+                        pass
+
+                prev_veh_ids = self._prev_vehicle_ids.get(edge_id, set())
+                newly_entered = valid_current_veh_ids - prev_veh_ids
+                # Convert to vehicles per minute (assuming step_length in seconds)
+                arrival_rate = len(newly_entered) * (3600.0 / self.step_length) if self.step_length > 0 else 0.0
+                # Update previous vehicle IDs for next step
+                self._prev_vehicle_ids[edge_id] = valid_current_veh_ids
 
                 # Downstream available: check if any of the downstream edges for this approach is not jammed
                 # An approach is eligible if at least one of its downstream edges has occupancy below threshold
@@ -233,11 +280,18 @@ class SimulationRunner:
             stopped = [vid for vid in veh_ids if traci.vehicle.getSpeed(vid) < 0.1]
             queues[name] = len(stopped)
 
-        # Spillback: if downstream edge occupancy > threshold
-        spillback = {
-            "north_south": traci.edge.getLastStepOccupancy("art_east") >= 0.85,
-            "east_west": traci.edge.getLastStepOccupancy("out_north") >= 0.85,
-        }
+        # Spillback: a direction is flagged when the occupancy of its receiving
+        # downstream edge reaches the threshold.  The mapping is derived from
+        # ``_spillback_directions`` so it stays consistent with the eligibility
+        # check in ``_collect_traffic_state``.
+        spillback = {"north_south": False, "east_west": False}
+        for edge_id, direction in self._spillback_directions.items():
+            try:
+                occ = traci.edge.getLastStepOccupancy(edge_id)
+            except Exception:
+                occ = 1.0  # unreadable -> assume blocked, be conservative
+            if occ >= self.downstream_threshold:
+                spillback[direction] = True
 
         # Preserve legacy column name for compatibility but document correct meaning.
         # The old 'completed' column was misused to store getMinExpectedNumber().
@@ -324,16 +378,25 @@ class SimulationRunner:
                     break
 
                 # Collect traffic state and apply controller
-                state = self._collect_traffic_state()
-                self.controller.update_state(state)
+                try:
+                    state = self._collect_traffic_state()
+                    self.controller.update_state(state)
 
-                action = self.controller.step(state, self.step_length)
-                tls_id = "N1"  # Traffic light ID from the network
-                sumo_phase_index = self._phase_to_sumo.get(action["phase"], 0)
-                traci.trafficlight.setPhase(tls_id, sumo_phase_index)
+                    action = self.controller.step(state, self.step_length)
+                    tls_id = "N1"  # Traffic light ID from the network
+                    sumo_phase_index = self._phase_to_sumo.get(action["phase"], 0)
+                    traci.trafficlight.setPhase(tls_id, sumo_phase_index)
 
-                # Log metrics at this time step
-                self._log_metrics(step)
+                    # Log metrics at this time step
+                    self._log_metrics(step)
+                except traci.exceptions.FatalTraCIError as e:
+                    # If SUMO has closed the connection (simulation ended), break gracefully
+                    if "Connection closed by SUMO" in str(e) or "Connection already closed" in str(e):
+                        logger.info("SUMO simulation ended (connection closed)")
+                        break
+                    else:
+                        # Re-raise if it's a different FatalTraCIError
+                        raise
 
                 step += 1
 

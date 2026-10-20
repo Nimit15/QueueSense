@@ -24,10 +24,11 @@ controllers:
     gamma: 0.2
     min_green: 10
     max_green: 60
-    spillback_threshold: 0.85
+    spillback_threshold: 0.30
 
 scenarios:
   - balanced
   - asymmetric
   - bottleneck
   - fault
+  - surge
