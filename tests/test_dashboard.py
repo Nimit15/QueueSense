@@ -28,21 +28,27 @@ def test_index_page_serves_html(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "QueueSense" in response.text
-    assert "ICCC" in response.text
-    assert "3D" in response.text or "Digital Twin" in response.text, (
-        "Index page should serve the new 3D digital twin UI"
-    )
+    assert "Edge-AI Adaptive Traffic Signal Controller" in response.text
     assert "three-canvas-container" in response.text, (
         "Index page should include the Three.js canvas container"
     )
     assert "styles.css" in response.text, (
         "Index page should link to the design system CSS"
     )
-    assert "three-scene.js" in response.text, (
-        "Index page should load the Three.js scene script"
+    assert "app.js" in response.text, (
+        "Index page should load the main application script"
     )
-    assert "hud-components.js" in response.text, (
-        "Index page should load the HUD components script"
+    assert "three.module.js" in response.text, (
+        "Index page should import Three.js via importmap"
+    )
+    assert "hero__controls" in response.text, (
+        "Index page should include interactive controls"
+    )
+    assert "decision-feed" in response.text, (
+        "Index page should include AI decision feed"
+    )
+    assert "scoreboard" in response.text, (
+        "Index page should include real-time scoreboard"
     )
 
 

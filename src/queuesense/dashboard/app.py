@@ -970,21 +970,22 @@ async def get_selector_status():
         return {"status": "initializing"}
 
     # Step selector with current state to get fresh receipt
-    receipt = engine.selector.step(engine.last_traffic_state, step_length=1.0)
+    action = engine.selector.step(engine.last_traffic_state, step_length=1.0)
+    receipt = action.get("receipt", {})
 
     return {
         "junction_id": engine.selector.junction_id,
-        "capacity_status": receipt["capacity_status"],
-        "selected_mode": receipt["selected_mode"],
-        "max_downstream_occupancy": receipt["max_downstream_occupancy"],
-        "trigger_edge_id": receipt["trigger_edge_id"],
-        "ungated_phase": receipt["ungated_phase"],
-        "gated_phase": receipt["gated_phase"],
-        "gate_intervened": receipt["gate_intervened"],
-        "safety_override": receipt["safety_override"],
-        "applied_phase": receipt["applied_phase"],
-        "reason_code": receipt["reason_code"],
-        "reason": receipt["reason"],
+        "capacity_status": receipt.get("capacity_status", action.get("capacity_status", "")),
+        "selected_mode": receipt.get("selected_mode", action.get("selected_mode", "")),
+        "max_downstream_occupancy": receipt.get("max_downstream_occupancy", 0.0),
+        "trigger_edge_id": receipt.get("trigger_edge_id", ""),
+        "ungated_phase": receipt.get("ungated_phase", action.get("ungated_phase", "")),
+        "gated_phase": receipt.get("gated_phase", action.get("gated_phase", "")),
+        "gate_intervened": receipt.get("gate_intervened", action.get("gate_intervened", False)),
+        "safety_override": receipt.get("safety_override", action.get("safety_override", False)),
+        "applied_phase": receipt.get("applied_phase", action.get("applied_phase", "")),
+        "reason_code": receipt.get("reason_code", action.get("reason_code", "")),
+        "reason": receipt.get("reason", action.get("reason", "")),
         "mode_persistence_steps": engine.selector._mode_persistence_steps,
         "thresholds": {
             "spillback": engine.selector.spillback_threshold,
