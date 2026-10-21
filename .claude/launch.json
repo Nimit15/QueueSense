@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "visual-test",
+      "runtimeExecutable": "D:/QueueSense/.venv/Scripts/python.exe",
+      "runtimeArgs": ["run_command_center.py", "--port", "8000", "--log-level", "warning"],
+      "port": 8004
+    }
+  ]
+}

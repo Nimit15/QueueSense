@@ -1,33 +1,17 @@
-// QueueSense Dashboard — Application Controller
-// Complete interaction logic with emil-kowalski micro-interactions
+// QueueSense Dashboard — App Controller
+// Bridges three-scene.js with benchmark charts and live KPI updates
 
 (function () {
   'use strict';
 
-  // --- State ---
-  const appState = {
-    scenario: 'auto',
-    mode: 'queuesense',
-    camera: 'isometric',
-    autoCycle: true,
-    density: 50,
-    downstream: 0,
-    apiAvailable: false,
-    benchmarkData: null,
-    ws: null,
-    reconnectTimer: null,
-    autoCycleTimer: null,
-    scenarioCycleIndex: 0,
-  };
-
-  // --- Fallback Benchmark Data (matches Stage 3/5 reconciled data) ---
+  // ─── Fallback Benchmark Data (reconciled Stage 3/5 values) ──
   const FALLBACK_BENCHMARK = {
     controllers: [
       {
         controller_id: 'A',
         controller_name: 'Controller A (Fixed-Time)',
         throughput_mean: 952.4,
-        throughput_std: 5.4,
+        throughput_std: 54.2,
         delay_mean: 105.3,
         delay_std: 12.4,
         delay_p95: 128.1,
@@ -39,7 +23,7 @@
         controller_id: 'B',
         controller_name: 'Controller B (Actuated)',
         throughput_mean: 962.1,
-        throughput_std: 5.1,
+        throughput_std: 48.7,
         delay_mean: 98.7,
         delay_std: 9.8,
         delay_p95: 118.0,
@@ -51,7 +35,7 @@
         controller_id: 'C',
         controller_name: 'Controller C (Queue-Pressure)',
         throughput_mean: 1257.1,
-        throughput_std: 2.9,
+        throughput_std: 52.3,
         delay_mean: 50.6,
         delay_std: 8.3,
         delay_p95: 63.5,
@@ -63,7 +47,7 @@
         controller_id: 'D',
         controller_name: 'Controller D (QueueSense)',
         throughput_mean: 1361.5,
-        throughput_std: 2.9,
+        throughput_std: 49.8,
         delay_mean: 38.5,
         delay_std: 6.7,
         delay_p95: 52.3,
@@ -74,12 +58,12 @@
     ],
   };
 
-  // --- Normalized Benchmark ---
+  // ─── Normalized Benchmark ───────────────────────────────────
   function normalizeBenchmark(raw) {
     const data = (raw && raw.controllers && Array.isArray(raw.controllers)) ? raw : FALLBACK_BENCHMARK;
     const controllers = data.controllers || FALLBACK_BENCHMARK.controllers;
 
-    return controllers.map(function(c) {
+    return controllers.map(function (c) {
       const name = c.controller_name || c.name || 'Unknown';
       const id = c.controller_id || c.id || name;
       const throughputMean = (typeof c.throughput_mean === 'number') ? c.throughput_mean : 0;
@@ -101,547 +85,429 @@
     });
   }
 
-  // --- Chart.js Instances ---
+  // ─── Chart.js Instances ─────────────────────────────────────
   let delayChart = null;
   let throughputChart = null;
 
-  // --- Color Palette (neutral, no neon) ---
+  // ─── Color Palette ───────────────────────────────────────────
   function getControllerColor(name) {
     const colors = {
-      'Controller A (Fixed-Time)':       '#9ca3af',
-      'Controller B (Actuated)':         '#60a5fa',
-      'Controller C (Queue-Pressure)':   '#f59e0b',
-      'Controller D (QueueSense)':       '#22c55e',
+      'A': '#4f96ff',
+      'B': '#22c55e',
+      'C': '#ffb800',
+      'D': '#ff2e4c',
     };
-    return colors[name] || '#9ca3af';
+    if (name.includes('Controller A') || name.includes('Fixed-Time')) return colors.A;
+    if (name.includes('Controller B') || name.includes('Actuated')) return colors.B;
+    if (name.includes('Controller C') || name.includes('Queue-Pressure')) return colors.C;
+    if (name.includes('Controller D') || name.includes('QueueSense')) return colors.D;
+    return '#4f96ff';
   }
 
-  function getControllerBg(name) {
-    const color = getControllerColor(name);
-    const r = parseInt(color.slice(1, 3), 16);
-    const g = parseInt(color.slice(3, 5), 16);
-    const b = parseInt(color.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, 0.25)`;
+  // ─── Fetch Benchmark Data ───────────────────────────────────
+  async function fetchBenchmark(scenario) {
+    try {
+      const url = scenario ? `/api/benchmark/${scenario}` : '/api/benchmark';
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (e) {
+      console.warn('Using fallback benchmark data:', e.message);
+      return FALLBACK_BENCHMARK;
+    }
   }
 
-  // --- Chart.js Options ---
-  function getChartOptions() {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1e23',
-          titleColor: '#e8e8ec',
-          bodyColor: '#b8b8c8',
-          borderColor: '#3a3a46',
-          borderWidth: 1,
-          cornerRadius: 6,
-          displayColors: false,
-        },
-      },
-      scales: {
-        y: {
-          grid: { color: '#2a2a34', drawBorder: false },
-          ticks: { color: '#6a6b80', font: { size: 10 }, padding: 4 },
-          beginAtZero: true,
-        },
-        x: {
-          grid: { display: false },
-          ticks: { color: '#9a9ab0', font: { size: 11 }, padding: 4 },
-        },
-      },
-      animation: {
-        duration: 600,
-        easing: 'easeOutQuart',
-      },
-    };
-  }
+  // ─── Render Charts ─────────────────────────────────────────
+  function renderCharts(benchmarkData) {
+    const controllers = normalizeBenchmark(benchmarkData);
+    const ctx = document.getElementById('chartDelay');
+    const ctxTp = document.getElementById('chartThroughput');
 
-  function initCharts() {
-    const normalized = normalizeBenchmark(appState.benchmarkData);
-    const labels = normalized.map(function(c) { return c.name; });
+    if (!ctx || !ctxTp) return;
 
-    const colors = normalized.map(function(c) { return getControllerColor(c.name); });
-    const bgColors = normalized.map(function(c) { return getControllerBg(c.name); });
+    const labels = controllers.map(c => {
+      const shortName = c.name.replace('Controller ', 'C').replace(' (', '\n(');
+      return c.id;
+    });
+
+    const delayData = controllers.map(c => c.delay_mean);
+    const tpData = controllers.map(c => c.throughput_mean);
+    const delayErr = controllers.map(c => c.delay_std);
+    const tpErr = controllers.map(c => c.throughput_std);
+    const bgColors = controllers.map(c => getControllerColor(c.name));
+
+    // Destroy existing charts
+    if (delayChart) delayChart.destroy();
+    if (throughputChart) throughputChart.destroy();
 
     // Delay Chart
-    const delayCtx = document.getElementById('chartDelay');
-    if (delayCtx) {
-      const ctx = delayCtx.getContext('2d');
-      delayChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Avg Delay (s)',
-            data: normalized.map(function(c) { return Math.round(c.delay_mean); }),
-            backgroundColor: bgColors,
-            borderColor: colors,
+    delayChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Avg Delay (s)',
+          data: delayData,
+          backgroundColor: bgColors,
+          borderColor: bgColors,
+          borderWidth: 0,
+          barThickness: 40,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(15, 18, 21, 0.95)',
+            titleColor: '#e8e8ec',
+            bodyColor: '#b8b8c8',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
             borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 40,
-          }],
+            cornerRadius: 8,
+            callbacks: {
+              label: function (ctx) {
+                const idx = ctx.dataIndex;
+                const c = controllers[idx];
+                return `Delay: ${c.delay_mean.toFixed(1)}s (±${c.delay_std.toFixed(1)}) | p95: ${c.delay_p95.toFixed(1)}s`;
+              },
+            },
+          },
         },
-        options: getChartOptions(),
-      });
-    }
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#9ca3af',
+              font: { size: 12, family: 'Inter, sans-serif' },
+            },
+            beginAtZero: true,
+          },
+          y: {
+            grid: { display: false },
+            ticks: {
+              color: '#b8b8c8',
+              font: { size: 13, weight: 600, family: 'Inter, sans-serif' },
+            },
+          },
+        },
+        animation: {
+          duration: 1200,
+          easing: 'power3.out',
+        },
+      },
+    });
 
     // Throughput Chart
-    const throughputCtx = document.getElementById('chartThroughput');
-    if (throughputCtx) {
-      const ctx2 = throughputCtx.getContext('2d');
-      throughputChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Throughput (veh/hr)',
-            data: normalized.map(function(c) { return Math.round(c.throughput_mean); }),
-            backgroundColor: bgColors,
-            borderColor: colors,
+    throughputChart = new Chart(ctxTp, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Throughput (veh/hr)',
+          data: tpData,
+          backgroundColor: bgColors,
+          borderColor: bgColors,
+          borderWidth: 0,
+          barThickness: 40,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(15, 18, 21, 0.95)',
+            titleColor: '#e8e8ec',
+            bodyColor: '#b8b8c8',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
             borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 40,
-          }],
+            cornerRadius: 8,
+            callbacks: {
+              label: function (ctx) {
+                const idx = ctx.dataIndex;
+                const c = controllers[idx];
+                return `Throughput: ${c.throughput_mean.toFixed(1)} (±${c.throughput_std.toFixed(1)}) | Queue: ${c.queue_mean.toFixed(1)} PCU`;
+              },
+            },
+          },
         },
-        options: getChartOptions(),
-      });
-    }
-  }
-
-  function updateCharts() {
-    const normalized = normalizeBenchmark(appState.benchmarkData);
-    const labels = normalized.map(function(c) { return c.name; });
-    const colors = normalized.map(function(c) { return getControllerColor(c.name); });
-    const bgColors = normalized.map(function(c) { return getControllerBg(c.name); });
-
-    if (delayChart) {
-      delayChart.data.labels = labels;
-      delayChart.data.datasets[0].data = normalized.map(function(c) { return Math.round(c.delay_mean); });
-      delayChart.data.datasets[0].backgroundColor = bgColors;
-      delayChart.data.datasets[0].borderColor = colors;
-      delayChart.update();
-    }
-
-    if (throughputChart) {
-      throughputChart.data.labels = labels;
-      throughputChart.data.datasets[0].data = normalized.map(function(c) { return Math.round(c.throughput_mean); });
-      throughputChart.data.datasets[0].backgroundColor = bgColors;
-      throughputChart.data.datasets[0].borderColor = colors;
-      throughputChart.update();
-    }
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#9ca3af',
+              font: { size: 12, family: 'Inter, sans-serif' },
+            },
+            beginAtZero: true,
+          },
+          y: {
+            grid: { display: false },
+            ticks: {
+              color: '#b8b8c8',
+              font: { size: 13, weight: 600, family: 'Inter, sans-serif' },
+            },
+          },
+        },
+        animation: {
+          duration: 1200,
+          easing: 'power3.out',
+        },
+      },
+    });
 
     // Update metric cards
-    const bestQueue = Math.min.apply(null, normalized.map(function(c) { return c.queue_mean; }));
-    const bestSpillback = Math.min.apply(null, normalized.map(function(c) { return c.spillback_mean; }));
-    const bestThroughput = Math.max.apply(null, normalized.map(function(c) { return c.throughput_mean; }));
-    const bestDelay = Math.min.apply(null, normalized.map(function(c) { return c.delay_mean; }));
+    updateMetricCards(controllers);
+  }
 
+  function updateMetricCards(controllers) {
+    // Best queue
+    const bestQueue = Math.min(...controllers.map(c => c.queue_mean));
     const bestQueueEl = document.getElementById('metricBestQueue');
-    const bestSpillEl = document.getElementById('metricBestSpillback');
-    const bestThruputEl = document.getElementById('metricBestThroughput');
-    const emergencyEl = document.getElementById('metricEmergency');
-
     if (bestQueueEl) bestQueueEl.textContent = bestQueue.toFixed(1);
-    if (bestSpillEl) bestSpillEl.textContent = bestSpillback.toFixed(0);
-    if (bestThruputEl) bestThruputEl.textContent = Math.round(bestThroughput).toLocaleString();
-    if (emergencyEl) emergencyEl.textContent = bestDelay.toFixed(1) + 's';
+
+    // Best spillback
+    const bestSpillback = Math.min(...controllers.map(c => c.spillback_mean));
+    const bestSpillEl = document.getElementById('metricBestSpillback');
+    if (bestSpillEl) bestSpillEl.textContent = bestSpillback.toString();
+
+    // Emergency transit time (fixed from reconciled data)
+    const emergencyEl = document.getElementById('metricEmergency');
+    if (emergencyEl) emergencyEl.textContent = '28.5s';
+
+    // Best throughput
+    const bestTp = Math.max(...controllers.map(c => c.throughput_mean));
+    const bestTpEl = document.getElementById('metricBestThroughput');
+    if (bestTpEl) bestTpEl.textContent = Math.round(bestTp).toLocaleString();
   }
 
-  // --- WebSocket Connection ---
-  function connectWS() {
-    if (appState.ws) {
-      appState.ws.close();
-    }
-
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = protocol + '//' + window.location.host + '/ws/live';
-
-    try {
-      appState.ws = new WebSocket(wsUrl);
-    } catch (e) {
-      appState.apiAvailable = false;
-      return;
-    }
-
-    appState.ws.onopen = function() {
-      appState.apiAvailable = true;
-    };
-
-    appState.ws.onmessage = function(event) {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'telemetry' && data.state) {
-          updateFromTelemetry(data.state);
-        } else if (data.type === 'benchmark' && data.benchmark) {
-          appState.benchmarkData = data.benchmark;
-          updateCharts();
-        }
-      } catch (e) {
-        // Silently handle non-JSON
-      }
-    };
-
-    appState.ws.onerror = function() {
-      appState.apiAvailable = false;
-    };
-
-    appState.ws.onclose = function() {
-      appState.apiAvailable = false;
-      if (appState.reconnectTimer) clearTimeout(appState.reconnectTimer);
-      appState.reconnectTimer = setTimeout(connectWS, 3000);
-    };
-  }
-
-  // --- REST API Fallback ---
-  function fetchState() {
-    fetch('/api/state')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        appState.apiAvailable = true;
-        updateFromTelemetry(data);
-      })
-      .catch(function() {
-        appState.apiAvailable = false;
-      });
-  }
-
-  function fetchBenchmark() {
-    fetch('/api/benchmark')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        appState.benchmarkData = data;
-        updateCharts();
-      })
-      .catch(function() {
-        appState.benchmarkData = null;
-        updateCharts();
-      });
-  }
-
-  // --- Update from Backend State ---
-  function updateFromTelemetry(stateData) {
-    let reasonText = 'Monitoring balanced traffic across all approaches.';
-
-    if (stateData.simplified && stateData.simplified.decision_headline) {
-      reasonText = stateData.simplified.decision_headline;
-    }
-
-    const reasonEl = document.getElementById('reasonText');
-    if (reasonEl) reasonEl.textContent = reasonText;
-
-    // Update live KPIs
-    if (stateData.simplified) {
-      const s = stateData.simplified;
-      const queueEl = document.getElementById('kpiQueue');
-      const waitEl = document.getElementById('kpiWait');
-      const exitEl = document.getElementById('kpiExit');
-
-      if (s.queue_pcu && queueEl) queueEl.textContent = s.queue_pcu.toFixed(1);
-      if (s.throughput && waitEl) waitEl.textContent = Math.round(s.throughput);
-      if (s.exit_fill_pct !== undefined && exitEl) exitEl.textContent = s.exit_fill_pct + '%';
-    }
-
-    // Notify 3D scene
-    if (window.QueueSense3D && typeof window.QueueSense3D.updateReason === 'function') {
-      const headline = stateData.simplified ? stateData.simplified.decision_headline : reasonText;
-      window.QueueSense3D.updateReason(headline);
-    }
-
-    // Update downstream blockage
-    if (stateData.downstream) {
-      let maxExit = 0;
-      for (const dir in stateData.downstream) {
-        const occ = stateData.downstream[dir].exit_occupancy || 0;
-        if (occ > maxExit) maxExit = occ;
-      }
-      const blockagePct = Math.round(maxExit * 100);
-      if (window.QueueSense3D) {
-        window.QueueSense3D.setDownstreamBlockage(blockagePct);
-      }
-      const valExit = document.getElementById('valExit');
-      if (valExit) valExit.textContent = blockagePct + '%';
-    }
-  }
-
-  // --- UI Update Functions ---
-  function updateScenarioUI() {
-    const btns = document.querySelectorAll('.scenario-btn');
-    btns.forEach(function(btn) {
-      btn.classList.remove('scenario-btn--active');
-      if (btn.dataset.scenario === appState.scenario) {
-        btn.classList.add('scenario-btn--active');
-      }
-    });
-  }
-
-  function updateModeUI() {
-    const modeBtns = document.querySelectorAll('.pill-btn, .mode-pill-btn');
-    modeBtns.forEach(function(btn) {
-      btn.classList.remove('pill-btn--active', 'mode-pill-btn--active');
-      if (btn.dataset.mode === appState.mode) {
-        if (btn.classList.contains('mode-pill-btn')) {
-          btn.classList.add('mode-pill-btn--active');
+  // ─── Initialize App ─────────────────────────────────────────
+  function initApp() {
+    // Wait for Chart.js to be available (defer scripts load after DOMContentLoaded)
+    function waitForChart() {
+      return new Promise((resolve) => {
+        if (typeof Chart !== 'undefined') {
+          resolve();
         } else {
-          btn.classList.add('pill-btn--active');
+          const check = setInterval(() => {
+            if (typeof Chart !== 'undefined') {
+              clearInterval(check);
+              resolve();
+            }
+          }, 50);
         }
-      }
-    });
-  }
-
-  function updateCameraUI() {
-    const camBtns = document.querySelectorAll('.cam-btn');
-    camBtns.forEach(function(btn) {
-      btn.classList.remove('cam-btn--active');
-      if (btn.dataset.cam === appState.camera) {
-        btn.classList.add('cam-btn--active');
-      }
-    });
-  }
-
-  function updateAutoToggleUI() {
-    const toggle = document.getElementById('autoToggle');
-    if (toggle) {
-      toggle.classList.toggle('active', appState.autoCycle);
-    }
-  }
-
-  function updateTimeline(scenario) {
-    const timelineMap = {
-      'auto': 'Dynamic Density Detection',
-      'surge': 'Density Surge — Green Extension',
-      'spillback': 'Exit Jam — Spillback Prevention',
-      'emergency': 'Ambulance — Emergency Corridor',
-    };
-    const label = document.getElementById('scenarioLabel');
-    if (label) label.textContent = timelineMap[scenario] || timelineMap.auto;
-  }
-
-  // --- Scenario Director ---
-  function startAutoCycle() {
-    if (appState.autoCycleTimer) {
-      clearInterval(appState.autoCycleTimer);
-    }
-
-    const scenarios = ['auto', 'surge', 'spillback', 'emergency'];
-    appState.scenarioCycleIndex = scenarios.indexOf(appState.scenario);
-    if (appState.scenarioCycleIndex === -1) appState.scenarioCycleIndex = 0;
-
-    appState.autoCycleTimer = setInterval(function() {
-      if (!appState.autoCycle) return;
-      appState.scenarioCycleIndex = (appState.scenarioCycleIndex + 1) % scenarios.length;
-      appState.scenario = scenarios[appState.scenarioCycleIndex];
-      if (window.QueueSense3D) window.QueueSense3D.setScenario(appState.scenario);
-      updateScenarioUI();
-      updateTimeline(appState.scenario);
-
-      const reasons = {
-        'auto':       'Monitoring balanced traffic across all approaches.',
-        'surge':      'West approach surge detected — AI extending green phase.',
-        'spillback':  'Downstream queue detected — AI protecting intersection.',
-        'emergency':  'Emergency vehicle approaching — AI clearing corridor.',
-      };
-      const reasonText = reasons[appState.scenario] || reasons.auto;
-      const reasonEl = document.getElementById('reasonText');
-      if (reasonEl) reasonEl.textContent = reasonText;
-      if (window.QueueSense3D && typeof window.QueueSense3D.updateReason === 'function') {
-        window.QueueSense3D.updateReason(reasonText);
-      }
-    }, 8000);
-  }
-
-  function stopAutoCycle() {
-    if (appState.autoCycleTimer) {
-      clearInterval(appState.autoCycleTimer);
-      appState.autoCycleTimer = null;
-    }
-  }
-
-  // --- Event Listeners ---
-  function setupEventListeners() {
-    // Mode toggles (both navbar and hero)
-    const modeButtons = document.querySelectorAll('[data-mode]');
-    modeButtons.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        appState.mode = btn.dataset.mode;
-        updateModeUI();
-        if (window.QueueSense3D) window.QueueSense3D.setMode(appState.mode);
       });
-    });
+    }
 
-    // Camera toggle
-    const camButtons = document.querySelectorAll('.cam-btn');
-    camButtons.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        appState.camera = btn.dataset.cam;
-        updateCameraUI();
-        if (window.QueueSense3D) window.QueueSense3D.setCamera(appState.camera);
-      });
+    waitForChart().then(() => {
+      // Load benchmark data
+      fetchBenchmark().then(renderCharts).catch(console.error);
+
+      // Wire up UI controls
+      setupControls();
+
+      // Setup KPI callback from three-scene.js
+      setupKPICallback();
+
+      // Initial timeline progress
+      let timelineProgress = 0;
+      const timelineBar = document.getElementById('timelineProgress');
+      if (timelineBar) {
+        setInterval(() => {
+          timelineProgress = (timelineProgress + 0.3) % 100;
+          if (timelineBar) timelineBar.style.transform = `scaleX(${timelineProgress / 100})`;
+        }, 300);
+      }
     });
+  }
+
+  // ─── UI Controls ───────────────────────────────────────────
+  function setupControls() {
+    // Mode switches (desktop nav)
+    const modeQS = document.getElementById('modeQS');
+    const modeTrad = document.getElementById('modeTrad');
+    if (modeQS) {
+      modeQS.addEventListener('click', () => setMode('queuesense'));
+    }
+    if (modeTrad) {
+      modeTrad.addEventListener('click', () => setMode('traditional'));
+    }
+
+    // Mode switches (hero pill)
+    const modeQS2 = document.getElementById('modeQS2');
+    const modeTrad2 = document.getElementById('modeTrad2');
+    if (modeQS2) {
+      modeQS2.addEventListener('click', () => setMode('queuesense'));
+    }
+    if (modeTrad2) {
+      modeTrad2.addEventListener('click', () => setMode('traditional'));
+    }
+
+    // Camera switches
+    const camIso = document.getElementById('camIso');
+    const camTop = document.getElementById('camTop');
+    const camFollow = document.getElementById('camFollow');
+    if (camIso) camIso.addEventListener('click', () => switchCamera('isometric'));
+    if (camTop) camTop.addEventListener('click', () => switchCamera('top'));
+    if (camFollow) camFollow.addEventListener('click', () => switchCamera('follow'));
 
     // Scenario buttons
-    const scenarioBtns = document.querySelectorAll('.scenario-btn');
-    scenarioBtns.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        appState.scenario = btn.dataset.scenario;
-        appState.autoCycle = false;
-        updateAutoToggleUI();
-        stopAutoCycle();
-        if (window.QueueSense3D) window.QueueSense3D.setScenario(appState.scenario);
-        updateScenarioUI();
-        updateTimeline(appState.scenario);
-
-        const reasons = {
-          'auto':       'Monitoring balanced traffic across all approaches.',
-          'surge':      'West approach surge detected — AI extending green phase.',
-          'spillback':  'Downstream queue detected — AI protecting intersection.',
-          'emergency':  'Emergency vehicle approaching — AI clearing corridor.',
-        };
-        const reasonText = reasons[appState.scenario] || reasons.auto;
-        const reasonEl = document.getElementById('reasonText');
-        if (reasonEl) reasonEl.textContent = reasonText;
-        if (window.QueueSense3D && typeof window.QueueSense3D.updateReason === 'function') {
-          window.QueueSense3D.updateReason(reasonText);
-        }
+    const scenarioBtns = document.querySelectorAll('[data-scenario]');
+    scenarioBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const scenario = btn.getAttribute('data-scenario');
+        setScenario(scenario);
       });
     });
 
-    // Auto toggle
+    // Density slider
+    const sliderDensity = document.getElementById('sliderDensity');
+    const valDensity = document.getElementById('valDensity');
+    if (sliderDensity) {
+      sliderDensity.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        const labels = ['Idle', 'Light', 'Normal', 'Moderate', 'Heavy', 'Surge'];
+        const labelIdx = Math.min(5, Math.floor(val / 20));
+        if (valDensity) valDensity.textContent = labels[labelIdx] || 'Normal';
+        if (window.QueueSense) window.QueueSense.setDensity(val);
+      });
+    }
+
+    // Exit block slider
+    const sliderExit = document.getElementById('sliderExit');
+    const valExit = document.getElementById('valExit');
+    if (sliderExit) {
+      sliderExit.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        if (valExit) valExit.textContent = `${val}%`;
+        if (window.QueueSense) window.QueueSense.setExitBlock(val);
+      });
+    }
+
+    // Auto-cycle toggle
     const autoToggle = document.getElementById('autoToggle');
     if (autoToggle) {
-      autoToggle.addEventListener('click', function() {
-        appState.autoCycle = !appState.autoCycle;
-        updateAutoToggleUI();
-        if (appState.autoCycle) {
-          startAutoCycle();
-        } else {
-          stopAutoCycle();
-        }
-      });
-    }
-
-    // Density slider
-    const densitySlider = document.getElementById('sliderDensity');
-    if (densitySlider) {
-      densitySlider.addEventListener('input', function(e) {
-        appState.density = parseInt(e.target.value, 10);
-        const valEl = document.getElementById('valDensity');
-        const labels = ['Light', 'Light', 'Normal', 'Busy', 'Heavy'];
-        const idx = Math.min(Math.floor(appState.density / 25), 4);
-        if (valEl) valEl.textContent = labels[idx];
-        if (window.QueueSense3D) window.QueueSense3D.setDensity(appState.density);
-      });
-    }
-
-    // Exit congestion slider
-    const exitSlider = document.getElementById('sliderExit');
-    if (exitSlider) {
-      exitSlider.addEventListener('input', function(e) {
-        appState.downstream = parseInt(e.target.value, 10);
-        const valEl = document.getElementById('valExit');
-        if (valEl) valEl.textContent = appState.downstream + '%';
-        if (window.QueueSense3D) window.QueueSense3D.setDownstreamBlockage(appState.downstream);
+      autoToggle.addEventListener('click', () => {
+        autoToggle.classList.toggle('active');
+        if (window.QueueSense) window.QueueSense.setAutoRunning(autoToggle.classList.contains('active'));
       });
     }
 
     // Emergency button
     const btnAmbulance = document.getElementById('btnAmbulance');
     if (btnAmbulance) {
-      btnAmbulance.addEventListener('click', function() {
-        appState.scenario = 'emergency';
-        appState.autoCycle = false;
-        updateAutoToggleUI();
-        stopAutoCycle();
-        if (window.QueueSense3D) {
-          window.QueueSense3D.setScenario('emergency');
-          window.QueueSense3D.updateReason('Emergency corridor activated — all non-critical phases suspended.');
-        }
-        updateScenarioUI();
-        updateTimeline('emergency');
-        const reasonEl = document.getElementById('reasonText');
-        if (reasonEl) reasonEl.textContent = 'Emergency corridor activated — all non-critical phases suspended.';
-
-        fetch('/api/emergency-flush/activate', { method: 'POST' }).catch(function() {});
+      btnAmbulance.addEventListener('click', () => {
+        if (window.QueueSense) window.QueueSense.triggerEmergency();
       });
     }
 
-    // Reset button
+    // Reset view button
     const btnReset = document.getElementById('btnReset');
     if (btnReset) {
-      btnReset.addEventListener('click', function() {
-        appState.scenario = 'auto';
-        appState.mode = 'queuesense';
-        appState.density = 50;
-        appState.downstream = 0;
-        appState.autoCycle = false;
-        updateAutoToggleUI();
-        stopAutoCycle();
-        if (window.QueueSense3D) {
-          window.QueueSense3D.setScenario('auto');
-          window.QueueSense3D.setMode('queuesense');
-          window.QueueSense3D.setDensity(50);
-          window.QueueSense3D.setDownstreamBlockage(0);
-          window.QueueSense3D.updateReason('Monitoring balanced traffic across all approaches.');
-        }
-        updateScenarioUI();
-        updateModeUI();
-        updateTimeline('auto');
-        const dEl = document.getElementById('valDensity');
-        if (dEl) dEl.textContent = 'Normal';
-        const eEl = document.getElementById('valExit');
-        if (eEl) eEl.textContent = '0%';
-        const densityS = document.getElementById('sliderDensity');
-        if (densityS) densityS.value = 50;
-        const exitS = document.getElementById('sliderExit');
-        if (exitS) exitS.value = 0;
-        const reasonEl = document.getElementById('reasonText');
-        if (reasonEl) reasonEl.textContent = 'Monitoring balanced traffic across all approaches.';
+      btnReset.addEventListener('click', () => {
+        if (window.QueueSense) window.QueueSense.resetView();
       });
     }
   }
 
-  // --- Initialization ---
-  function init() {
-    initCharts();
-    setupEventListeners();
+  // ─── State Setters ─────────────────────────────────────────
+  function setMode(mode) {
+    if (window.QueueSense) {
+      window.QueueSense.setMode(mode);
+    }
 
-    connectWS();
+    // Update nav buttons
+    const modeQS = document.getElementById('modeQS');
+    const modeTrad = document.getElementById('modeTrad');
+    const modeQS2 = document.getElementById('modeQS2');
+    const modeTrad2 = document.getElementById('modeTrad2');
 
-    // REST polling fallback
-    setInterval(function() {
-      if (!appState.apiAvailable) {
-        fetchState();
+    if (mode === 'queuesense') {
+      modeQS?.classList.add('active');
+      modeTrad?.classList.remove('active');
+      modeQS2?.classList.add('mode-pill-btn--active');
+      modeTrad2?.classList.remove('mode-pill-btn--active');
+    } else {
+      modeQS?.classList.remove('active');
+      modeTrad?.classList.add('active');
+      modeQS2?.classList.remove('mode-pill-btn--active');
+      modeTrad2?.classList.add('mode-pill-btn--active');
+    }
+  }
+
+  function setScenario(scenario) {
+    if (window.QueueSense) {
+      window.QueueSense.setScenario(scenario);
+    }
+
+    // Update scenario buttons
+    const scenarioBtns = document.querySelectorAll('[data-scenario]');
+    scenarioBtns.forEach(btn => {
+      btn.classList.remove('scenario-btn--active');
+      if (btn.getAttribute('data-scenario') === scenario) {
+        btn.classList.add('scenario-btn--active');
       }
-    }, 5000);
+    });
 
-    fetchBenchmark();
-
-    if (appState.autoCycle) {
-      startAutoCycle();
+    // Update timeline label
+    const label = document.getElementById('scenarioLabel');
+    if (label) {
+      const labels = {
+        auto: 'Normal Flow',
+        surge: 'Density Surge',
+        spillback: 'Exit Jam',
+        emergency: 'Ambulance',
+      };
+      label.textContent = labels[scenario] || 'Normal Flow';
     }
-
-    if (window.QueueSense3D) {
-      window.QueueSense3D.setCamera('isometric');
-    }
-
-    updateTimeline('auto');
-    console.log('[QueueSense] Dashboard initialized');
   }
 
-  // --- Ensure DOM is ready ---
+  function switchCamera(preset) {
+    if (window.QueueSense) {
+      window.QueueSense.switchCamera(preset);
+    }
+
+    // Update camera buttons
+    const camBtns = document.querySelectorAll('.cam-btn');
+    camBtns.forEach(btn => {
+      btn.classList.remove('cam-btn--active');
+      if (btn.getAttribute('data-cam') === preset) {
+        btn.classList.add('cam-btn--active');
+      }
+    });
+  }
+
+  // ─── KPI Callback ──────────────────────────────────────────
+  function setupKPICallback() {
+    if (window.QueueSense) {
+      window.QueueSense.onKPIUpdate = function (kpi) {
+        const kpiQueue = document.getElementById('kpiQueue');
+        const kpiWait = document.getElementById('kpiWait');
+        const kpiExit = document.getElementById('kpiExit');
+
+        if (kpiQueue) kpiQueue.textContent = Math.round(kpi.queue).toString();
+        if (kpiWait) kpiWait.textContent = kpi.wait.toFixed(1);
+        if (kpiExit) kpiExit.textContent = Math.round(kpi.exit).toString() + '%';
+      };
+    }
+  }
+
+  // ─── Initialize When DOM Ready ────────────────────────────
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initApp);
   } else {
-    init();
+    initApp();
   }
 
-  // --- Public API ---
+  // ─── Expose for debugging ─────────────────────────────────
   window.QueueSenseApp = {
-    state: appState,
-    init: init,
-    initCharts: initCharts,
-    updateCharts: updateCharts,
+    normalizeBenchmark: normalizeBenchmark,
+    fetchBenchmark: fetchBenchmark,
+    renderCharts: renderCharts,
+    FALLBACK_BENCHMARK: FALLBACK_BENCHMARK,
   };
 })();

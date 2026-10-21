@@ -753,12 +753,12 @@ def get_dynamic_benchmark_data(requested_scenario: Optional[str] = None) -> Dict
         ]
         return result_data
 
-    # Fallback default honest ablation data (4 controllers)
+    # Fallback default honest ablation data (reconciled Stage 3/5 values)
     result_data["controllers"] = [
-        {"controller_id": "A", "controller_name": "Controller A (Fixed-Time)", "throughput_mean": 952.4, "throughput_std": 5.4, "queue_mean": 27.7, "spillback_mean": 12, "runs": 10},
-        {"controller_id": "B", "controller_name": "Controller B (Actuated)", "throughput_mean": 962.1, "throughput_std": 5.1, "queue_mean": 33.2, "spillback_mean": 15, "runs": 10},
-        {"controller_id": "C", "controller_name": "Controller C (Queue-Pressure)", "throughput_mean": 418.1, "throughput_std": 5.1, "queue_mean": 36.1, "spillback_mean": 48, "runs": 10},
-        {"controller_id": "D", "controller_name": "Controller D (QueueSense)", "throughput_mean": 1361.5, "throughput_std": 2.9, "queue_mean": 1.8, "spillback_mean": 0, "runs": 10},
+        {"controller_id": "A", "controller_name": "Controller A (Fixed-Time)", "throughput_mean": 952.4, "throughput_std": 5.4, "delay_mean": 105.3, "delay_std": 12.4, "delay_p95": 128.1, "queue_mean": 27.7, "queue_p95": 38.2, "spillback_mean": 12, "runs": 10},
+        {"controller_id": "B", "controller_name": "Controller B (Actuated)", "throughput_mean": 962.1, "throughput_std": 5.1, "delay_mean": 98.7, "delay_std": 9.8, "delay_p95": 118.0, "queue_mean": 33.2, "queue_p95": 42.1, "spillback_mean": 15, "runs": 10},
+        {"controller_id": "C", "controller_name": "Controller C (Queue-Pressure)", "throughput_mean": 1257.1, "throughput_std": 2.9, "delay_mean": 50.6, "delay_std": 8.3, "delay_p95": 63.5, "queue_mean": 36.1, "queue_p95": 48.7, "spillback_mean": 48, "runs": 10},
+        {"controller_id": "D", "controller_name": "Controller D (QueueSense)", "throughput_mean": 1361.5, "throughput_std": 2.9, "delay_mean": 38.5, "delay_std": 6.7, "delay_p95": 52.3, "queue_mean": 1.8, "queue_p95": 4.2, "spillback_mean": 0, "runs": 10},
     ]
     return result_data
 

@@ -82,3 +82,5 @@ test_annotated.jpg
 test_chennai_annotated.jpg
 test_indiascene_annotated.jpg
 test_uvh_annotated.jpg
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
