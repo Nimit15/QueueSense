@@ -1,21 +1,26 @@
-/* QueueSense Dashboard — Minimal Design System */
-/* No gradients, no glass, no eyebrows, max 2 typefaces (Inter only) */
+/* QueueSense Dashboard — Refined Neutral Design System */
+/* No gradients, no glass, no neon, no side-tabs. Stone/neutral palette. */
 
 :root {
-  --bg: #0a0a0e;
-  --surface: #15151b;
-  --surface-alt: #1d1d24;
-  --ink: #f2f2f6;
-  --ink-muted: #9a9ab0;
-  --ink-dim: #9ca3af;
-  --accent: #00e5ff;
-  --accent-dim: #00b0d4;
-  --border: #2a2a34;
-  --border-strong: #3a3a46;
-  --radius: 6px;
-  --radius-lg: 12px;
-  --gap: 1.5rem;
-  --transition: 0.2s ease;
+  --ground: #0f1215;
+  --surface: #1a1e23;
+  --surface-2: #24282e;
+  --ink: #e8e8ec;
+  --ink-dim: #b8b8c8;
+  --ink-muted: #9ca3af;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --danger: #f97316;
+  --success: #22c55e;
+  --border: #3a3a46;
+  --border-strong: #4a4a56;
+  --text-code: #d1d5e0;
+  --radius: 8px;
+  --radius-lg: 16px;
+  --gap: 1.25rem;
+  --transition: 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-fast: 120ms cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -31,22 +36,21 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  background: var(--ground);
   color: var(--ink);
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 /* ===== Layout ===== */
-
 .container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
 /* ===== Hero ===== */
-
 .hero {
   display: flex;
   min-height: 100vh;
@@ -75,12 +79,11 @@ body {
   top: 1rem;
   display: flex;
   gap: 0.25rem;
-  background: var(--surface-alt);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.25rem;
   z-index: 10;
-  backdrop-filter: none;
 }
 
 .hero__pill--mode {
@@ -95,7 +98,7 @@ body {
 .pill-btn, .cam-btn {
   background: transparent;
   border: none;
-  color: var(--ink-muted);
+  color: var(--ink-dim);
   font-size: 0.8rem;
   font-weight: 500;
   padding: 0.4rem 0.9rem;
@@ -111,12 +114,11 @@ body {
 
 .pill-btn--active, .cam-btn--active {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--ground);
   font-weight: 700;
 }
 
 /* ===== Control Dock ===== */
-
 .control-dock {
   flex: 1;
   display: flex;
@@ -144,31 +146,33 @@ body {
 }
 
 .card__header h3 {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ink-muted);
+  color: var(--ink-dim);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 /* ===== Scenario Buttons ===== */
-
 .scenario-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
 }
 
+.scenario-btn, .pill-btn, .cam-btn {
+  transition: var(--transition);
+}
+
 .scenario-btn {
-  background: var(--surface-alt);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--ink);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   padding: 0.7rem;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: var(--transition);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -177,11 +181,12 @@ body {
 
 .scenario-btn:hover {
   border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .scenario-btn--active {
   border-color: var(--accent);
-  background: rgba(0, 229, 255, 0.08);
+  background: rgba(59, 130, 246, 0.12);
 }
 
 .scenario-btn .scenario-label {
@@ -190,12 +195,11 @@ body {
 
 .scenario-btn .scenario-sub {
   font-size: 0.65rem;
-  color: var(--ink-dim);
+  color: var(--ink-muted);
   text-align: center;
 }
 
 /* ===== Auto Toggle ===== */
-
 .auto-toggle {
   display: flex;
   align-items: center;
@@ -223,7 +227,7 @@ body {
   left: 2px;
   width: 16px;
   height: 16px;
-  background: var(--ink-dim);
+  background: var(--ink-muted);
   border-radius: 50%;
   transition: var(--transition);
 }
@@ -234,16 +238,15 @@ body {
 
 .auto-toggle.active .toggle-slider::after {
   transform: translateX(16px);
-  background: var(--bg);
+  background: var(--ground);
 }
 
 .toggle-label {
   font-size: 0.8rem;
-  color: var(--ink-muted);
+  color: var(--ink-dim);
 }
 
 /* ===== Sliders ===== */
-
 .slider-group {
   margin-bottom: 1rem;
 }
@@ -253,7 +256,8 @@ body {
   justify-content: space-between;
   font-size: 0.8rem;
   margin-bottom: 0.4rem;
-  color: var(--ink-muted);
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
 }
 
 .slider-value {
@@ -277,17 +281,16 @@ body {
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
-  border: 2px solid var(--bg);
+  border: 2px solid var(--ground);
 }
 
 /* ===== Action Buttons ===== */
-
 .action-btn {
   width: 100%;
   border: none;
   border-radius: var(--radius);
   padding: 0.7rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
@@ -295,17 +298,17 @@ body {
 }
 
 .action-btn--emergency {
-  background: #ff3e3e;
-  color: var(--bg);
+  background: var(--danger);
+  color: var(--ground);
 }
 
 .action-btn--emergency:hover {
-  background: #ff5a5a;
+  background: #fb923c;
 }
 
 .action-btn--reset {
   background: transparent;
-  color: var(--ink-muted);
+  color: var(--ink-dim);
   border: 1px solid var(--border);
 }
 
@@ -315,18 +318,16 @@ body {
 }
 
 /* ===== AI Reason ===== */
-
 .ai-reason {
   display: block;
-  background: var(--surface-alt);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
   padding: 0.8rem;
 }
 
 .ai-reason__label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--accent);
   text-transform: uppercase;
@@ -335,28 +336,28 @@ body {
 
 .ai-reason__text {
   font-size: 0.8rem;
-  color: var(--ink-muted);
+  color: var(--ink-dim);
   margin-top: 0.2rem;
   line-height: 1.4;
 }
 
 /* ===== Results Section ===== */
-
 .results {
   padding: 4rem 2rem;
-  background: var(--bg);
+  background: var(--ground);
 }
 
-.results h2 {
+.results h1 {
   font-size: 1.5rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 0.5rem;
+  color: var(--ink);
 }
 
 .results__subtitle {
   text-align: center;
-  color: var(--ink-dim);
+  color: var(--ink-muted);
   font-size: 0.85rem;
   margin-bottom: 2.5rem;
 }
@@ -376,9 +377,9 @@ body {
 }
 
 .chart-card h4 {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-dim);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -391,7 +392,6 @@ body {
 }
 
 /* ===== Metric Cards ===== */
-
 .metric-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -411,27 +411,26 @@ body {
   font-size: 1.75rem;
   font-weight: 800;
   color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 .metric-card__label {
   display: block;
-  font-size: 0.75rem;
-  color: var(--ink-dim);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
   text-transform: uppercase;
   margin-top: 0.3rem;
 }
 
 /* ===== Footer ===== */
-
 footer {
   text-align: center;
   padding: 2rem;
-  color: var(--ink-dim);
+  color: var(--ink-muted);
   font-size: 0.8rem;
 }
 
 /* ===== Responsive ===== */
-
 @media (max-width: 1024px) {
   .hero {
     flex-direction: column;
@@ -474,7 +473,6 @@ footer {
 }
 
 /* ===== Chart.js overrides ===== */
-
 .chart-card canvas {
   max-height: 240px;
 }
@@ -482,4 +480,12 @@ footer {
 /* Ensure Chart.js text is not grey-on-grey */
 .chart-card .chartjs-render-monitor text {
   fill: var(--ink) !important;
+}
+
+/* Press feedback for buttons */
+.scenario-btn:active,
+.pill-btn:active,
+.cam-btn:active,
+.action-btn:active {
+  transform: scale(0.97);
 }
