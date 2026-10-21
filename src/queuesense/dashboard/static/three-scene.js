@@ -51,11 +51,29 @@ const COLORS = {
 };
 
 // ─── Vehicle Definitions (multi-part 3D) ──────────────────────
+// Standardize: vehicle front (+length) points along +Z axis locally
+// Wheels are placed at ±X positions for left/right side
+// Realistic automotive colors: Pearl White, Silver, Slate Grey, Blue, Crimson, Obsidian
+
+function getRealisticVehicleColor(type, isEmergency = false) {
+  const colorMap = {
+    sedan: 0xf8f8fa,       // Pearl White
+    suv: 0xcbd5e1,        // Slate Grey
+    truck: 0x64748b,      // Metallic Silver
+    bus: isEmergency ? 0xdc2626 : 0x2563eb,  // Crimson (ambulance) or Transit Blue
+    auto: 0x15803d,        // Deep Green
+    bike: 0xef4444,        // Crimson
+    emergency: 0xdc2626,   // Crimson body
+  };
+  return colorMap[type] || 0x4f96ff;
+}
+
 function createVehicle(type, color, x, z, length, width, height) {
   const group = new THREE.Group();
-  const paintColor = color !== undefined ? color : (0x4f96ff + Math.random() * 0x808080);
+  const isEmergency = (type === 'emergency');
+  const paintColor = color !== undefined ? color : getRealisticVehicleColor(type, isEmergency);
 
-  // Body (chassis / main passenger cell)
+  // Body (chassis / main passenger cell) - front points +Z
   const bodyGeom = new THREE.BoxGeometry(length, height * 0.6, width);
   const bodyMat = new THREE.MeshStandardMaterial({
     color: paintColor,
@@ -67,21 +85,28 @@ function createVehicle(type, color, x, z, length, width, height) {
   body.receiveShadow = true;
   group.add(body);
 
-  // Roof / cabin
-  const roofHeight = height * 0.4;
-  let cabinLength, cabinWidth;
+  // Realistic cabin with dark tinted windows (opacity 0.7)
+  let cabinLength, cabinWidth, roofHeight;
   if (type === 'truck') {
     cabinLength = length * 0.25;
     cabinWidth = width * 0.9;
+    roofHeight = height * 0.35;
   } else if (type === 'bus') {
     cabinLength = length * 0.8;
     cabinWidth = width * 0.9;
+    roofHeight = height * 0.4;
   } else if (type === 'auto') {
     cabinLength = length * 0.3;
     cabinWidth = width * 0.7;
+    roofHeight = height * 0.35;
+  } else if (type === 'emergency') {
+    cabinLength = length * 0.6;
+    cabinWidth = width * 0.9;
+    roofHeight = height * 0.4;
   } else {
     cabinLength = length * 0.5;
     cabinWidth = width * 0.85;
+    roofHeight = height * 0.4;
   }
 
   const cabinGeom = new THREE.BoxGeometry(cabinLength, roofHeight, cabinWidth);
@@ -98,7 +123,7 @@ function createVehicle(type, color, x, z, length, width, height) {
   cabin.receiveShadow = true;
   group.add(cabin);
 
-  // Wheels
+  // Wheels (black, with proper left/right placement for forward-facing vehicles)
   const wheelMat = new THREE.MeshStandardMaterial({
     color: 0x111419,
     metalness: 0.9,
@@ -110,30 +135,30 @@ function createVehicle(type, color, x, z, length, width, height) {
   let wheelPositions;
   if (type === 'bus') {
     wheelPositions = [
-      [-length * 0.4, -height * 0.2, width * 0.35],
-      [-length * 0.4, -height * 0.2, -width * 0.35],
-      [length * 0.4, -height * 0.2, width * 0.35],
-      [length * 0.4, -height * 0.2, -width * 0.35],
-      [-length * 0.42, -height * 0.2, width * 0.35],
-      [length * 0.42, -height * 0.2, -width * 0.35],
+      [-length * 0.5, -height * 0.2, width * 0.35],   // left-front
+      [-length * 0.5, -height * 0.2, -width * 0.35],  // left-rear
+      [length * 0.5, -height * 0.2, width * 0.35],     // right-front
+      [length * 0.5, -height * 0.2, -width * 0.35],    // right-rear
+      [-length * 0.48, -height * 0.2, width * 0.35],   // left extra
+      [length * 0.48, -height * 0.2, -width * 0.35],  // right extra
     ];
   } else if (type === 'truck') {
     wheelPositions = [
-      [-length * 0.35, -height * 0.2, width * 0.35],
-      [-length * 0.35, -height * 0.2, -width * 0.35],
-      [length * 0.38, -height * 0.2, width * 0.35],
-      [length * 0.38, -height * 0.2, -width * 0.35],
-      [length * 0.42, -height * 0.2, width * 0.35],
-      [length * 0.42, -height * 0.2, -width * 0.35],
-      [-length * 0.38, -height * 0.2, width * 0.35],
-      [-length * 0.38, -height * 0.2, -width * 0.35],
+      [-length * 0.6, -height * 0.2, width * 0.35],   // left-front
+      [-length * 0.6, -height * 0.2, -width * 0.35],  // left-rear
+      [length * 0.6, -height * 0.2, width * 0.35],     // right-front
+      [length * 0.6, -height * 0.2, -width * 0.35],    // right-rear
+      [-length * 0.55, -height * 0.2, width * 0.35],   // left extra
+      [length * 0.55, -height * 0.2, -width * 0.35],  // right extra
+      [-length * 0.5, -height * 0.2, width * 0.35],    // middle-left
+      [length * 0.5, -height * 0.2, -width * 0.35],   // middle-right
     ];
   } else {
     wheelPositions = [
-      [-length * 0.35, -height * 0.2, width * 0.35],
-      [-length * 0.35, -height * 0.2, -width * 0.35],
-      [length * 0.35, -height * 0.2, width * 0.35],
-      [length * 0.35, -height * 0.2, -width * 0.35],
+      [-length * 0.4, -height * 0.2, width * 0.35],   // left-front
+      [-length * 0.4, -height * 0.2, -width * 0.35],  // left-rear
+      [length * 0.4, -height * 0.2, width * 0.35],     // right-front
+      [length * 0.4, -height * 0.2, -width * 0.35],    // right-rear
     ];
   }
 
@@ -146,7 +171,7 @@ function createVehicle(type, color, x, z, length, width, height) {
     group.add(wheel);
   });
 
-  // Headlights (glowing white)
+  // Headlights (glowing white, front +Z)
   const headlightMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     toneMapped: false,
@@ -160,7 +185,7 @@ function createVehicle(type, color, x, z, length, width, height) {
   hlR.position.z = -width * 0.25;
   group.add(hlR);
 
-  // Taillights (glowing red)
+  // Taillights (glowing red, rear -Z)
   const taillightMat = new THREE.MeshBasicMaterial({
     color: 0xef4444,
     toneMapped: false,
@@ -175,7 +200,7 @@ function createVehicle(type, color, x, z, length, width, height) {
   tlR.position.z = -width * 0.28;
   group.add(tlR);
 
-  // Emergency beacon for ambulances
+  // Emergency beacon for ambulances (flashing red + blue)
   if (type === 'emergency') {
     const beaconRedGeom = new THREE.SphereGeometry(width * 0.18, 16, 12);
     const beaconRedMat = new THREE.MeshStandardMaterial({
@@ -203,7 +228,7 @@ function createVehicle(type, color, x, z, length, width, height) {
     group.userData.beaconBlue = beaconB;
   }
 
-  // Auto-rickshaw canopy
+  // Auto-rickshaw canopy (simple conical roof, NOT red cone)
   if (type === 'auto') {
     const canopyGeom = new THREE.ConeGeometry(width * 0.7, height * 0.6, 6);
     const canopyMat = new THREE.MeshStandardMaterial({
@@ -219,7 +244,7 @@ function createVehicle(type, color, x, z, length, width, height) {
     group.add(canopy);
   }
 
-  // Motorcycle: simpler, two wheels
+  // Motorcycle: simplified with forward-facing wheels
   if (type === 'bike') {
     const bikeWheelGeom = new THREE.CylinderGeometry(width * 0.15, width * 0.15, width * 0.15, 16);
     const wheelFront = new THREE.Mesh(bikeWheelGeom, wheelMat);
@@ -392,10 +417,12 @@ function createStreetLamp(x, z) {
   arm.receiveShadow = true;
   group.add(arm);
 
-  // Glowing lamp
+  // Glowing lamp - use MeshStandardMaterial with emissive for proper glow
   const lampGeom = new THREE.SphereGeometry(0.3, 16, 12);
-  const lampMat = new THREE.MeshBasicMaterial({
+  const lampMat = new THREE.MeshStandardMaterial({
     color: 0xffeb3b,
+    emissive: 0xffeb3b,
+    emissiveIntensity: 1.5,
     toneMapped: false,
   });
   const lamp = new THREE.Mesh(lampGeom, lampMat);
@@ -404,7 +431,7 @@ function createStreetLamp(x, z) {
   group.add(lamp);
 
   // Point light
-  const plight = new THREE.PointLight(0xffeb3b, 0.5, 15);
+  const plight = new THREE.PointLight(0xffeb3b, 0.8, 20);
   plight.position.y = 7.5;
   plight.position.z = -1.5;
   group.add(plight);
@@ -416,6 +443,22 @@ function createStreetLamp(x, z) {
 
 // ─── Building Massing ─────────────────────────────────────────
 function createBuilding(x, z, width, depth, height, color) {
+  // Skip buildings in road zones to avoid visual artifacts
+  const roadWidth = 8.0;
+  const j2Distance = 30;
+  const exclusionBuffer = 3.0;
+
+  // Check if position is within road exclusion zones
+  const isInRoadZone = (
+    Math.abs(z) <= roadWidth / 2 + exclusionBuffer ||
+    Math.abs(x) <= roadWidth / 2 + exclusionBuffer ||
+    Math.abs(z - j2Distance) <= roadWidth / 2 + exclusionBuffer
+  );
+
+  if (isInRoadZone) {
+    return null; // Skip buildings in road zones
+  }
+
   const geom = new THREE.BoxGeometry(width, height, depth);
   const mat = new THREE.MeshStandardMaterial({
     color: color || COLORS.building,
@@ -430,10 +473,52 @@ function createBuilding(x, z, width, depth, height, color) {
   return mesh;
 }
 
+// Helper function to filter building positions and avoid road zones
+function filterBuildingPositions(buildings) {
+  const roadWidth = 8.0;
+  const j2Distance = 30;
+  const exclusionBuffer = 3.0;
+
+  return buildings.filter(b => {
+    const isInRoadZone = (
+      Math.abs(b.z) <= roadWidth / 2 + exclusionBuffer ||
+      Math.abs(b.x) <= roadWidth / 2 + exclusionBuffer ||
+      Math.abs(b.z - j2Distance) <= roadWidth / 2 + exclusionBuffer ||
+      Math.abs(b.z + j2Distance) <= roadWidth / 2 + exclusionBuffer
+    );
+
+    if (isInRoadZone) {
+      console.log(`Building skipped at position: x=${b.x}, z=${b.z} (in road exclusion zone)`);
+      return false;
+    }
+    return true;
+  });
+}
+
 // ─── Tree ─────────────────────────────────────────────────────
 function createTree(x, z, scaleFactor) {
   const group = new THREE.Group();
   const s = scaleFactor || 1.0;
+
+  // Road exclusion zone check: keep trees out of road surface only
+  // Road is 8 units wide (±4 from center), sidewalk starts at ±6.5
+  // Use buffer of 3 units from road edge = 7 units from center
+  const roadWidth = 8.0;
+  const j2Distance = 30;
+  const exclusionBuffer = 3.0; // Buffer from road edge
+
+  // Check if position is within road surface + small buffer
+  const roadEdge = roadWidth / 2 + exclusionBuffer; // 4 + 3 = 7 units from center
+  const isInRoadZone = (
+    Math.abs(z) <= roadEdge || // Near NS road
+    Math.abs(x) <= roadEdge || // Near EW road
+    Math.abs(z - j2Distance) <= roadEdge || // Near J2 road
+    Math.abs(z + j2Distance) <= roadEdge   // Near J2 road
+  );
+
+  if (isInRoadZone) {
+    return null; // Skip trees in road zones
+  }
 
   // Trunk
   const trunkGeom = new THREE.CylinderGeometry(0.15 * s, 0.25 * s, 1.2 * s, 8);
@@ -693,15 +778,15 @@ function buildIntersection() {
   j2StopBars.south = j2StopBarFar;
   state.signals.stopBars.j2 = j2StopBars;
 
-  // Downstream sensor zone at J2 (visualized as a glowing ring)
+  // Downstream sensor zone at J2 (architectural visualization)
   const sensorGeom = new THREE.RingGeometry(4.0, 4.5, 32);
   const sensorMat = new THREE.MeshStandardMaterial({
-    color: 0x00e676,
-    emissive: 0x00e676,
-    emissiveIntensity: 0.3,
+    color: 0x156932, // Deep green (replaces neon 0x00e676)
+    emissive: 0x1e7e34, // Subtle glow (replaces neon 0x00e676)
+    emissiveIntensity: 0.15, // Reduced glow (replaces 0.3)
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.4, // Reduced opacity (replaces 0.7)
     toneMapped: false,
   });
   const sensorRing = new THREE.Mesh(sensorGeom, sensorMat);
@@ -715,21 +800,44 @@ function buildIntersection() {
   const buildings = [
     { x: -20, z: -25, w: 8, d: 12, h: 12, c: COLORS.buildingDim },
     { x: 20, z: -25, w: 6, d: 10, h: 10, c: COLORS.buildingDim },
-    { x: -22, z: 25, w: 8, d: 8, h: 8, c: COLORS.building },
-    { x: 18, z: 25, w: 10, d: 6, h: 11, c: COLORS.buildingDim },
-    { x: -25, z: 40, w: 6, d: 14, h: 9, c: COLORS.building },
-    { x: 25, z: 40, w: 7, d: 10, h: 7, c: COLORS.buildingDim },
-    { x: -15, z: 45, w: 10, d: 8, h: 14, c: COLORS.building },
+    { x: -22, z: 38, w: 8, d: 8, h: 8, c: COLORS.building },
+    { x: 18, z: 38, w: 10, d: 6, h: 11, c: COLORS.buildingDim },
+    { x: -25, z: 45, w: 6, d: 14, h: 9, c: COLORS.building },
+    { x: 25, z: 45, w: 7, d: 10, h: 7, c: COLORS.buildingDim },
+    { x: -15, z: 50, w: 10, d: 8, h: 14, c: COLORS.building },
   ];
-  buildings.forEach(b => createBuilding(b.x, b.z, b.w, b.d, b.h, b.c));
+
+  // Filter out buildings in road zones before creating them
+  const filteredBuildings = buildings.filter(b => {
+    const isInRoadZone = (
+      Math.abs(b.z) <= 4 + 3.0 || // Near NS road (J1 at z=0)
+      Math.abs(b.x) <= 4 + 3.0 || // Near EW road (J1 at x=0)
+      Math.abs(b.z - 30) <= 4 + 3.0 // Near J2 road (J2 at z=30)
+    );
+
+    if (isInRoadZone) {
+      console.log(`Building skipped at position: x=${b.x}, z=${b.z} (in road exclusion zone)`);
+      return false;
+    }
+    return true;
+  });
+
+  filteredBuildings.forEach(b => createBuilding(b.x, b.z, b.w, b.d, b.h, b.c));
 
   const treePositions = [
-    [-10, -12], [10, -12], [-8, -35], [8, -35],
+    [-10, -12], [10, -12], [-10, -35], [10, -35],
     [-12, -28], [12, -28], [-10, 12], [10, 12],
-    [-12, 35], [12, 35], [-8, 45], [8, 45],
-    [0, -45], [0, 45], [-15, 0], [15, 0],
+    [-12, 35], [12, 35], [-8, 50], [8, 50],
+    [8, -45], [-8, -45], [-15, -20], [15, -20],
   ];
-  treePositions.forEach(p => createTree(p[0], p[1], 1.0 + Math.random() * 0.5));
+  treePositions.forEach(p => {
+    const tree = createTree(p[0], p[1], 1.0 + Math.random() * 0.5);
+    if (tree) {
+      console.log(`Tree created at position: x=${p[0]}, z=${p[1]}`);
+    } else {
+      console.log(`Tree skipped at position: x=${p[0]}, z=${p[1]} (in road exclusion zone)`);
+    }
+  });
 
   // Street lamps
   const lampPositions = [
@@ -773,27 +881,17 @@ function spawnVehicle(axis, direction, forceType) {
   const laneWidth = roadW / 2;
 
   let x, z, rotY;
-  // Position vehicles in proper lanes
+  // Position vehicles in proper lanes (centered in lane)
   if (axis === 'ns') {
-    if (direction === 'N') {
-      x = -roadW / 2 + laneWidth / 2; // Right lane (from N perspective)
-      z = -32;
-      rotY = 0;
-    } else {
-      x = roadW / 2 - laneWidth / 2; // Right lane (from S perspective)
-      z = 32;
-      rotY = Math.PI;
-    }
+    // Northbound lane: from south to north, middle of road width
+    x = 0;
+    z = -32;
+    rotY = 0; // facing north (+Z)
   } else {
-    if (direction === 'E') {
-      z = -roadW / 2 + laneWidth / 2;
-      x = -32;
-      rotY = -Math.PI / 2;
-    } else {
-      z = roadW / 2 - laneWidth / 2;
-      x = 32;
-      rotY = Math.PI / 2;
-    }
+    // Eastbound lane: from west to east, middle of road width
+    x = -32;
+    z = 0;
+    rotY = Math.PI / 2; // facing east (+X)
   }
 
   let t;
@@ -804,7 +902,7 @@ function spawnVehicle(axis, direction, forceType) {
     t = types[Math.floor(Math.random() * types.length)];
   }
 
-  const colors = [0x4f96ff, 0xff6b6b, 0x4ecdc4, 0xff9f43, 0x54a0ff, 0x22c55e, 0xb197ff];
+  const colors = [0xf8f8fa, 0x64748b, 0xdc2626, 0x15803d, 0xef4444, 0x2563eb, 0xb197ff];
   const paintColor = colors[Math.floor(Math.random() * colors.length)];
 
   const dims = VEHICLE_LENGTHS[t];

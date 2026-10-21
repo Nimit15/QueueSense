@@ -16,6 +16,15 @@
         "rule": "overused-font",
         "value": "inter",
         "createdAt": "2026-10-21T13:37:48.638Z"
+      },
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "src/queuesense/dashboard/static/index.html"
+        ],
+        "createdAt": "2026-10-21T16:30:53.749Z",
+        "reason": "intentional live status indicator — nav__status-dot pulses during auto-cycling 3D simulation, labeled 'Live Simulation'"
       }
     ]
   }
