@@ -42,9 +42,10 @@
   </nav>
 
   <!-- ===== Hero / 3D Sandbox ===== -->
-  <section class="hero" id="sandbox">
+  <section class="hero" id="sandbox" aria-labelledby="hero-title">
     <div class="hero__canvas">
-      <h1 class="visually-hidden">QueueSense — Edge-AI Adaptive Traffic Signal Controller</h1>
+      <h1 id="hero-title" class="visually-hidden">QueueSense — Edge-AI Adaptive Traffic Signal Controller</h1>
+      <h2 class="visually-hidden">Live 3D Sandbox</h2>
       <div id="scene-container"></div>
 
       <div class="hero__pill hero__pill--camera">
@@ -196,13 +197,13 @@
 
       <div class="chart-row">
         <div class="chart-card">
-          <h4>Delay (seconds)</h4>
+          <h3>Delay (seconds)</h3>
           <div class="chart-wrapper">
             <canvas id="chartDelay"></canvas>
           </div>
         </div>
         <div class="chart-card">
-          <h4>Throughput (veh/hr)</h4>
+          <h3>Throughput (veh/hr)</h3>
           <div class="chart-wrapper">
             <canvas id="chartThroughput"></canvas>
           </div>
