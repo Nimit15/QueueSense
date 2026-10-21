@@ -1,5 +1,5 @@
 // QueueSense Dashboard — Application Controller
-// Robust Chart.js data normalization with neutral palette
+// Complete interaction logic with emil-kowalski micro-interactions
 
 (function () {
   'use strict';
@@ -16,96 +16,75 @@
     benchmarkData: null,
     ws: null,
     reconnectTimer: null,
+    autoCycleTimer: null,
+    scenarioCycleIndex: 0,
   };
 
-  // --- Fallback benchmark data (4 controllers, matches TEST expectations) ---
+  // --- Fallback Benchmark Data (matches Stage 3/5 reconciled data) ---
   const FALLBACK_BENCHMARK = {
     controllers: [
       {
         controller_id: 'A',
-        controller_name: 'Fixed-Time',
-        delay_mean: 72.3,
+        controller_name: 'Controller A (Fixed-Time)',
+        throughput_mean: 952.4,
+        throughput_std: 5.4,
+        delay_mean: 105.3,
         delay_std: 12.4,
-        delay_p95: 98.1,
-        throughput_mean: 1247,
-        throughput_std: 89,
-        queue_mean: 18.4,
-        queue_p95: 25.6,
-        spillback_mean: 0.15,
+        delay_p95: 128.1,
+        queue_mean: 27.7,
+        queue_p95: 38.2,
+        spillback_mean: 12,
       },
       {
         controller_id: 'B',
-        controller_name: 'Actuated',
-        delay_mean: 58.7,
+        controller_name: 'Controller B (Actuated)',
+        throughput_mean: 962.1,
+        throughput_std: 5.1,
+        delay_mean: 98.7,
         delay_std: 9.8,
-        delay_p95: 81.0,
-        throughput_mean: 1361,
-        throughput_std: 72,
-        queue_mean: 15.2,
-        queue_p95: 22.1,
-        spillback_mean: 0.08,
+        delay_p95: 118.0,
+        queue_mean: 33.2,
+        queue_p95: 42.1,
+        spillback_mean: 15,
       },
       {
         controller_id: 'C',
-        controller_name: 'Queue-Pressure',
-        delay_mean: 46.2,
+        controller_name: 'Controller C (Queue-Pressure)',
+        throughput_mean: 1257.1,
+        throughput_std: 2.9,
+        delay_mean: 50.6,
         delay_std: 8.3,
         delay_p95: 63.5,
-        throughput_mean: 1423,
-        throughput_std: 65,
-        queue_mean: 12.1,
-        queue_p95: 18.7,
-        spillback_mean: 0.12,
+        queue_mean: 36.1,
+        queue_p95: 48.7,
+        spillback_mean: 48,
       },
       {
         controller_id: 'D',
-        controller_name: 'QueueSense AI',
+        controller_name: 'Controller D (QueueSense)',
+        throughput_mean: 1361.5,
+        throughput_std: 2.9,
         delay_mean: 38.5,
         delay_std: 6.7,
         delay_p95: 52.3,
-        throughput_mean: 1493,
-        throughput_std: 58,
-        queue_mean: 8.5,
-        queue_p95: 14.2,
-        spillback_mean: 0.02,
+        queue_mean: 1.8,
+        queue_p95: 4.2,
+        spillback_mean: 0,
       },
     ],
   };
 
-  // --- Normalized benchmark: ensures every controller has all fields ---
-  // Handles API responses that may use different field names:
-  // - controller_name vs name (display)
-  // - controller_id vs id
-  // - delay_p95 may be missing (fall back to delay_mean * 1.3)
-  // - queue_pcu vs queue_mean
+  // --- Normalized Benchmark ---
   function normalizeBenchmark(raw) {
-    var data = (raw && raw.controllers && Array.isArray(raw.controllers)) ? raw : FALLBACK_BENCHMARK;
-    var controllers = data.controllers || FALLBACK_BENCHMARK.controllers;
+    const data = (raw && raw.controllers && Array.isArray(raw.controllers)) ? raw : FALLBACK_BENCHMARK;
+    const controllers = data.controllers || FALLBACK_BENCHMARK.controllers;
 
     return controllers.map(function(c) {
-      var name = c.controller_name || c.name || 'Unknown';
-      var id = c.controller_id || c.id || name;
-      var throughputMean = (typeof c.throughput_mean === 'number') ? c.throughput_mean : 0;
-      // Derive delay if not provided: higher throughput = lower delay.
-      // Formula: base 100s - throughput scaled to delay range.
-      // Throughput ~1400 => delay ~40s, throughput ~400 => delay ~90s
-      var delayMean;
-      if (typeof c.delay_mean === 'number') {
-        delayMean = c.delay_mean;
-      } else if (throughputMean > 0) {
-        // Inverse relationship: delay = 120 - (throughput / 14)
-        // 1400 veh/hr => 120 - 100 = 20s... that's too low
-        // Better: delay = 160 - (throughput * 0.085)
-        // 1400 => 160 - 119 = 41s, 400 => 160 - 34 = 126s (too high)
-        // Use a simpler model: delay inversely proportional to throughput
-        delayMean = Math.round(100 * (1 - throughputMean / 1800) + 30);
-        // Clamp to reasonable range
-        if (delayMean < 20) delayMean = 20;
-        if (delayMean > 120) delayMean = 120;
-      } else {
-        delayMean = 0;
-      }
-      var queueMean = (typeof c.queue_mean === 'number') ? c.queue_mean : (c.queue_pcu || 0);
+      const name = c.controller_name || c.name || 'Unknown';
+      const id = c.controller_id || c.id || name;
+      const throughputMean = (typeof c.throughput_mean === 'number') ? c.throughput_mean : 0;
+      const delayMean = (typeof c.delay_mean === 'number') ? c.delay_mean : Math.round(100 * (1 - throughputMean / 1800) + 30);
+      const queueMean = (typeof c.queue_mean === 'number') ? c.queue_mean : (c.queue_pcu || 0);
 
       return {
         id: id,
@@ -122,46 +101,36 @@
     });
   }
 
-  // --- Chart.js instances ---
-  var delayChart = null;
-  var throughputChart = null;
+  // --- Chart.js Instances ---
+  let delayChart = null;
+  let throughputChart = null;
 
-  // Refined neutral palette for charts (no neon)
+  // --- Color Palette (neutral, no neon) ---
   function getControllerColor(name) {
-    var colors = {
-      'Fixed-Time':       '#9ca3af',
-      'Actuated':         '#60a5fa',
-      'Queue-Pressure':   '#f59e0b',
-      'QueueSense AI':    '#22c55e',
+    const colors = {
       'Controller A (Fixed-Time)':       '#9ca3af',
       'Controller B (Actuated)':         '#60a5fa',
       'Controller C (Queue-Pressure)':   '#f59e0b',
-      'Controller D (QueueSense)':        '#22c55e',
+      'Controller D (QueueSense)':       '#22c55e',
     };
     return colors[name] || '#9ca3af';
   }
 
   function getControllerBg(name) {
-    var color = getControllerColor(name);
-    // Convert hex to rgba with 30% opacity
-    var r = parseInt(color.slice(1, 3), 16);
-    var g = parseInt(color.slice(3, 5), 16);
-    var b = parseInt(color.slice(5, 7), 16);
-    return 'rgba(' + r + ', ' + g + ', ' + b + ', 0.25)';
+    const color = getControllerColor(name);
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.25)`;
   }
 
-  // Common Chart.js options (neutral theme)
-  function getChartOptions(ySuffix) {
+  // --- Chart.js Options ---
+  function getChartOptions() {
     return {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          labels: {
-            color: '#6a6b80',
-            font: { size: 11 },
-          },
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: '#1a1e23',
           titleColor: '#e8e8ec',
@@ -169,6 +138,7 @@
           borderColor: '#3a3a46',
           borderWidth: 1,
           cornerRadius: 6,
+          displayColors: false,
         },
       },
       scales: {
@@ -190,16 +160,16 @@
   }
 
   function initCharts() {
-    var normalized = normalizeBenchmark(appState.benchmarkData);
-    var labels = normalized.map(function(c) { return c.name; });
+    const normalized = normalizeBenchmark(appState.benchmarkData);
+    const labels = normalized.map(function(c) { return c.name; });
 
-    var colors = normalized.map(function(c) { return getControllerColor(c.name); });
-    var bgColors = normalized.map(function(c) { return getControllerBg(c.name); });
+    const colors = normalized.map(function(c) { return getControllerColor(c.name); });
+    const bgColors = normalized.map(function(c) { return getControllerBg(c.name); });
 
-    // Delay chart (lower is better — use red-toned for delays)
-    var delayCtx = document.getElementById('chartDelay');
+    // Delay Chart
+    const delayCtx = document.getElementById('chartDelay');
     if (delayCtx) {
-      var ctx = delayCtx.getContext('2d');
+      const ctx = delayCtx.getContext('2d');
       delayChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -214,14 +184,14 @@
             barThickness: 40,
           }],
         },
-        options: getChartOptions('seconds'),
+        options: getChartOptions(),
       });
     }
 
-    // Throughput chart (higher is better — use blue/green tones)
-    var throughputCtx = document.getElementById('chartThroughput');
+    // Throughput Chart
+    const throughputCtx = document.getElementById('chartThroughput');
     if (throughputCtx) {
-      var ctx2 = throughputCtx.getContext('2d');
+      const ctx2 = throughputCtx.getContext('2d');
       throughputChart = new Chart(ctx2, {
         type: 'bar',
         data: {
@@ -236,16 +206,16 @@
             barThickness: 40,
           }],
         },
-        options: getChartOptions('veh/hr'),
+        options: getChartOptions(),
       });
     }
   }
 
   function updateCharts() {
-    var normalized = normalizeBenchmark(appState.benchmarkData);
-    var labels = normalized.map(function(c) { return c.name; });
-    var colors = normalized.map(function(c) { return getControllerColor(c.name); });
-    var bgColors = normalized.map(function(c) { return getControllerBg(c.name); });
+    const normalized = normalizeBenchmark(appState.benchmarkData);
+    const labels = normalized.map(function(c) { return c.name; });
+    const colors = normalized.map(function(c) { return getControllerColor(c.name); });
+    const bgColors = normalized.map(function(c) { return getControllerBg(c.name); });
 
     if (delayChart) {
       delayChart.data.labels = labels;
@@ -264,27 +234,30 @@
     }
 
     // Update metric cards
-    var bestQueue = Math.min.apply(null, normalized.map(function(c) { return c.queue_mean; }));
-    var bestSpillback = Math.min.apply(null, normalized.map(function(c) { return c.spillback_mean; }));
-    var bestThroughput = Math.max.apply(null, normalized.map(function(c) { return c.throughput_mean; }));
+    const bestQueue = Math.min.apply(null, normalized.map(function(c) { return c.queue_mean; }));
+    const bestSpillback = Math.min.apply(null, normalized.map(function(c) { return c.spillback_mean; }));
+    const bestThroughput = Math.max.apply(null, normalized.map(function(c) { return c.throughput_mean; }));
+    const bestDelay = Math.min.apply(null, normalized.map(function(c) { return c.delay_mean; }));
 
-    var bestQueueEl = document.getElementById('metricBestQueue');
-    var bestSpillEl = document.getElementById('metricBestSpillback');
-    var bestThruputEl = document.getElementById('metricBestThroughput');
+    const bestQueueEl = document.getElementById('metricBestQueue');
+    const bestSpillEl = document.getElementById('metricBestSpillback');
+    const bestThruputEl = document.getElementById('metricBestThroughput');
+    const emergencyEl = document.getElementById('metricEmergency');
 
     if (bestQueueEl) bestQueueEl.textContent = bestQueue.toFixed(1);
-    if (bestSpillEl) bestSpillEl.textContent = bestSpillback.toFixed(2);
+    if (bestSpillEl) bestSpillEl.textContent = bestSpillback.toFixed(0);
     if (bestThruputEl) bestThruputEl.textContent = Math.round(bestThroughput).toLocaleString();
+    if (emergencyEl) emergencyEl.textContent = bestDelay.toFixed(1) + 's';
   }
 
-  // --- WebSocket connection ---
+  // --- WebSocket Connection ---
   function connectWS() {
     if (appState.ws) {
       appState.ws.close();
     }
 
-    var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    var wsUrl = protocol + '//' + window.location.host + '/ws/live';
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = protocol + '//' + window.location.host + '/ws/live';
 
     try {
       appState.ws = new WebSocket(wsUrl);
@@ -299,7 +272,7 @@
 
     appState.ws.onmessage = function(event) {
       try {
-        var data = JSON.parse(event.data);
+        const data = JSON.parse(event.data);
         if (data.type === 'telemetry' && data.state) {
           updateFromTelemetry(data.state);
         } else if (data.type === 'benchmark' && data.benchmark) {
@@ -322,7 +295,7 @@
     };
   }
 
-  // --- REST API fallback ---
+  // --- REST API Fallback ---
   function fetchState() {
     fetch('/api/state')
       .then(function(r) { return r.json(); })
@@ -344,66 +317,58 @@
       })
       .catch(function() {
         appState.benchmarkData = null;
-        // Use fallback data
         updateCharts();
       });
   }
 
-  // --- Update from backend state ---
+  // --- Update from Backend State ---
   function updateFromTelemetry(stateData) {
-    var reasonText = 'Balanced traffic monitored dynamically across all approaches.';
+    let reasonText = 'Monitoring balanced traffic across all approaches.';
 
     if (stateData.simplified && stateData.simplified.decision_headline) {
       reasonText = stateData.simplified.decision_headline;
     }
 
-    var reasonEl = document.getElementById('reasonText');
+    const reasonEl = document.getElementById('reasonText');
     if (reasonEl) reasonEl.textContent = reasonText;
 
-    // Update metric cards with live data if available
+    // Update live KPIs
     if (stateData.simplified) {
-      var s = stateData.simplified;
-      var qEl = document.getElementById('metricBestQueue');
-      var tEl = document.getElementById('metricBestThroughput');
-      var eEl = document.getElementById('metricEmergency');
+      const s = stateData.simplified;
+      const queueEl = document.getElementById('kpiQueue');
+      const waitEl = document.getElementById('kpiWait');
+      const exitEl = document.getElementById('kpiExit');
 
-      if (s.queue_pcu && qEl) qEl.textContent = s.queue_pcu.toFixed(1);
-      if (s.throughput && tEl) tEl.textContent = Math.round(s.throughput).toLocaleString();
+      if (s.queue_pcu && queueEl) queueEl.textContent = s.queue_pcu.toFixed(1);
+      if (s.throughput && waitEl) waitEl.textContent = Math.round(s.throughput);
+      if (s.exit_fill_pct !== undefined && exitEl) exitEl.textContent = s.exit_fill_pct + '%';
     }
 
-    // Notify the 3D scene
+    // Notify 3D scene
     if (window.QueueSense3D && typeof window.QueueSense3D.updateReason === 'function') {
-      var headline = stateData.simplified ? stateData.simplified.decision_headline : reasonText;
+      const headline = stateData.simplified ? stateData.simplified.decision_headline : reasonText;
       window.QueueSense3D.updateReason(headline);
     }
 
-    // Update downstream blockage visualization
+    // Update downstream blockage
     if (stateData.downstream) {
-      var maxExit = 0;
-      for (var dir in stateData.downstream) {
-        var occ = stateData.downstream[dir].exit_occupancy || 0;
+      let maxExit = 0;
+      for (const dir in stateData.downstream) {
+        const occ = stateData.downstream[dir].exit_occupancy || 0;
         if (occ > maxExit) maxExit = occ;
       }
-      var blockagePct = Math.round(maxExit * 100);
+      const blockagePct = Math.round(maxExit * 100);
       if (window.QueueSense3D) {
         window.QueueSense3D.setDownstreamBlockage(blockagePct);
       }
-      var valExit = document.getElementById('valExit');
+      const valExit = document.getElementById('valExit');
       if (valExit) valExit.textContent = blockagePct + '%';
-    }
-
-    // Auto-switch scenario on spillback
-    if (stateData.downstream && stateData.downstream.east &&
-        stateData.downstream.east.exit_occupancy > 0.8 && appState.scenario === 'auto') {
-      appState.scenario = 'spillback';
-      if (window.QueueSense3D) window.QueueSense3D.setScenario('spillback');
-      updateScenarioUI();
     }
   }
 
   // --- UI Update Functions ---
   function updateScenarioUI() {
-    var btns = document.querySelectorAll('.scenario-btn');
+    const btns = document.querySelectorAll('.scenario-btn');
     btns.forEach(function(btn) {
       btn.classList.remove('scenario-btn--active');
       if (btn.dataset.scenario === appState.scenario) {
@@ -413,17 +378,21 @@
   }
 
   function updateModeUI() {
-    var modeBtns = document.querySelectorAll('.pill-btn');
+    const modeBtns = document.querySelectorAll('.pill-btn, .mode-pill-btn');
     modeBtns.forEach(function(btn) {
-      btn.classList.remove('pill-btn--active');
+      btn.classList.remove('pill-btn--active', 'mode-pill-btn--active');
       if (btn.dataset.mode === appState.mode) {
-        btn.classList.add('pill-btn--active');
+        if (btn.classList.contains('mode-pill-btn')) {
+          btn.classList.add('mode-pill-btn--active');
+        } else {
+          btn.classList.add('pill-btn--active');
+        }
       }
     });
   }
 
   function updateCameraUI() {
-    var camBtns = document.querySelectorAll('.cam-btn');
+    const camBtns = document.querySelectorAll('.cam-btn');
     camBtns.forEach(function(btn) {
       btn.classList.remove('cam-btn--active');
       if (btn.dataset.cam === appState.camera) {
@@ -432,75 +401,106 @@
     });
   }
 
+  function updateAutoToggleUI() {
+    const toggle = document.getElementById('autoToggle');
+    if (toggle) {
+      toggle.classList.toggle('active', appState.autoCycle);
+    }
+  }
+
+  function updateTimeline(scenario) {
+    const timelineMap = {
+      'auto': 'Dynamic Density Detection',
+      'surge': 'Density Surge — Green Extension',
+      'spillback': 'Exit Jam — Spillback Prevention',
+      'emergency': 'Ambulance — Emergency Corridor',
+    };
+    const label = document.getElementById('scenarioLabel');
+    if (label) label.textContent = timelineMap[scenario] || timelineMap.auto;
+  }
+
   // --- Scenario Director ---
   function startAutoCycle() {
-    if (!appState.autoCycle) return;
+    if (appState.autoCycleTimer) {
+      clearInterval(appState.autoCycleTimer);
+    }
 
-    var scenarios = ['auto', 'surge', 'spillback', 'emergency'];
-    var idx = 0;
+    const scenarios = ['auto', 'surge', 'spillback', 'emergency'];
+    appState.scenarioCycleIndex = scenarios.indexOf(appState.scenario);
+    if (appState.scenarioCycleIndex === -1) appState.scenarioCycleIndex = 0;
 
-    setInterval(function() {
+    appState.autoCycleTimer = setInterval(function() {
       if (!appState.autoCycle) return;
-      appState.scenario = scenarios[idx];
+      appState.scenarioCycleIndex = (appState.scenarioCycleIndex + 1) % scenarios.length;
+      appState.scenario = scenarios[appState.scenarioCycleIndex];
       if (window.QueueSense3D) window.QueueSense3D.setScenario(appState.scenario);
       updateScenarioUI();
-      idx = (idx + 1) % scenarios.length;
+      updateTimeline(appState.scenario);
+
+      const reasons = {
+        'auto':       'Monitoring balanced traffic across all approaches.',
+        'surge':      'West approach surge detected — AI extending green phase.',
+        'spillback':  'Downstream queue detected — AI protecting intersection.',
+        'emergency':  'Emergency vehicle approaching — AI clearing corridor.',
+      };
+      const reasonText = reasons[appState.scenario] || reasons.auto;
+      const reasonEl = document.getElementById('reasonText');
+      if (reasonEl) reasonEl.textContent = reasonText;
+      if (window.QueueSense3D && typeof window.QueueSense3D.updateReason === 'function') {
+        window.QueueSense3D.updateReason(reasonText);
+      }
     }, 8000);
+  }
+
+  function stopAutoCycle() {
+    if (appState.autoCycleTimer) {
+      clearInterval(appState.autoCycleTimer);
+      appState.autoCycleTimer = null;
+    }
   }
 
   // --- Event Listeners ---
   function setupEventListeners() {
-    // Mode toggle
-    var modeQS = document.getElementById('modeQS');
-    var modeTrad = document.getElementById('modeTrad');
-    if (modeQS) modeQS.addEventListener('click', function() {
-      appState.mode = 'queuesense';
-      updateModeUI();
-      if (window.QueueSense3D) window.QueueSense3D.setMode('queuesense');
-    });
-    if (modeTrad) modeTrad.addEventListener('click', function() {
-      appState.mode = 'traditional';
-      updateModeUI();
-      if (window.QueueSense3D) window.QueueSense3D.setMode('traditional');
+    // Mode toggles (both navbar and hero)
+    const modeButtons = document.querySelectorAll('[data-mode]');
+    modeButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        appState.mode = btn.dataset.mode;
+        updateModeUI();
+        if (window.QueueSense3D) window.QueueSense3D.setMode(appState.mode);
+      });
     });
 
     // Camera toggle
-    var camIso = document.getElementById('camIso');
-    var camTop = document.getElementById('camTop');
-    var camFollow = document.getElementById('camFollow');
-    if (camIso) camIso.addEventListener('click', function() {
-      appState.camera = 'isometric';
-      updateCameraUI();
-      if (window.QueueSense3D) window.QueueSense3D.setCamera('isometric');
-    });
-    if (camTop) camTop.addEventListener('click', function() {
-      appState.camera = 'top';
-      updateCameraUI();
-      if (window.QueueSense3D) window.QueueSense3D.setCamera('top');
-    });
-    if (camFollow) camFollow.addEventListener('click', function() {
-      appState.camera = 'follow';
-      updateCameraUI();
-      if (window.QueueSense3D) window.QueueSense3D.setCamera('follow');
+    const camButtons = document.querySelectorAll('.cam-btn');
+    camButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        appState.camera = btn.dataset.cam;
+        updateCameraUI();
+        if (window.QueueSense3D) window.QueueSense3D.setCamera(appState.camera);
+      });
     });
 
     // Scenario buttons
-    var scenarioBtns = document.querySelectorAll('.scenario-btn');
+    const scenarioBtns = document.querySelectorAll('.scenario-btn');
     scenarioBtns.forEach(function(btn) {
       btn.addEventListener('click', function() {
         appState.scenario = btn.dataset.scenario;
         appState.autoCycle = false;
+        updateAutoToggleUI();
+        stopAutoCycle();
         if (window.QueueSense3D) window.QueueSense3D.setScenario(appState.scenario);
         updateScenarioUI();
+        updateTimeline(appState.scenario);
 
-        var reasons = {
-          'auto':       'Balanced traffic monitored dynamically across all approaches.',
+        const reasons = {
+          'auto':       'Monitoring balanced traffic across all approaches.',
           'surge':      'West approach surge detected — AI extending green phase.',
           'spillback':  'Downstream queue detected — AI protecting intersection.',
           'emergency':  'Emergency vehicle approaching — AI clearing corridor.',
         };
-        var reasonText = reasons[appState.scenario] || reasons.auto;
-        var reasonEl = document.getElementById('reasonText');
+        const reasonText = reasons[appState.scenario] || reasons.auto;
+        const reasonEl = document.getElementById('reasonText');
         if (reasonEl) reasonEl.textContent = reasonText;
         if (window.QueueSense3D && typeof window.QueueSense3D.updateReason === 'function') {
           window.QueueSense3D.updateReason(reasonText);
@@ -509,56 +509,58 @@
     });
 
     // Auto toggle
-    var autoToggle = document.getElementById('autoToggle');
+    const autoToggle = document.getElementById('autoToggle');
     if (autoToggle) {
       autoToggle.addEventListener('click', function() {
         appState.autoCycle = !appState.autoCycle;
-        autoToggle.classList.toggle('active');
+        updateAutoToggleUI();
         if (appState.autoCycle) {
           startAutoCycle();
+        } else {
+          stopAutoCycle();
         }
       });
     }
 
     // Density slider
-    var densitySlider = document.getElementById('sliderDensity');
+    const densitySlider = document.getElementById('sliderDensity');
     if (densitySlider) {
       densitySlider.addEventListener('input', function(e) {
         appState.density = parseInt(e.target.value, 10);
-        var valEl = document.getElementById('valDensity');
-        var label = 'Normal';
-        if (appState.density > 75) label = 'Heavy';
-        else if (appState.density > 50) label = 'Busy';
-        else if (appState.density > 25) label = 'Light';
-        else label = 'Light';
-        if (valEl) valEl.textContent = label;
+        const valEl = document.getElementById('valDensity');
+        const labels = ['Light', 'Light', 'Normal', 'Busy', 'Heavy'];
+        const idx = Math.min(Math.floor(appState.density / 25), 4);
+        if (valEl) valEl.textContent = labels[idx];
         if (window.QueueSense3D) window.QueueSense3D.setDensity(appState.density);
       });
     }
 
     // Exit congestion slider
-    var exitSlider = document.getElementById('sliderExit');
+    const exitSlider = document.getElementById('sliderExit');
     if (exitSlider) {
       exitSlider.addEventListener('input', function(e) {
         appState.downstream = parseInt(e.target.value, 10);
-        var valEl = document.getElementById('valExit');
+        const valEl = document.getElementById('valExit');
         if (valEl) valEl.textContent = appState.downstream + '%';
         if (window.QueueSense3D) window.QueueSense3D.setDownstreamBlockage(appState.downstream);
       });
     }
 
     // Emergency button
-    var btnAmbulance = document.getElementById('btnAmbulance');
+    const btnAmbulance = document.getElementById('btnAmbulance');
     if (btnAmbulance) {
       btnAmbulance.addEventListener('click', function() {
         appState.scenario = 'emergency';
         appState.autoCycle = false;
+        updateAutoToggleUI();
+        stopAutoCycle();
         if (window.QueueSense3D) {
           window.QueueSense3D.setScenario('emergency');
           window.QueueSense3D.updateReason('Emergency corridor activated — all non-critical phases suspended.');
         }
         updateScenarioUI();
-        var reasonEl = document.getElementById('reasonText');
+        updateTimeline('emergency');
+        const reasonEl = document.getElementById('reasonText');
         if (reasonEl) reasonEl.textContent = 'Emergency corridor activated — all non-critical phases suspended.';
 
         fetch('/api/emergency-flush/activate', { method: 'POST' }).catch(function() {});
@@ -566,7 +568,7 @@
     }
 
     // Reset button
-    var btnReset = document.getElementById('btnReset');
+    const btnReset = document.getElementById('btnReset');
     if (btnReset) {
       btnReset.addEventListener('click', function() {
         appState.scenario = 'auto';
@@ -574,23 +576,28 @@
         appState.density = 50;
         appState.downstream = 0;
         appState.autoCycle = false;
+        updateAutoToggleUI();
+        stopAutoCycle();
         if (window.QueueSense3D) {
           window.QueueSense3D.setScenario('auto');
           window.QueueSense3D.setMode('queuesense');
           window.QueueSense3D.setDensity(50);
           window.QueueSense3D.setDownstreamBlockage(0);
-          window.QueueSense3D.updateReason('Balanced traffic monitored dynamically across all approaches.');
+          window.QueueSense3D.updateReason('Monitoring balanced traffic across all approaches.');
         }
         updateScenarioUI();
         updateModeUI();
-        var dEl = document.getElementById('valDensity');
+        updateTimeline('auto');
+        const dEl = document.getElementById('valDensity');
         if (dEl) dEl.textContent = 'Normal';
-        var eEl = document.getElementById('valExit');
+        const eEl = document.getElementById('valExit');
         if (eEl) eEl.textContent = '0%';
-        var autoToggleEl = document.getElementById('autoToggle');
-        if (autoToggleEl) autoToggleEl.classList.remove('active');
-        var reasonEl = document.getElementById('reasonText');
-        if (reasonEl) reasonEl.textContent = 'Balanced traffic monitored dynamically across all approaches.';
+        const densityS = document.getElementById('sliderDensity');
+        if (densityS) densityS.value = 50;
+        const exitS = document.getElementById('sliderExit');
+        if (exitS) exitS.value = 0;
+        const reasonEl = document.getElementById('reasonText');
+        if (reasonEl) reasonEl.textContent = 'Monitoring balanced traffic across all approaches.';
       });
     }
   }
@@ -602,6 +609,7 @@
 
     connectWS();
 
+    // REST polling fallback
     setInterval(function() {
       if (!appState.apiAvailable) {
         fetchState();
@@ -618,6 +626,7 @@
       window.QueueSense3D.setCamera('isometric');
     }
 
+    updateTimeline('auto');
     console.log('[QueueSense] Dashboard initialized');
   }
 
@@ -628,6 +637,7 @@
     init();
   }
 
+  // --- Public API ---
   window.QueueSenseApp = {
     state: appState,
     init: init,

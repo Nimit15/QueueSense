@@ -98,12 +98,12 @@
     glass_dark:     new THREE.MeshPhysicalMaterial({ color: 0x0a0a1a, transparent: true, opacity: 0.45, roughness: 0.05, metalness: 0.9, transmission: 0.9 }),
     wheel_rubber:   new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.95, metalness: 0.0 }),
     wheel_metal:    new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.4, metalness: 0.8 }),
-    signal_green:   new THREE.MeshBasicMaterial({ color: 0x22c55e, toneMapped: false }),
-    signal_yellow:  new THREE.MeshBasicMaterial({ color: 0xf59e0b, toneMapped: false }),
-    signal_red:     new THREE.MeshBasicMaterial({ color: 0xf97316, toneMapped: false }),
+    signal_green:   new THREE.MeshBasicMaterial({ color: 0x22c55e, toneMapped: false, emissive: 0x22c55e, emissiveIntensity: 0.4 }),
+    signal_yellow:  new THREE.MeshBasicMaterial({ color: 0xf5a623, toneMapped: false, emissive: 0xf5a623, emissiveIntensity: 0.4 }),
+    signal_red:     new THREE.MeshBasicMaterial({ color: 0xef4444, toneMapped: false, emissive: 0xef4444, emissiveIntensity: 0.4 }),
     signal_dark:    new THREE.MeshBasicMaterial({ color: 0x1a1a1e, toneMapped: false }),
     pole_metal:     new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.3, metalness: 0.9 }),
-    countdown_led:  new THREE.MeshBasicMaterial({ color: 0xf97316, toneMapped: false }),
+    countdown_led:  new THREE.MeshBasicMaterial({ color: 0xef4444, toneMapped: false }),
     road_text:      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, toneMapped: false }),
     cross_hatch:    new THREE.MeshBasicMaterial({ color: 0x3a3a4a, transparent: true, opacity: 0.3, toneMapped: false }),
     zebra_cross:    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, toneMapped: false }),
@@ -550,8 +550,8 @@
     stripE.position.set(20, 0.02, 0);
     group.add(stripE);
 
-    // Stop lines (flat planes with rotation.x = -PI/2)
-    const stopLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, toneMapped: false });
+    // Stop lines (flat planes with glow effect)
+    const stopLineMat = new THREE.MeshStandardMaterial({ color: 0xff6b35, emissive: 0xff6b35, emissiveIntensity: 0.5, transparent: true, opacity: 0.85, toneMapped: false });
     const stopLineGeo = new THREE.PlaneGeometry(6, 0.1);
 
     const stopLine1 = new THREE.Mesh(stopLineGeo, stopLineMat);
@@ -576,20 +576,59 @@
     stopLine4.position.set(6, 0.01, 0);
     group.add(stopLine4);
 
-    // Crosswalks (zebra) — flat planes with rotation.x = -PI/2
-    const crossMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5, toneMapped: false });
-    const crossGeo = new THREE.PlaneGeometry(1, 0.4);
-    for (let i = -2; i <= 2; i++) {
-      const cw1 = new THREE.Mesh(crossGeo, crossMat);
-      cw1.rotation.x = -Math.PI / 2;
-      cw1.position.set(i * 1.2, 0.02, 0);
-      group.add(cw1);
-
-      const cw2 = new THREE.Mesh(crossGeo, crossMat);
-      cw2.rotation.x = -Math.PI / 2;
-      cw2.rotation.z = Math.PI / 2;
-      cw2.position.set(0, 0.02, i * 1.2);
-      group.add(cw2);
+    // Crosswalks (zebra pattern) — multiple parallel stripes
+    const crossMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, toneMapped: false });
+    const stripeW = 0.25;
+    const stripeGap = 0.15;
+    const stripeLen = 4;
+    // NS crosswalk (horizontal, facing traffic going NS)
+    for (let i = -stripeLen/2; i < stripeLen/2; i += stripeW + stripeGap) {
+      const cw = new THREE.Mesh(new THREE.PlaneGeometry(stripeLen, stripeW), crossMat);
+      cw.rotation.x = -Math.PI / 2;
+      cw.position.set(0, 0.025, i === 0 ? -3.5 : i - (i > 0 ? stripeW/2 : -stripeW/2));
+      // Proper zebra: stripes perpendicular to road direction
+      cw.rotation.z = Math.PI / 2;
+      group.add(cw);
+    }
+    // Redo: proper zebra stripes crossing the road
+    const zebraMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6, toneMapped: false });
+    // South approach crosswalk (vehicles coming from south, crossing east-west road)
+    for (let i = 0; i < 10; i++) {
+      const x = -2 + i * 0.45;
+      const z = -3.2 + 0.2;
+      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 1.8), zebraMat);
+      stripe.rotation.x = -Math.PI / 2;
+      stripe.position.set(x, 0.03, z);
+      group.add(stripe);
+    }
+    // North approach crosswalk
+    for (let i = 0; i < 10; i++) {
+      const x = -2 + i * 0.45;
+      const z = 2.8 + 0.2;
+      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 1.8), zebraMat);
+      stripe.rotation.x = -Math.PI / 2;
+      stripe.position.set(x, 0.03, z);
+      group.add(stripe);
+    }
+    // West approach crosswalk
+    for (let i = 0; i < 10; i++) {
+      const z = -2 + i * 0.45;
+      const x = -3.2 + 0.2;
+      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.2), zebraMat);
+      stripe.rotation.x = -Math.PI / 2;
+      stripe.rotation.z = Math.PI / 2;
+      stripe.position.set(x, 0.03, z);
+      group.add(stripe);
+    }
+    // East approach crosswalk
+    for (let i = 0; i < 10; i++) {
+      const z = -2 + i * 0.45;
+      const x = 3.4 - 0.2;
+      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.2), zebraMat);
+      stripe.rotation.x = -Math.PI / 2;
+      stripe.rotation.z = Math.PI / 2;
+      stripe.position.set(x, 0.03, z);
+      group.add(stripe);
     }
 
     // Sidewalks (flat planes with rotation.x = -PI/2)

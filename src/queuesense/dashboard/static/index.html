@@ -3,100 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QueueSense — Smart Traffic Control</title>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <meta name="description" content="QueueSense — Edge-AI Adaptive Traffic Signal Controller for mixed Indian traffic. SEVA Innovation Challenge 2026.">
+  <title>QueueSense — Edge-AI Traffic Control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/three@0.166.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.166.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <!-- Hero -->
-  <section class="hero">
+  <!-- ===== Navigation ===== -->
+  <nav class="navbar">
+    <div class="nav__container">
+      <a href="#" class="nav__brand">QueueSense</a>
+      <div class="nav__status">
+        <span class="nav__status-dot"></span>
+        <span class="nav__status-text">Live Simulation</span>
+      </div>
+      <div class="nav__links">
+        <a href="#sandbox">Live 3D Sandbox</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#benchmark">300-Case Benchmark</a>
+      </div>
+      <div class="nav__mode-switch">
+        <button class="mode-toggle" data-mode="queuesense" id="modeQS">
+          <span class="mode-toggle__label">QueueSense AI</span>
+        </button>
+        <button class="mode-toggle mode-toggle--alt" data-mode="traditional" id="modeTrad">
+          <span class="mode-toggle__label">Traditional</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Hero / 3D Sandbox ===== -->
+  <section class="hero" id="sandbox">
     <div class="hero__canvas">
       <div id="scene-container"></div>
-      <div class="hero__pill hero__pill--mode">
-        <button class="pill-btn pill-btn--active" data-mode="queuesense" id="modeQS">QueueSense AI</button>
-        <button class="pill-btn" data-mode="traditional" id="modeTrad">Traditional</button>
-      </div>
+
+      <!-- Camera preset pills -->
       <div class="hero__pill hero__pill--camera">
-        <button class="cam-btn cam-btn--active" data-cam="isometric" id="camIso">3D View</button>
+        <button class="cam-btn cam-btn--active" data-cam="isometric" id="camIso">Isometric</button>
         <button class="cam-btn" data-cam="top" id="camTop">Top-Down</button>
         <button class="cam-btn" data-cam="follow" id="camFollow">Corridor</button>
+      </div>
+
+      <!-- Mode toggle pill -->
+      <div class="hero__pill hero__pill--mode">
+        <button class="mode-pill-btn mode-pill-btn--active" data-mode="queuesense" id="modeQS2">QueueSense AI</button>
+        <button class="mode-pill-btn" data-mode="traditional" id="modeTrad2">Traditional</button>
+      </div>
+
+      <!-- Scenario timeline progress -->
+      <div class="hero__timeline">
+        <div class="timeline__track">
+          <div class="timeline__progress" id="timelineProgress"></div>
+        </div>
+        <div class="timeline__label" id="scenarioLabel">Dynamic Density Detection</div>
       </div>
     </div>
 
     <aside class="control-dock">
+      <!-- Scenario Director -->
       <div class="card">
         <div class="card__header">
-          <h3>Scenario</h3>
+          <h3>Scenario Director</h3>
           <button class="auto-toggle" id="autoToggle">
             <span class="toggle-slider"></span>
             <span class="toggle-label">Auto-Cycle</span>
           </button>
         </div>
         <div class="scenario-grid">
-          <button class="scenario-btn scenario-btn--active" data-scenario="auto" id="scnAuto">Auto</button>
-          <button class="scenario-btn" data-scenario="surge" id="scnSurge">West Surge</button>
-          <button class="scenario-btn" data-scenario="spillback" id="scnSpillback">Exit Jam</button>
-          <button class="scenario-btn" data-scenario="emergency" id="scnEmergency">Ambulance</button>
+          <button class="scenario-btn" data-scenario="auto" id="scnAuto">
+            <span class="scenario-label">Normal Flow</span>
+            <span class="scenario-sub">Balanced traffic</span>
+          </button>
+          <button class="scenario-btn" data-scenario="surge" id="scnSurge">
+            <span class="scenario-label">Density Surge</span>
+            <span class="scenario-sub">AI Green Extension</span>
+          </button>
+          <button class="scenario-btn" data-scenario="spillback" id="scnSpillback">
+            <span class="scenario-label">Exit Jam</span>
+            <span class="scenario-sub">Spillback Prevention</span>
+          </button>
+          <button class="scenario-btn" data-scenario="emergency" id="scnEmergency">
+            <span class="scenario-label">Ambulance</span>
+            <span class="scenario-sub">Emergency Corridor</span>
+          </button>
         </div>
       </div>
 
+      <!-- Operator Controls -->
       <div class="card">
         <div class="card__header">
-          <h3>Adjust</h3>
+          <h3>Traffic Density</h3>
         </div>
         <div class="slider-group">
           <label class="slider-label">
-            <span>Traffic Density</span>
+            <span>Affects spawning rate</span>
             <span class="slider-value" id="valDensity">Normal</span>
           </label>
-          <input type="range" min="0" max="100" value="50" class="slider" id="sliderDensity">
+          <input type="range" min="0" max="100" value="50" class="slider slider--accent" id="sliderDensity">
         </div>
         <div class="slider-group">
           <label class="slider-label">
             <span>Downstream Congestion</span>
             <span class="slider-value" id="valExit">0%</span>
           </label>
-          <input type="range" min="0" max="100" value="0" class="slider" id="sliderExit">
+          <input type="range" min="0" max="100" value="0" class="slider slider--danger" id="sliderExit">
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="card card--compact">
         <button class="action-btn action-btn--emergency" id="btnAmbulance">
           <span>Call Ambulance</span>
         </button>
         <button class="action-btn action-btn--reset" id="btnReset">
-          <span>Reset</span>
+          <span>Reset View</span>
         </button>
       </div>
 
+      <!-- AI Reasoning HUD -->
       <div class="card">
-        <div class="ai-reason" id="aiReason">
-          <span class="ai-reason__label">QueueSense</span>
-          <p class="ai-reason__text" id="reasonText">West Road is packed (18 vehicles) — AI added +10s of Green time.</p>
+        <div class="ai-reason">
+          <span class="ai-reason__label">QueueSense AI</span>
+          <p class="ai-reason__text" id="reasonText">Monitoring balanced traffic across all approaches.</p>
+        </div>
+      </div>
+
+      <!-- Live KPI Grid (minimal) -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-value" id="kpiQueue">—</span>
+          <span class="kpi-label">Queue (PCU)</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-value" id="kpiWait">—</span>
+          <span class="kpi-label">Avg Wait</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-value" id="kpiExit">—</span>
+          <span class="kpi-label">Exit Fill</span>
         </div>
       </div>
     </aside>
   </section>
 
-  <!-- Results -->
-  <section class="results">
+  <!-- ===== How It Works ===== -->
+  <section class="how-it-works" id="how-it-works">
     <div class="container">
-      <h2>Benchmark Results</h2>
-      <p class="results__subtitle">300-case simulation across 5 scenarios, 10 seeds, 4 controllers</p>
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p class="section-subtitle">Three core innovations that make QueueSense outperform every baseline.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12.5"/><circle cx="12" cy="16" r="1.5"/></svg>
+          </div>
+          <h3>Density-Based Green Extension</h3>
+          <p>Real-time queue pressure detection extends green for platoons until the lane clears, then switches early.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11l18-7v14l-18 7z"/><path d="M3 11l9-3 9 3"/></svg>
+          </div>
+          <h3>Preemptive Downstream Gating</h3>
+          <p>QueueSense reads downstream exit occupancy and holds upstream green red to prevent intersection gridlock.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 12l3-3"/><path d="M12 12l-3 3"/></svg>
+          </div>
+          <h3>Downstream-Flush Priority</h3>
+          <p>Emergency vehicles trigger downstream junction green waves first, clearing the corridor ahead.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Benchmark Results ===== -->
+  <section class="benchmark" id="benchmark">
+    <div class="container">
+      <div class="section-header">
+        <h2>300-Case Benchmark</h2>
+        <p class="section-subtitle">5 scenarios × 10 seeds × 4 controllers — mean, std, and 95th percentile.</p>
+      </div>
 
       <div class="chart-row">
         <div class="chart-card">
           <h4>Delay (seconds)</h4>
-          <canvas id="chartDelay"></canvas>
+          <div class="chart-wrapper">
+            <canvas id="chartDelay"></canvas>
+          </div>
         </div>
         <div class="chart-card">
           <h4>Throughput (veh/hr)</h4>
-          <canvas id="chartThroughput"></canvas>
+          <div class="chart-wrapper">
+            <canvas id="chartThroughput"></canvas>
+          </div>
         </div>
       </div>
 
@@ -121,9 +229,13 @@
     </div>
   </section>
 
+  <!-- ===== Footer ===== -->
   <footer>
     <div class="container">
       <p>QueueSense — Edge-AI Adaptive Traffic Signal Controller for mixed Indian traffic. SEVA Innovation Challenge 2026.</p>
+      <div class="credits">
+        <span>UVH-26 YOLOv11-S • IRC SP:41 PCU Weights • SUMO TraCI</span>
+      </div>
     </div>
   </footer>
 
