@@ -6,23 +6,17 @@
   <meta name="description" content="QueueSense — Edge-AI Adaptive Traffic Signal Controller for mixed Indian traffic. Live 3D simulation sandbox demonstrating density-aware green extension, downstream spillback prevention, and emergency green corridor.">
   <title>QueueSense — Edge-AI Adaptive Traffic Signal Controller</title>
 
-  <!-- Three.js ES Module -->
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
+  <!-- Three.js (UMD build via CDN - bulletproof loading) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- OrbitControls will be loaded inline after Three.js -->
 
-  <!-- Chart.js for telemetry charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js (UMD build via CDN - bulletproof loading) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Design System CSS -->
   <link rel="stylesheet" href="/static/styles.css">
@@ -30,218 +24,258 @@
 <body>
 
   <!-- =============================================================================
-       HERO — INTERACTIVE 3D TRAFFIC SIMULATION SANDBOX
+       HERO — STUDIO SPLIT-STAGE: 3D SCENE (LEFT) + CONTROL DOCK (RIGHT)
        ============================================================================= -->
   <section class="hero" id="hero">
     <div class="hero__bg" aria-hidden="true"></div>
 
-    <div class="hero__canvas-container" id="three-canvas-container" role="application" aria-label="Interactive traffic simulation sandbox">
-      <!-- Three.js canvas will be injected here -->
-    </div>
+    <div class="hero__stage">
+      <!-- LEFT: Main 3D Canvas Stage -->
+      <div class="hero__canvas-stage" role="application" aria-label="Interactive traffic simulation sandbox">
+        <div class="canvas-container" id="three-canvas-container">
+          <!-- Three.js canvas injected here -->
+        </div>
 
-    <!-- Floating UI Overlay -->
-    <div class="hero__overlay" id="heroOverlay">
+        <!-- Floating Top-Left: Live Phase & AI Decision Pill -->
+        <div class="hud-pill hud-pill--phase" id="phasePill" aria-live="polite" aria-label="Current signal phase and AI decision">
+          <div class="phase-pill__header">
+            <span class="phase-pill__dot" id="phaseDot" aria-hidden="true"></span>
+            <span class="phase-pill__label" id="phaseLabel">WEST-EAST GREEN</span>
+          </div>
+          <div class="phase-pill__timer" id="phaseTimer" aria-label="Phase timer">18s</div>
+          <div class="phase-pill__ai-badge" id="aiBadge" aria-hidden="true">
+            <span class="ai-badge__pulse" aria-hidden="true"></span>
+            <span class="ai-badge__text">AI DENSITY EXTENSION: +10s</span>
+          </div>
+          <div class="phase-pill__reason" id="phaseReason">Clearing heavy westbound queue — exit road 28% clear</div>
+        </div>
 
-      <!-- Top Bar: Logo + Title -->
-      <header class="hero__header">
-        <div class="hero__brand">
-          <svg class="hero__logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="currentColor"/>
-            <path d="M8 16L14 22L24 10" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <div>
-            <h1 class="hero__title">QueueSense</h1>
-            <p class="hero__subtitle">Edge-AI Adaptive Traffic Signal Controller</p>
+        <!-- Floating Bottom-Center: Camera & View Dock -->
+        <div class="hud-pill hud-pill--camera" id="cameraPill" role="radiogroup" aria-label="Camera view">
+          <button class="camera-option camera-option--active" data-camera="isometric" role="radio" aria-checked="true" type="button">
+            <svg class="camera-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><line x1="22" y1="15.5" x2="12" y2="8.5"></line><line x1="2" y1="15.5" x2="12" y2="8.5"></line></svg>
+            <span>3D Isometric</span>
+          </button>
+          <button class="camera-option" data-camera="topDown" role="radio" aria-checked="false" type="button">
+            <svg class="camera-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8M8 12h8"></path></svg>
+            <span>Top-Down Tactical</span>
+          </button>
+          <button class="camera-option" data-camera="corridor" role="radio" aria-checked="false" type="button">
+            <svg class="camera-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12s4-8 8-8 8 8 8 8-4 8-8 8-8-8-8-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>Corridor Follow</span>
+          </button>
+          <button class="camera-option" data-camera="orbit" role="radio" aria-checked="false" type="button">
+            <svg class="camera-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>Interactive Orbit</span>
+          </button>
+        </div>
+
+        <!-- Floating Bottom-Left: Live Scoreboard Strip -->
+        <div class="hud-pill hud-pill--scoreboard" id="scoreboardPill" role="region" aria-label="Live metrics" aria-live="polite">
+          <div class="scoreboard-item">
+            <div class="scoreboard-value tabular-nums" id="scoreThroughput">1,340</div>
+            <div class="scoreboard-label">Throughput (veh/hr)</div>
+          </div>
+          <div class="scoreboard-divider" aria-hidden="true"></div>
+          <div class="scoreboard-item">
+            <div class="scoreboard-value tabular-nums" id="scoreAvgWait">19.4</div>
+            <div class="scoreboard-label">Avg Wait Time (s)</div>
+          </div>
+          <div class="scoreboard-divider" aria-hidden="true"></div>
+          <div class="scoreboard-item">
+            <div class="scoreboard-value tabular-nums" id="scoreExitFill">28%</div>
+            <div class="scoreboard-label" id="scoreExitLabel">CLEAR</div>
+          </div>
+          <div class="scoreboard-divider" aria-hidden="true"></div>
+          <div class="scoreboard-item">
+            <div class="scoreboard-value tabular-nums" id="scoreGridlocks">0</div>
+            <div class="scoreboard-label">Gridlocks Prevented</div>
           </div>
         </div>
+      </div>
 
-        <div class="hero__badges" aria-label="Key achievements">
-          <span class="badge badge--emerald">−82% Avg Wait vs Fixed-Time</span>
-          <span class="badge badge--cyan">−56.7% Spillback Events</span>
-          <span class="badge badge--violet">300-Case SUMO Verified</span>
-        </div>
-      </header>
-
-      <!-- Main Controls: Signal Mode + Traffic Controls -->
-      <div class="hero__controls" id="heroControls" role="region" aria-label="Simulation controls">
-
-        <!-- Signal Control Mode Switcher -->
-        <fieldset class="control-group" aria-label="Signal control mode">
-          <legend class="control-group__label">Signal Control Mode</legend>
-          <div class="mode-switcher" id="modeSwitcher" role="radiogroup" aria-label="Choose signal control strategy">
-            <label class="mode-option mode-option--active" data-mode="queuesense" role="radio" aria-checked="true" tabindex="0">
-              <span class="mode-option__icon" aria-hidden="true">🧠</span>
-              <div class="mode-option__text">
+      <!-- RIGHT: Sleek Bento Control Console (380px) -->
+      <aside class="hero__control-dock" role="complementary" aria-label="Simulation controls">
+        <!-- Card 1: Controller Policy Selector -->
+        <div class="control-card" data-card="controller">
+          <header class="control-card__header">
+            <h3 class="control-card__title">Controller Policy</h3>
+            <span class="control-card__badge badge--emerald" id="controllerBadge">ADAPTIVE</span>
+          </header>
+          <div class="mode-selector" id="modeSelector" role="radiogroup" aria-label="Choose signal control strategy">
+            <button class="mode-option mode-option--active" data-mode="queuesense" role="radio" aria-checked="true" type="button">
+              <div class="mode-option__content">
                 <strong>QueueSense AI</strong>
-                <span>Adaptive Density + Exit Protection</span>
+                <span>Smart Density Extension + Downstream Spillback Gate</span>
               </div>
               <span class="mode-option__indicator" aria-hidden="true"></span>
-            </label>
-            <label class="mode-option" data-mode="actuated" role="radio" aria-checked="false" tabindex="-1">
-              <span class="mode-option__icon" aria-hidden="true">⏱️</span>
-              <div class="mode-option__text">
-                <strong>SUMO Actuated</strong>
-                <span>Gap-Based Induction Loop Logic</span>
+            </button>
+            <button class="mode-option" data-mode="fixed" role="radio" aria-checked="false" type="button">
+              <div class="mode-option__content">
+                <strong>Fixed-Time Baseline</strong>
+                <span>Static 42s timer — watch queues build on busy approaches</span>
               </div>
               <span class="mode-option__indicator" aria-hidden="true"></span>
-            </label>
-            <label class="mode-option" data-mode="pressure" role="radio" aria-checked="false" tabindex="-1">
-              <span class="mode-option__icon" aria-hidden="true">⚡</span>
-              <div class="mode-option__text">
-                <strong>Queue Pressure Only</strong>
-                <span>Blind to Downstream Blockage</span>
+            </button>
+            <button class="mode-option" data-mode="pressure" role="radio" aria-checked="false" type="button">
+              <div class="mode-option__content">
+                <strong>Queue-Pressure Only</strong>
+                <span>Blind to downstream exit — watch it gridlock the yellow box</span>
               </div>
               <span class="mode-option__indicator" aria-hidden="true"></span>
-            </label>
-            <label class="mode-option" data-mode="fixed" role="radio" aria-checked="false" tabindex="-1">
-              <span class="mode-option__icon" aria-hidden="true">📋</span>
-              <div class="mode-option__text">
-                <strong>Fixed-Time Preset</strong>
-                <span>Pre-Timed Cycle Plan</span>
+            </button>
+            <button class="mode-option" data-mode="actuated" role="radio" aria-checked="false" type="button">
+              <div class="mode-option__content">
+                <strong>Actuated Gap</strong>
+                <span>Gap-based induction loop logic — no adaptive extension</span>
               </div>
               <span class="mode-option__indicator" aria-hidden="true"></span>
-            </label>
-          </div>
-        </fieldset>
-
-        <!-- Traffic Spawn Mode -->
-        <fieldset class="control-group" aria-label="Traffic spawn mode">
-          <legend class="control-group__label">Traffic Spawn Mode</legend>
-          <div class="scenario-pills" id="scenarioPills" role="radiogroup" aria-label="Choose traffic pattern">
-            <button class="scenario-pill scenario-pill--active scenario-pill--emerald" data-scenario="normal" role="radio" aria-checked="true" type="button">
-              <span class="scenario-pill__icon" aria-hidden="true">🌊</span>
-              <span>Balanced Normal</span>
-            </button>
-            <button class="scenario-pill" data-scenario="surge" role="radio" aria-checked="false" type="button">
-              <span class="scenario-pill__icon" aria-hidden="true">🚗</span>
-              <span>Peak Surge</span>
-            </button>
-            <button class="scenario-pill" data-scenario="spillback" role="radio" aria-checked="false" type="button">
-              <span class="scenario-pill__icon" aria-hidden="true">🔴</span>
-              <span>Downstream Spillback</span>
-            </button>
-            <button class="scenario-pill" data-scenario="bottleneck" role="radio" aria-checked="false" type="button">
-              <span class="scenario-pill__icon" aria-hidden="true">🟣</span>
-              <span>Severe Bottleneck</span>
-            </button>
-            <button class="scenario-pill" data-scenario="emergency" role="radio" aria-checked="false" type="button">
-              <span class="scenario-pill__icon" aria-hidden="true">🚑</span>
-              <span>Emergency Corridor</span>
-            </button>
-            <button class="scenario-pill" data-scenario="sensor_fault" role="radio" aria-checked="false" type="button">
-              <span class="scenario-pill__icon" aria-hidden="true">⚠️</span>
-              <span>Sensor Fault</span>
             </button>
           </div>
-        </fieldset>
+        </div>
 
-        <!-- Interactive Sliders -->
-        <fieldset class="control-group control-group--sliders" aria-label="Simulation parameters">
-          <legend class="control-group__label">Simulation Parameters</legend>
-          <div class="slider-row">
-            <label class="slider-control" for="slider-sim-speed">
+        <!-- Card 2: Live Scenario Mode -->
+        <div class="control-card" data-card="scenario">
+          <header class="control-card__header">
+            <h3 class="control-card__title">Live Scenario Mode</h3>
+            <label class="toggle-auto" id="autoToggle">
+              <input type="checkbox" id="autoScenario" checked aria-label="Auto-cycle IRL scenarios">
+              <span class="toggle-auto__slider"></span>
+              <span class="toggle-auto__label">Auto-Cycle IRL Scenarios</span>
+            </label>
+          </header>
+          <div class="scenario-grid" id="scenarioGrid" role="radiogroup" aria-label="Choose traffic pattern">
+            <button class="scenario-btn scenario-btn--active scenario-btn--emerald" data-scenario="auto" role="radio" aria-checked="true" type="button">
+              <span class="scenario-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+              </span>
+              <span class="scenario-btn__text">Auto Random IRL Waves</span>
+            </button>
+            <button class="scenario-btn scenario-btn--amber" data-scenario="surge" role="radio" aria-checked="false" type="button">
+              <span class="scenario-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+              </span>
+              <span class="scenario-btn__text">Heavy Directional Surge</span>
+            </button>
+            <button class="scenario-btn scenario-btn--rose" data-scenario="spillback" role="radio" aria-checked="false" type="button">
+              <span class="scenario-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              </span>
+              <span class="scenario-btn__text">Downstream Exit Spillback</span>
+            </button>
+            <button class="scenario-btn scenario-btn--violet" data-scenario="emergency" role="radio" aria-checked="false" type="button">
+              <span class="scenario-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path><path d="M12 7v4M12 16h.01"></path></svg>
+              </span>
+              <span class="scenario-btn__text">Emergency Green Corridor</span>
+            </button>
+            <button class="scenario-btn scenario-btn--amber" data-scenario="sensor_fault" role="radio" aria-checked="false" type="button">
+              <span class="scenario-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </span>
+              <span class="scenario-btn__text">Sensor Fault (UNKNOWN)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3: Interactive Real-Time Sliders -->
+        <div class="control-card" data-card="sliders">
+          <header class="control-card__header">
+            <h3 class="control-card__title">Real-Time Parameters</h3>
+          </header>
+          <div class="slider-group">
+            <label class="slider-control" for="sliderSimSpeed">
               <span class="slider-control__label">Simulation Speed</span>
-              <div class="slider-control__value" id="value-sim-speed">1.0x</div>
+              <div class="slider-control__value tabular-nums" id="valueSimSpeed">1.0x</div>
             </label>
-            <input type="range" class="slider-control__input" id="slider-sim-speed" name="simSpeed" min="0.1" max="3" value="1" step="0.1" aria-label="Simulation speed multiplier">
+            <input type="range" class="slider-control__input" id="sliderSimSpeed" name="simSpeed" min="0.5" max="3.0" value="1.0" step="0.1" aria-label="Simulation speed multiplier">
           </div>
-          <div class="slider-row">
-            <label class="slider-control" for="slider-congestion">
-              <span class="slider-control__label">Downstream Congestion</span>
-              <div class="slider-control__value" id="value-congestion">50%</div>
+          <div class="slider-group">
+            <label class="slider-control" for="sliderTrafficIntensity">
+              <span class="slider-control__label">Traffic Arrival Intensity</span>
+              <div class="slider-control__value" id="valueTrafficIntensity">Normal</div>
             </label>
-            <input type="range" class="slider-control__input" id="slider-congestion" name="congestion" min="0" max="1" value="0.5" step="0.05" aria-label="Downstream exit road occupancy">
+            <input type="range" class="slider-control__input" id="sliderTrafficIntensity" name="trafficIntensity" min="0" max="100" value="50" step="1" aria-label="Traffic arrival intensity">
           </div>
-          <div class="slider-row">
-            <label class="slider-control" for="slider-spawn-rate">
-              <span class="slider-control__label">Vehicle Spawn Rate</span>
-              <div class="slider-control__value" id="value-spawn-rate">1.0x</div>
+          <div class="slider-group">
+            <label class="slider-control" for="sliderDownstreamBottleneck">
+              <span class="slider-control__label">Downstream Exit Bottleneck</span>
+              <div class="slider-control__value tabular-nums" id="valueDownstreamBottleneck">0%</div>
             </label>
-            <input type="range" class="slider-control__input" id="slider-spawn-rate" name="spawnRate" min="0.1" max="3" value="1" step="0.1" aria-label="Vehicle spawn rate multiplier">
+            <input type="range" class="slider-control__input" id="sliderDownstreamBottleneck" name="downstreamBottleneck" min="0" max="100" value="0" step="5" aria-label="Downstream exit bottleneck percentage">
           </div>
-        </fieldset>
+        </div>
 
-        <!-- Instant Action Buttons -->
-        <fieldset class="control-group control-group--actions" aria-label="Instant actions">
-          <legend class="control-group__label">Instant Actions</legend>
-          <div class="action-buttons">
-            <button class="btn btn--primary btn--large" id="btn-emergency-flush" type="button" aria-label="Dispatch emergency ambulance">
-              <span class="btn__icon" aria-hidden="true">🚑</span>
+        <!-- Card 4: Live Approach Density & Receiving Capacity Bars -->
+        <div class="control-card" data-card="density">
+          <header class="control-card__header">
+            <h3 class="control-card__title">Approach Density & Receiving Capacity</h3>
+          </header>
+          <div class="density-bars" id="densityBars">
+            <div class="density-bar">
+              <div class="density-bar__header">
+                <span class="density-bar__name">North</span>
+                <span class="density-bar__value tabular-nums" id="densityNorth">0%</span>
+              </div>
+              <div class="density-bar__track"><div class="density-bar__fill" id="fillNorth" style="width: 0%"></div></div>
+            </div>
+            <div class="density-bar">
+              <div class="density-bar__header">
+                <span class="density-bar__name">South</span>
+                <span class="density-bar__value tabular-nums" id="densitySouth">0%</span>
+              </div>
+              <div class="density-bar__track"><div class="density-bar__fill" id="fillSouth" style="width: 0%"></div></div>
+            </div>
+            <div class="density-bar">
+              <div class="density-bar__header">
+                <span class="density-bar__name">East</span>
+                <span class="density-bar__value tabular-nums" id="densityEast">0%</span>
+              </div>
+              <div class="density-bar__track"><div class="density-bar__fill" id="fillEast" style="width: 0%"></div></div>
+            </div>
+            <div class="density-bar">
+              <div class="density-bar__header">
+                <span class="density-bar__name">West</span>
+                <span class="density-bar__value tabular-nums" id="densityWest">0%</span>
+              </div>
+              <div class="density-bar__track"><div class="density-bar__fill" id="fillWest" style="width: 0%"></div></div>
+            </div>
+            <div class="density-bar density-bar--gate">
+              <div class="density-bar__header">
+                <span class="density-bar__name">J1→J2 Exit Link</span>
+                <span class="density-bar__value tabular-nums" id="densityExit">0%</span>
+              </div>
+              <div class="density-bar__track density-bar__track--gate"><div class="density-bar__fill" id="fillExit" style="width: 0%"></div><div class="density-bar__gate-marker" id="gateMarker" style="left: 30%"></div></div>
+              <div class="density-bar__gate-label" id="gateLabel">30% Gate Threshold</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Instant Actions -->
+        <div class="control-card" data-card="actions">
+          <header class="control-card__header">
+            <h3 class="control-card__title">Instant Actions</h3>
+          </header>
+          <div class="action-buttons" id="actionButtons">
+            <button class="btn btn--primary btn--block" id="btnEmergencyFlush" type="button" aria-label="Dispatch emergency ambulance">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path><path d="M12 7v4M12 16h.01"></path></svg>
               <span>EMERGENCY FLUSH</span>
             </button>
-            <button class="btn btn--secondary btn--large" id="btn-selector" type="button" aria-label="Run controller selector">
-              <span class="btn__icon" aria-hidden="true">🤖</span>
+            <button class="btn btn--secondary btn--block" id="btnSelector" type="button" aria-label="Run controller selector">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2"></rect><path d="M12 2v20M2 12h20"></path></svg>
               <span>RUN SELECTOR</span>
             </button>
-            <button class="btn btn--secondary btn--large" id="btn-reset" type="button" aria-label="Reset simulation to defaults">
-              <span class="btn__icon" aria-hidden="true">🔄</span>
-              <span>RESET</span>
+            <button class="btn btn--secondary btn--block" id="btnReset" type="button" aria-label="Reset simulation to defaults">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+              <span>RESET SIMULATION</span>
             </button>
-            <button class="btn btn--ghost btn--large" id="btn-download" type="button" aria-label="Download benchmark CSV">
-              <span class="btn__icon" aria-hidden="true">📥</span>
+            <button class="btn btn--ghost btn--block" id="btnDownload" type="button" aria-label="Download benchmark CSV">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               <span>DOWNLOAD CSV</span>
             </button>
           </div>
-        </fieldset>
-
-        <!-- Camera View Switcher -->
-        <fieldset class="control-group control-group--camera" aria-label="Camera view">
-          <legend class="control-group__label">Camera View</legend>
-          <div class="camera-switcher" id="cameraSwitcher" role="radiogroup" aria-label="Choose camera perspective">
-            <button class="camera-pill camera-pill--active" data-camera="isometric" role="radio" aria-checked="true" type="button">
-              <span class="camera-pill__icon" aria-hidden="true">📐</span>
-              <span>Isometric</span>
-            </button>
-            <button class="camera-pill" data-camera="topDown" role="radio" aria-checked="false" type="button">
-              <span class="camera-pill__icon" aria-hidden="true">🛰️</span>
-              <span>Top-Down</span>
-            </button>
-            <button class="camera-pill" data-camera="driver" role="radio" aria-checked="false" type="button">
-              <span class="camera-pill__icon" aria-hidden="true">🎮</span>
-              <span>Driver Follow</span>
-            </button>
-          </div>
-        </fieldset>
-      </div>
-
-      <!-- Live Decision Feed & Scoreboard -->
-      <div class="hero__decision-feed" id="decisionFeed" role="region" aria-label="AI decision feed" aria-live="polite">
-        <div class="decision-feed__header">
-          <h2 class="decision-feed__title">AI Decision Feed</h2>
-          <span class="decision-feed__status badge badge--emerald" id="decisionStatus">ADAPTIVE</span>
         </div>
-        <div class="decision-feed__content" id="decisionContent">
-          <p class="decision-feed__reason" id="decisionReason">System initializing. Live perception active. Waiting for first decision cycle...</p>
-          <div class="decision-feed__meta" id="decisionMeta">
-            <span class="decision-feed__meta-item"><strong>Phase:</strong> <span id="phaseName">NORTH-SOUTH</span></span>
-            <span class="decision-feed__meta-item"><strong>Timer:</strong> <span class="tabular-nums" id="phaseTimer">22s</span></span>
-            <span class="decision-feed__meta-item"><strong>AI Adj:</strong> <span class="tabular-nums" id="aiAdjustment">+0s</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Real-Time Scoreboard -->
-      <div class="hero__scoreboard" id="scoreboard" role="region" aria-label="Live metrics" aria-live="polite">
-        <div class="scoreboard__grid">
-          <div class="scoreboard__metric">
-            <div class="scoreboard__value tabular-nums" id="score-throughput">0.0</div>
-            <div class="scoreboard__label">Throughput (veh/hr)</div>
-          </div>
-          <div class="scoreboard__metric">
-            <div class="scoreboard__value tabular-nums" id="score-queue">0.0</div>
-            <div class="scoreboard__label">Avg Queue (PCU)</div>
-          </div>
-          <div class="scoreboard__metric">
-            <div class="scoreboard__value tabular-nums" id="score-spillback">0.0</div>
-            <div class="scoreboard__label">Spillback Risk (%)</div>
-          </div>
-          <div class="scoreboard__metric">
-            <div class="scoreboard__value tabular-nums" id="score-emergency">0.0</div>
-            <div class="scoreboard__label">Emergency (s)</div>
-          </div>
-        </div>
-      </div>
-
+      </aside>
     </div>
   </section>
 
@@ -275,7 +309,7 @@
                 <rect x="160" y="50" width="30" height="12" rx="3" fill="var(--accent-rose)" opacity="0.8"/>
                 <rect x="200" y="50" width="30" height="12" rx="3" fill="var(--accent-violet)" opacity="0.8"/>
               </g>
-              <text x="140" y="130" text-anchor="middle" font-size="11" fill="var(--fg-muted)" font-family="IBM Plex Sans">Live PCU-weighted density → extended green</text>
+              <text x="140" y="130" text-anchor="middle" font-size="11" fill="#a8b8cc" font-family="JetBrains Mono, monospace">Live PCU-weighted density → extended green</text>
             </svg>
           </div>
           <h3 class="step__title">Dynamic Density Green Extension</h3>
@@ -293,14 +327,13 @@
                   <stop offset="100%" stop-color="#ef4444"/>
                 </linearGradient>
               </defs>
-              <!-- Corridor with spillback zone -->
               <rect x="10" y="40" width="260" height="60" rx="8" fill="var(--bg-panel)" stroke="var(--border-default)"/>
               <rect x="20" y="45" width="160" height="50" rx="6" fill="url(#gradSpillback)" opacity="0.3" id="spillbackZone"/>
-              <text x="140" y="130" text-anchor="middle" font-size="11" fill="var(--fg-muted)" font-family="IBM Plex Sans">Exit occupancy ≥30% → hold upstream green</text>
+              <text x="140" y="130" text-anchor="middle" font-size="11" fill="#a8b8cc" font-family="JetBrains Mono, monospace">Exit occupancy >=30% -> hold upstream green</text>
             </svg>
           </div>
           <h3 class="step__title">Downstream Queue Spillback Prevention</h3>
-          <p class="step__description">Connected downstream junction (J2) and receiving link (J1→J2) are monitored continuously. When exit road occupancy reaches ≥30%, the downstream link highlights <strong>Exit Road Filling Up — Stopping Upstream Green Beforehand</strong> and QueueSense holds upstream traffic safely behind the stop line — zero cars trapped in the intersection box — while switching green to the unblocked cross-street.</p>
+          <p class="step__description">Connected downstream junction (J2) and receiving link (J1->J2) are monitored continuously. When exit road occupancy reaches >=30%, the downstream link highlights <strong>Exit Road Filling Up - Stopping Upstream Green Beforehand</strong> and QueueSense holds upstream traffic safely behind the stop line - zero cars trapped in the intersection box - while switching green to the unblocked cross-street.</p>
         </article>
 
         <article class="step" role="listitem">
@@ -310,20 +343,18 @@
               <defs>
                 <linearGradient id="gradEmergency" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stop-color="#ef4444"/>
-                  <stop offset="50%" stop-color="#a855f7"/>
-                  <stop offset="100%" stop-color="#06b6d4"/>
+                  <stop offset="100%" stop-color="#fbbf24"/>
                 </linearGradient>
               </defs>
-              <!-- Ambulance corridor -->
               <rect x="10" y="40" width="260" height="60" rx="8" fill="var(--bg-panel)" stroke="var(--border-default)"/>
               <path d="M20 70 L260 70" stroke="url(#gradEmergency)" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
               <circle cx="80" cy="70" r="10" fill="#ef4444" opacity="0.9"/>
               <circle cx="75" cy="65" r="3" fill="white"/>
-              <text x="140" y="130" text-anchor="middle" font-size="11" fill="var(--fg-muted)" font-family="IBM Plex Sans">J2 flushes first → green corridor wave</text>
+              <text x="140" y="130" text-anchor="middle" font-size="11" fill="#a8b8cc" font-family="JetBrains Mono, monospace">J2 flushes first -> green corridor wave</text>
             </svg>
           </div>
           <h3 class="step__title">Downstream-Flush Emergency Green Corridor</h3>
-          <p class="step__description">When an ambulance spawns (randomly or via button), flashing red/blue lights appear. Downstream junction J2 turns green FIRST to flush blocking cars out of the way, then J1 opens a smooth Green Corridor wave. Result: <strong>28.5s</strong> ambulance travel time vs 52.0s naive preemption vs 76.0s no preemption — verified across 300 SUMO runs.</p>
+          <p class="step__description">When an ambulance spawns (randomly or via button), flashing red/blue lights appear. Downstream junction J2 turns green FIRST to flush blocking cars out of the way, then J1 opens a smooth Green Corridor wave. Result: <strong>28.5s</strong> ambulance travel time vs 52.0s naive preemption vs 76.0s no preemption - verified across 300 SUMO runs.</p>
         </article>
 
         <article class="step" role="listitem">
@@ -337,32 +368,31 @@
                   <stop offset="100%" stop-color="#ef4444"/>
                 </linearGradient>
               </defs>
-              <!-- Three state indicators -->
               <g class="safety-states">
                 <g transform="translate(35, 35)">
                   <circle cx="35" cy="25" r="30" fill="#10b981" opacity="0.2"/>
                   <circle cx="35" cy="25" r="20" fill="#10b981"/>
                   <text x="35" y="29" text-anchor="middle" font-size="11" fill="white" font-weight="bold">CLEAR</text>
-                  <text x="35" y="62" text-anchor="middle" font-size="9" fill="var(--fg-muted)" font-family="IBM Plex Sans">Proceed normally</text>
+                  <text x="35" y="62" text-anchor="middle" font-size="9" fill="#a8b8cc" font-family="JetBrains Mono, monospace">Proceed normally</text>
                 </g>
                 <g transform="translate(105, 35)">
                   <circle cx="35" cy="25" r="30" fill="#f59e0b" opacity="0.2"/>
                   <circle cx="35" cy="25" r="20" fill="#f59e0b"/>
                   <text x="35" y="29" text-anchor="middle" font-size="10" fill="white" font-weight="bold">ELEVATED</text>
-                  <text x="35" y="62" text-anchor="middle" font-size="9" fill="var(--fg-muted)" font-family="IBM Plex Sans">Risk rising</text>
+                  <text x="35" y="62" text-anchor="middle" font-size="9" fill="#a8b8cc" font-family="JetBrains Mono, monospace">Risk rising</text>
                 </g>
                 <g transform="translate(175, 35)">
                   <circle cx="35" cy="25" r="30" fill="#ef4444" opacity="0.2"/>
                   <circle cx="35" cy="25" r="20" fill="#ef4444"/>
                   <text x="35" y="29" text-anchor="middle" font-size="10" fill="white" font-weight="bold">BLOCKED</text>
-                  <text x="35" y="62" text-anchor="middle" font-size="9" fill="var(--fg-muted)" font-family="IBM Plex Sans">Hold phase</text>
+                  <text x="35" y="62" text-anchor="middle" font-size="9" fill="#a8b8cc" font-family="JetBrains Mono, monospace">Hold phase</text>
                 </g>
               </g>
-              <text x="140" y="130" text-anchor="middle" font-size="11" fill="var(--fg-muted)" font-family="IBM Plex Sans">3-State Safety Supervisor</text>
+              <text x="140" y="130" text-anchor="middle" font-size="11" fill="#a8b8cc" font-family="JetBrains Mono, monospace">3-State Safety Supervisor</text>
             </svg>
           </div>
           <h3 class="step__title">3-State Fault-Aware Safety Supervisor</h3>
-          <p class="step__description">Every decision passes through a hard safety gate: <strong>CLEAR</strong> (proceed normally), <strong>ELEVATED_RISK</strong> (shorten green, prepare clearance), <strong>BLOCKED</strong> (suppress phase, hold red). On sensor fault or dropout, a 3-strike watchdog triggers immediate fallback to C-DAC Fixed-Time plan — identical safety rules (min 10s green, max 60s, yellow/all-red clearance) enforced across ALL 4 benchmarked controllers.</p>
+          <p class="step__description">Every decision passes through a hard safety gate: <strong>CLEAR</strong> (proceed normally), <strong>ELEVATED_RISK</strong> (shorten green, prepare clearance), <strong>BLOCKED</strong> (suppress phase, hold red). On sensor fault or dropout, a 3-strike watchdog triggers immediate fallback to C-DAC Fixed-Time plan - identical safety rules (min 10s green, max 60s, yellow/all-red clearance) enforced across ALL 4 benchmarked controllers.</p>
         </article>
       </div>
     </div>
@@ -375,7 +405,7 @@
     <div class="container">
       <header class="section__header">
         <h2 id="proofTitle" class="section__title">Verified Benchmark & Research Proof</h2>
-        <p class="section__lead">300-case SUMO evaluation across 5 scenarios × 10 seeds × 4 controllers. Every number below is reproducible from <code>results/benchmark_v2_250_isolated/</code>.</p>
+        <p class="section__lead">300-case SUMO evaluation across 5 scenarios x 10 seeds x 4 controllers. Every number below is reproducible from <code>results/benchmark_v2_250_isolated/</code>.</p>
       </header>
 
       <!-- Controller Comparison Chart -->
@@ -387,7 +417,9 @@
       <!-- Metric Cards -->
       <div class="metrics-grid" role="list" aria-label="Key benchmark metrics">
         <article class="metric-card metric-card--throughput" role="listitem">
-          <div class="metric-card__icon" aria-hidden="true">📈</div>
+          <div class="metric-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
           <div class="metric-card__content">
             <div class="metric-card__value tabular-nums" id="metricBestThroughput">1,361.5</div>
             <div class="metric-card__label">Best Throughput (veh/hr)</div>
@@ -395,23 +427,29 @@
           </div>
         </article>
         <article class="metric-card metric-card--queue" role="listitem">
-          <div class="metric-card__icon" aria-hidden="true">🚗</div>
+          <div class="metric-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+          </div>
           <div class="metric-card__content">
             <div class="metric-card__value tabular-nums" id="metricBestQueue">1.8</div>
             <div class="metric-card__label">Lowest Avg Queue (PCU)</div>
-            <div class="metric-card__detail">vs 27.7 Fixed-Time (−93.5%)</div>
+            <div class="metric-card__detail">vs 27.7 Fixed-Time (-93.5%)</div>
           </div>
         </article>
         <article class="metric-card metric-card--spillback" role="listitem">
-          <div class="metric-card__icon" aria-hidden="true">🛑</div>
+          <div class="metric-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          </div>
           <div class="metric-card__content">
             <div class="metric-card__value tabular-nums" id="metricBestSpillback">0</div>
             <div class="metric-card__label">Spillback Steps</div>
-            <div class="metric-card__detail">vs 48 Queue-Pressure Only (−100%)</div>
+            <div class="metric-card__detail">vs 48 Queue-Pressure Only (-100%)</div>
           </div>
         </article>
         <article class="metric-card metric-card--emergency" role="listitem">
-          <div class="metric-card__icon" aria-hidden="true">🚑</div>
+          <div class="metric-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path><path d="M12 7v4M12 16h.01"></path></svg>
+          </div>
           <div class="metric-card__content">
             <div class="metric-card__value tabular-nums" id="metricEmergency">28.5s</div>
             <div class="metric-card__label">Ambulance Travel Time</div>
@@ -435,7 +473,7 @@
             </tr>
           </thead>
           <tbody id="ablationTableBody">
-            <!-- Populated by JS from benchmark data -->
+            <!-- Populated by JS from embedded benchmark data -->
           </tbody>
         </table>
       </div>
@@ -448,7 +486,7 @@
             <div class="emergency-strategy__badge">BEST</div>
             <h4 class="emergency-strategy__name">QueueSense Downstream Flush</h4>
             <div class="emergency-strategy__time tabular-nums">28.5s</div>
-            <div class="emergency-strategy__detail">J2 flushes first → J1 green wave</div>
+            <div class="emergency-strategy__detail">J2 flushes first -> J1 green wave</div>
             <div class="emergency-strategy__stops">Stops: 0 | Recovery: 8.2s</div>
           </article>
           <article class="emergency-strategy" role="listitem">
@@ -489,7 +527,7 @@
             <path d="M8 16L14 22L24 10" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <p class="footer__tagline">Edge-AI Adaptive Traffic Signal Controller for mixed Indian traffic conditions.</p>
-          <p class="footer__challenge">SEVA First Innovation Challenge 2026 — Category II: Diploma & Higher Education</p>
+          <p class="footer__challenge">SEVA First Innovation Challenge 2026 - Category II: Diploma & Higher Education</p>
         </div>
         <nav class="footer__nav" aria-label="Footer navigation">
           <div class="footer__nav-group">
@@ -522,11 +560,17 @@
         <p class="footer__copyright">Built with scientific rigor. No marketing fluff. Every claim verified by 300 SUMO runs.</p>
         <p class="footer__attribution">🤖 Generated with <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a></p>
       </div>
-    </div  </footer>
+    </div>
+  </footer>
 
   <!-- =============================================================================
-       MAIN APPLICATION SCRIPT
+       3D LIVING DIGITAL TWIN (loaded as classic script - no ES module fragility)
        ============================================================================= -->
-  <script type="module" src="/static/app.js"></script>
+  <script src="/static/three-scene.js"></script>
+
+  <!-- =============================================================================
+       MAIN APPLICATION SCRIPT (loaded as classic script - no ES module fragility)
+       ============================================================================= -->
+  <script src="/static/app.js"></script>
 </body>
 </html>

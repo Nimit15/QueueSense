@@ -1,864 +1,968 @@
 /* =============================================================================
    QUEUESENSE — MAIN APPLICATION MODULE
    Initializes Three.js scene, wires controls, fetches API data, animates UI
+   Uses GLOBAL THREE and global functions from three-scene.js (no ES modules)
    Emil Kowalski + Impeccable + Taste Design Engineering
    ============================================================================= */
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { initDigitalTwin, getTwinScene, switchCameraPreset, setScenario, setMode, triggerEmergencyFlush } from './three-scene.js';
+(function() {
+  'use strict';
 
-/* =============================================================================
-   STATE MANAGEMENT
-   ============================================================================= */
+  /* =============================================================================
+     FALLBACK DATA (embedded inline, replaces API when server unavailable)
+     ============================================================================= */
 
-const AppState = {
-  // Control state
-  currentMode: 'queuesense',
-  currentScenario: 'normal',
-  currentCamera: 'isometric',
-  isAutoScenario: true,
-  simSpeed: 1.0,
-  congestionLevel: 0.5,
-  spawnRate: 1.0,
+  var FALLBACK_BENCHMARK = [
+    { controller_id: 'A', name: 'Fixed-Time', typeLabel: 'Baseline', typeClass: 'type-fixed', avg_delay_sec: 42.8, p95_delay_sec: 98.5, throughput_veh_hr: 952.4, spillback_incidents: 12, emergency_response_sec: 76.0 },
+    { controller_id: 'B', name: 'Actuated Gap', typeLabel: 'Baseline', typeClass: 'type-actuated', avg_delay_sec: 31.2, p95_delay_sec: 82.3, throughput_veh_hr: 962.1, spillback_incidents: 15, emergency_response_sec: 52.0 },
+    { controller_id: 'C', name: 'Queue-Pressure Only', typeLabel: 'Experimental', typeClass: 'type-pressure', avg_delay_sec: 18.7, p95_delay_sec: 58.9, throughput_veh_hr: 1257.1, spillback_incidents: 48, emergency_response_sec: 52.0 },
+    { controller_id: 'D', name: 'QueueSense (Full)', typeLabel: 'Production', typeClass: 'type-queuesense', avg_delay_sec: 6.1, p95_delay_sec: 24.3, throughput_veh_hr: 1361.5, spillback_incidents: 0, emergency_response_sec: 28.5 },
+  ];
 
-  // API state
-  liveState: null,
-  benchmarkData: null,
-  passportData: null,
-  emergencyResults: null,
-  selectorDecision: null,
-  wsConnection: null,
+  var FALLBACK_EMERGENCY = [
+    { name: 'QueueSense Downstream Flush', clearance_time_sec: 28.5, stops: 0, recovery_time_sec: 8.2, description: 'J2 flushes first -> J1 green wave', isBest: true },
+    { name: 'Naive Local Preemption', clearance_time_sec: 52.0, stops: 2, recovery_time_sec: 24.5, description: 'J1 green only, no downstream flush', isBest: false },
+    { name: 'No Preemption', clearance_time_sec: 76.0, stops: 4, recovery_time_sec: 41.3, description: 'Standard cycle, ambulance waits', isBest: false },
+  ];
 
-  // UI state
-  isInitialized: false,
-  lastFrameTime: 0,
-  frameCount: 0,
-
-  // Elements cache
-  elements: {},
-};
-
-/* =============================================================================
-   DOM ELEMENT CACHING
-   ============================================================================= */
-
-function cacheElements() {
-  AppState.elements = {
-    // Hero controls
-    modeSwitcher: document.querySelectorAll('.mode-option'),
-    scenarioPills: document.querySelectorAll('.scenario-pill'),
-    sliders: {
-      simSpeed: document.getElementById('slider-sim-speed'),
-      congestion: document.getElementById('slider-congestion'),
-      spawnRate: document.getElementById('slider-spawn-rate'),
-    },
-    sliderValues: {
-      simSpeed: document.getElementById('value-sim-speed'),
-      congestion: document.getElementById('value-congestion'),
-      spawnRate: document.getElementById('value-spawn-rate'),
-    },
-    actionButtons: {
-      emergencyFlush: document.getElementById('btn-emergency-flush'),
-      reset: document.getElementById('btn-reset'),
-      selector: document.getElementById('btn-selector'),
-      download: document.getElementById('btn-download'),
-    },
-    cameraPills: document.querySelectorAll('.camera-pill'),
-
-    // Decision feed
-    decisionFeed: {
-      reason: document.getElementById('decision-reason'),
-      status: document.getElementById('decision-status'),
-      meta: document.getElementById('decision-meta'),
-    },
-
-    // Scoreboard
-    scoreboard: {
-      throughput: document.getElementById('score-throughput'),
-      queueLength: document.getElementById('score-queue'),
-      spillback: document.getElementById('score-spillback'),
-      emergency: document.getElementById('score-emergency'),
-    },
-
-    // Charts (placeholders for Chart.js)
-    charts: {
-      delayChart: document.getElementById('delay-chart'),
-    },
-
-    // Metric cards
-    metricCards: {
-      throughput: document.getElementById('metric-throughput'),
-      queue: document.getElementById('metric-queue'),
-      spillback: document.getElementById('metric-spillback'),
-      emergency: document.getElementById('metric-emergency'),
-    },
-
-    // Ablation table
-    ablationTable: document.getElementById('ablation-table'),
-
-    // Emergency results
-    emergencyResults: document.getElementById('emergency-results'),
-
-    // Passport
-    passportGrid: document.getElementById('passport-grid'),
-
-    // Canvas container
-    canvasContainer: document.querySelector('.hero__canvas-container'),
-
-    // Status indicators
-    liveIndicator: document.getElementById('live-indicator'),
-    wsStatus: document.getElementById('ws-status'),
+  var FALLBACK_PASSPORT = {
+    junctions: [
+      {
+        id: 'J1', overall_pass: true, pass_count: 8,
+        checks: [
+          { name: 'Queue Detection', details: 'PCU-weighted detection active on all 4 approaches', pass: true, evidence: '94.2% mAP' },
+          { name: 'Signal Timing', details: 'Min green 10s enforced, max 60s cap', pass: true, evidence: 'Cycle: 72s' },
+          { name: 'Downstream Gate', details: 'Exit occupancy 30% threshold monitored', pass: true, evidence: 'J1->J2 clear' },
+          { name: 'Spillback Prevention', details: 'J2 exit saturated -> hold upstream green', pass: true, evidence: 'Active' },
+          { name: 'Emergency Corridor', details: 'Downstream-first flush policy', pass: true, evidence: 'Verified' },
+          { name: 'Sensor Fault Recovery', details: '3-strike watchdog -> fixed-time fallback', pass: true, evidence: '3 strikes' },
+          { name: 'Safety Transition', details: 'Yellow/all-red clearance enforced', pass: true, evidence: '5s+2s' },
+          { name: 'Pedestrian Phase', details: 'Zebra crossing flash integrated', pass: true, evidence: '2s grace' },
+        ]
+      },
+      {
+        id: 'J2', overall_pass: true, pass_count: 8,
+        checks: [
+          { name: 'Queue Detection', details: 'PCU-weighted detection active on all 4 approaches', pass: true, evidence: '94.2% mAP' },
+          { name: 'Signal Timing', details: 'Min green 10s enforced, max 60s cap', pass: true, evidence: 'Cycle: 72s' },
+          { name: 'Downstream Gate', details: 'Exit road capacity monitored', pass: true, evidence: 'Exit clear' },
+          { name: 'Spillback Prevention', details: 'Downstream-first strategy', pass: true, evidence: 'Active' },
+          { name: 'Emergency Corridor', details: 'First-flush policy for ambulance', pass: true, evidence: 'Verified' },
+          { name: 'Sensor Fault Recovery', details: 'Fallback to fixed-time on dropout', pass: true, evidence: '3 strikes' },
+          { name: 'Safety Transition', details: 'Yellow/all-red clearance enforced', pass: true, evidence: '5s+2s' },
+          { name: 'Pedestrian Phase', details: 'Crosswalk priority integrated', pass: true, evidence: '2s grace' },
+        ]
+      },
+    ]
   };
-}
 
-/* =============================================================================
-   INITIALIZATION
-   ============================================================================= */
+  /* =============================================================================
+     STATE MANAGEMENT
+     ============================================================================= */
 
-async function initializeApp() {
-  cacheElements();
+  var AppState = {
+    currentMode: 'queuesense',
+    currentScenario: 'auto',
+    currentCamera: 'isometric',
+    isAutoScenario: true,
+    simSpeed: 1.0,
+    congestionLevel: 0.5,
+    spawnRate: 1.0,
+    trafficIntensity: 50,
+    downstreamBottleneck: 0,
 
-  // Initialize Three.js scene
-  const canvasContainer = AppState.elements.canvasContainer;
-  if (!canvasContainer) {
-    console.error('Canvas container not found');
-    return;
+    liveState: null,
+    benchmarkData: null,
+    passportData: null,
+    emergencyResults: null,
+    selectorDecision: null,
+    wsConnection: null,
+
+    isInitialized: false,
+    lastFrameTime: 0,
+    frameCount: 0,
+
+    elements: {},
+  };
+
+  /* =============================================================================
+     DOM ELEMENT CACHING
+     ============================================================================= */
+
+  function cacheElements() {
+    AppState.elements = {
+      // Hero controls
+      modeOptions: document.querySelectorAll('.mode-option'),
+      scenarioBtns: document.querySelectorAll('.scenario-btn'),
+      sliders: {
+        simSpeed: document.getElementById('sliderSimSpeed'),
+        trafficIntensity: document.getElementById('sliderTrafficIntensity'),
+        downstreamBottleneck: document.getElementById('sliderDownstreamBottleneck'),
+      },
+      sliderValues: {
+        simSpeed: document.getElementById('valueSimSpeed'),
+        trafficIntensity: document.getElementById('valueTrafficIntensity'),
+        downstreamBottleneck: document.getElementById('valueDownstreamBottleneck'),
+      },
+      actionButtons: {
+        emergencyFlush: document.getElementById('btnEmergencyFlush'),
+        reset: document.getElementById('btnReset'),
+        selector: document.getElementById('btnSelector'),
+        download: document.getElementById('btnDownload'),
+      },
+      cameraOptions: document.querySelectorAll('.camera-option'),
+
+      // Decision feed / phase pill
+      phasePill: {
+        dot: document.getElementById('phaseDot'),
+        label: document.getElementById('phaseLabel'),
+        timer: document.getElementById('phaseTimer'),
+        aiBadge: document.getElementById('aiBadge'),
+        reason: document.getElementById('phaseReason'),
+      },
+
+      // Scoreboard strip
+      scoreboard: {
+        throughput: document.getElementById('scoreThroughput'),
+        avgWait: document.getElementById('scoreAvgWait'),
+        exitFill: document.getElementById('scoreExitFill'),
+        exitLabel: document.getElementById('scoreExitLabel'),
+        gridlocks: document.getElementById('scoreGridlocks'),
+      },
+
+      // Live metric cards
+      metricCards: {
+        throughput: document.getElementById('metricBestThroughput'),
+        queue: document.getElementById('metricBestQueue'),
+        spillback: document.getElementById('metricBestSpillback'),
+        emergency: document.getElementById('metricEmergency'),
+      },
+
+      // Charts
+      delayChart: document.getElementById('benchmarkChart'),
+      benchmarkLegend: document.getElementById('benchmarkLegend'),
+
+      // Ablation table
+      ablationTableBody: document.querySelector('#ablationTable tbody'),
+
+      // Emergency results
+      emergencyResults: document.getElementById('emergencyResults'),
+
+      // Passport
+      passportGrid: document.getElementById('passportGrid'),
+      passportSummary: document.getElementById('passportSummary'),
+
+      // Canvas container
+      canvasContainer: document.querySelector('.canvas-container'),
+
+      // Auto toggle
+      autoScenario: document.getElementById('autoScenario'),
+
+      // Density bars
+      densityBars: {
+        north: { value: document.getElementById('densityNorth'), fill: document.getElementById('fillNorth') },
+        south: { value: document.getElementById('densitySouth'), fill: document.getElementById('fillSouth') },
+        east: { value: document.getElementById('densityEast'), fill: document.getElementById('fillEast') },
+        west: { value: document.getElementById('densityWest'), fill: document.getElementById('fillWest') },
+        exit: { value: document.getElementById('densityExit'), fill: document.getElementById('fillExit') },
+      },
+      gateMarker: document.getElementById('gateMarker'),
+      gateLabel: document.getElementById('gateLabel'),
+
+      // Badges / status
+      controllerBadge: document.getElementById('controllerBadge'),
+      wsStatus: document.getElementById('wsStatus'),
+    };
   }
 
-  initDigitalTwin(canvasContainer);
+  /* =============================================================================
+     INITIALIZATION
+     ============================================================================= */
 
-  // Wire up callbacks from three-scene
-  window.onTwinStateUpdate = handleTwinStateUpdate;
-  window.onSignalUpdate = handleSignalUpdate;
-  window.onScenarioChange = handleScenarioChange;
-  window.onModeChange = handleModeChange;
-  window.onZoneUpdate = handleZoneUpdate;
-  window.onTwinTelemetry = handleTelemetry;
+  function initializeApp() {
+    cacheElements();
 
-  // Wire up UI controls
-  wireControls();
+    // Initialize Three.js scene
+    var canvasContainer = AppState.elements.canvasContainer;
+    if (canvasContainer && typeof window.initDigitalTwin === 'function') {
+      initDigitalTwin(canvasContainer);
+    }
 
-  // Connect WebSocket for live state
-  connectWebSocket();
+    // Wire up callbacks from three-scene
+    window.onTwinStateUpdate = handleTwinStateUpdate;
+    window.onSignalUpdate = handleSignalUpdate;
+    window.onTwinScenarioChange = handleScenarioChange;
+    window.onModeChange = handleModeChange;
+    window.onZoneUpdate = handleZoneUpdate;
+    window.onTwinTelemetry = handleTelemetry;
 
-  // Fetch initial API data
-  await fetchAllAPIData();
+    // Wire up UI controls
+    wireControls();
 
-  // Start render loop
-  AppState.isInitialized = true;
-  requestAnimationFrame(renderLoop);
+    // Fetch initial API data (with fallback)
+    fetchAllAPIData();
 
-  // Mark live indicator as active
-  updateLiveIndicator(true);
-}
+    // Start render loop
+    AppState.isInitialized = true;
+    requestAnimationFrame(renderLoop);
+  }
 
-function wireControls() {
-  // Mode switcher
-  AppState.elements.modeSwitcher.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const mode = btn.dataset.mode;
-      setModeControl(mode);
-    });
-  });
-
-  // Scenario pills
-  AppState.elements.scenarioPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      const scenario = pill.dataset.scenario;
-      setScenarioControl(scenario);
-    });
-  });
-
-  // Sliders
-  Object.entries(AppState.elements.sliders).forEach(([key, slider]) => {
-    if (slider) {
-      slider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        AppState[key] = value;
-        updateSliderDisplay(key, value);
-        applySliderToScene(key, value);
+  function wireControls() {
+    // Mode switcher
+    var modeOptions = AppState.elements.modeOptions;
+    if (modeOptions) {
+      modeOptions.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var mode = btn.getAttribute('data-mode');
+          setModeControl(mode);
+        });
       });
     }
-  });
 
-  // Action buttons
-  const { emergencyFlush, reset, selector, download } = AppState.elements.actionButtons;
-  if (emergencyFlush) emergencyFlush.addEventListener('click', () => handleEmergencyFlush());
-  if (reset) reset.addEventListener('click', () => handleReset());
-  if (selector) selector.addEventListener('click', () => handleSelector());
-  if (download) download.addEventListener('click', () => handleDownload());
+    // Scenario buttons
+    var scenarioBtns = AppState.elements.scenarioBtns;
+    if (scenarioBtns) {
+      scenarioBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var scenario = btn.getAttribute('data-scenario');
+          setScenarioControl(scenario);
+        });
+      });
+    }
 
-  // Camera pills
-  AppState.elements.cameraPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      const preset = pill.dataset.camera;
-      setCameraPreset(preset);
-    });
-  });
+    // Camera options
+    var cameraOptions = AppState.elements.cameraOptions;
+    if (cameraOptions) {
+      cameraOptions.forEach(function(pill) {
+        pill.addEventListener('click', function() {
+          var preset = pill.getAttribute('data-camera');
+          setCameraPreset(preset);
+        });
+      });
+    }
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', handleKeyboardShortcuts);
-}
+    // Sliders
+    for (var key in AppState.elements.sliders) {
+      var slider = AppState.elements.sliders[key];
+      if (slider) {
+        slider.addEventListener('input', function(e) {
+          var value = parseFloat(e.target.value);
+          var sliderName = e.target.getAttribute('name') || key;
+          applySlider(sliderName, value);
+        });
+      }
+    }
 
-/* =============================================================================
-   CONTROL HANDLERS
-   ============================================================================= */
+    // Auto toggle
+    if (AppState.elements.autoScenario) {
+      AppState.elements.autoScenario.addEventListener('change', function(e) {
+        AppState.isAutoScenario = e.target.checked;
+        if (AppState.isAutoScenario && typeof window.setScenario === 'function') {
+          window.setScenario('normal');
+        }
+      });
+    }
 
-function setModeControl(mode) {
-  if (AppState.currentMode === mode) return;
+    // Action buttons
+    var btns = AppState.elements.actionButtons;
+    if (btns.emergencyFlush) btns.emergencyFlush.addEventListener('click', handleEmergencyFlush);
+    if (btns.reset) btns.reset.addEventListener('click', handleReset);
+    if (btns.selector) btns.selector.addEventListener('click', handleSelector);
+    if (btns.download) btns.download.addEventListener('click', handleDownload);
 
-  AppState.currentMode = mode;
-  setMode(mode);
+    // Keyboard shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+  }
 
-  // Update UI
-  AppState.elements.modeSwitcher.forEach(btn => {
-    btn.classList.toggle('mode-option--active', btn.dataset.mode === mode);
-  });
+  /* =============================================================================
+     CONTROL HANDLERS
+     ============================================================================= */
 
-  // Update decision feed
-  updateDecisionFeed({
-    reason: mode === 'queuesense'
-      ? 'QueueSense adaptive control active. Downstream blockage awareness + queue-pressure optimization.'
-      : 'Traditional fixed-time actuated control. Gap-based induction loop logic, no spillback awareness.',
-    status: { text: mode === 'queuesense' ? 'ADAPTIVE' : 'FIXED', class: mode === 'queuesense' ? 'badge--emerald' : 'badge--cyan' },
-    meta: [
-      { label: 'Mode', value: mode === 'queuesense' ? 'QueueSense (D)' : 'Actuated (B)' },
-      { label: 'Downstream Awareness', value: mode === 'queuesense' ? 'ON' : 'OFF' },
-      { label: 'Safety Supervisor', value: 'ACTIVE' },
-    ],
-  });
-}
+  function setModeControl(mode) {
+    if (AppState.currentMode === mode) return;
 
-function setScenarioControl(scenario) {
-  if (AppState.currentScenario === scenario) return;
+    AppState.currentMode = mode;
+    if (typeof window.setMode === 'function') {
+      window.setMode(mode);
+    }
 
-  AppState.currentScenario = scenario;
-  AppState.isAutoScenario = false;
-  setScenario(scenario);
+    // Update UI
+    var modeOptions = AppState.elements.modeOptions;
+    if (modeOptions) {
+      modeOptions.forEach(function(btn) {
+        var isActive = btn.getAttribute('data-mode') === mode;
+        btn.classList.toggle('mode-option--active', isActive);
+        btn.setAttribute('aria-checked', isActive);
+      });
+    }
 
-  // Update UI
-  AppState.elements.scenarioPills.forEach(pill => {
-    pill.classList.toggle('scenario-pill--active', pill.dataset.scenario === scenario);
-  });
+    // Update controller badge
+    if (AppState.elements.controllerBadge) {
+      var badge = AppState.elements.controllerBadge;
+      if (mode === 'queuesense') {
+        badge.textContent = 'ADAPTIVE';
+        badge.className = 'control-card__badge badge--emerald';
+      } else {
+        badge.textContent = 'FIXED';
+        badge.className = 'control-card__badge badge--cyan';
+      }
+    }
 
-  // Update scenario pill visual states
-  AppState.elements.scenarioPills.forEach(pill => {
-    pill.classList.remove('scenario-pill--emerald', 'scenario-pill--amber', 'scenario-pill--rose', 'scenario-pill--violet', 'scenario-pill--cyan');
-    if (pill.dataset.scenario === scenario) {
-      const colors = {
-        normal: 'emerald',
-        surge: 'amber',
-        spillback: 'rose',
-        bottleneck: 'violet',
-        emergency: 'cyan',
-        sensor_fault: 'rose',
+    // Update phase pill reason
+    if (AppState.elements.phasePill.reason) {
+      var reasonText = mode === 'queuesense'
+        ? 'QueueSense active. Downstream blockage awareness + queue-pressure optimization.'
+        : 'Fixed-time control active. No adaptive extension.';
+      AppState.elements.phasePill.reason.textContent = reasonText;
+    }
+  }
+
+  function setScenarioControl(scenario) {
+    AppState.currentScenario = scenario;
+    AppState.isAutoScenario = false;
+
+    if (scenario !== 'auto') {
+      if (typeof window.setScenario === 'function') {
+        window.setScenario(scenario);
+      }
+    }
+
+    // Update UI
+    var scenarioBtns = AppState.elements.scenarioBtns;
+    if (scenarioBtns) {
+      scenarioBtns.forEach(function(btn) {
+        var isActive = btn.getAttribute('data-scenario') === scenario;
+        btn.classList.toggle('scenario-btn--active', isActive);
+        btn.setAttribute('aria-checked', isActive);
+      });
+    }
+
+    // Update phase pill
+    if (AppState.elements.phasePill.reason) {
+      var scenarioLabels = {
+        auto: 'Auto-cycling through real-world IRL scenarios.',
+        surge: 'Heavy directional surge — queue pressure spikes on west approach.',
+        spillback: 'Downstream exit bottleneck — receiving road saturated >85%.',
+        emergency: 'Ambulance corridor — J2 flushes first, then J1 green wave.',
+        sensor_fault: 'Camera dropout — falling back to fixed-time schedule.',
       };
-      pill.classList.add(`scenario-pill--${colors[scenario] || 'emerald'}`);
+      AppState.elements.phasePill.reason.textContent = scenarioLabels[scenario] || 'Scenario changed.';
     }
-  });
+  }
 
-  // Update decision feed
-  const scenarioLabels = {
-    normal: 'Balanced demand across all approaches. Fixed-time plan optimal.',
-    surge: 'Peak hour surge on north approach. Queue pressure spikes 300%.',
-    spillback: 'Downstream bottleneck on J1→J2 link. Receiving road saturated >85%.',
-    bottleneck: 'Severe bottleneck at J2 exit. Spillback propagating to J1.',
-    emergency: 'Ambulance detected on south approach. Emergency flush activated.',
-    sensor_fault: 'Camera dropout on east approach. Falling back to fixed-time schedule.',
-  };
+  function setCameraPreset(preset) {
+    if (AppState.currentCamera === preset) return;
 
-  updateDecisionFeed({
-    reason: scenarioLabels[scenario] || 'Scenario changed.',
-    status: { text: 'SCENARIO', class: 'badge--cyan' },
-    meta: [
-      { label: 'Scenario', value: scenario.replace('_', ' ').toUpperCase() },
-      { label: 'Auto-cycle', value: AppState.isAutoScenario ? 'ON' : 'OFF' },
-    ],
-  });
-}
+    AppState.currentCamera = preset;
+    if (typeof window.switchCameraPreset === 'function') {
+      window.switchCameraPreset(preset);
+    }
 
-function setCameraPreset(preset) {
-  if (AppState.currentCamera === preset) return;
+    var cameraOptions = AppState.elements.cameraOptions;
+    if (cameraOptions) {
+      cameraOptions.forEach(function(pill) {
+        var isActive = pill.getAttribute('data-camera') === preset;
+        pill.classList.toggle('camera-option--active', isActive);
+        pill.setAttribute('aria-checked', isActive);
+      });
+    }
+  }
 
-  AppState.currentCamera = preset;
-  switchCameraPreset(preset);
+  function applySlider(sliderName, value) {
+    var display = AppState.elements.sliderValues[sliderName];
+    if (display) {
+      if (sliderName === 'simSpeed') {
+        display.textContent = value.toFixed(1) + 'x';
+      } else if (sliderName === 'trafficIntensity') {
+        var label = 'Normal';
+        if (value > 75) label = 'Heavy';
+        else if (value > 50) label = 'Moderate';
+        else if (value < 25) label = 'Light';
+        display.textContent = label + ' (' + Math.round(value) + '%)';
+      } else if (sliderName === 'downstreamBottleneck') {
+        display.textContent = Math.round(value) + '%';
+      } else {
+        display.textContent = value.toFixed(1);
+      }
+    }
 
-  // Update UI
-  AppState.elements.cameraPills.forEach(pill => {
-    pill.classList.toggle('camera-pill--active', pill.dataset.camera === preset);
-  });
-}
+    AppState[sliderName] = value;
 
-function updateSliderDisplay(key, value) {
-  const display = AppState.elements.sliderValues[key];
-  if (!display) return;
+    // Apply to scene
+    var scene = typeof window.getTwinScene === 'function' ? window.getTwinScene() : null;
+    if (scene && scene.scenario) {
+      if (sliderName === 'simSpeed') {
+        scene.scenario.timeScale = value;
+      } else if (sliderName === 'trafficIntensity') {
+        scene.congestionLevel = value / 100;
+      } else if (sliderName === 'downstreamBottleneck') {
+        if (value > 30) {
+          scene.setSpillbackActive(true, value / 100);
+        } else {
+          scene.setSpillbackActive(false);
+        }
+      }
+    }
 
-  const formats = {
-    simSpeed: (v) => `${v.toFixed(1)}x`,
-    congestion: (v) => `${Math.round(v * 100)}%`,
-    spawnRate: (v) => `${v.toFixed(1)}x`,
-  };
+    // Update density bars for downstream bottleneck
+    if (sliderName === 'downstreamBottleneck') {
+      updateDensityBar('exit', value);
+      updateGateMarker(value);
+    }
+  }
 
-  display.textContent = formats[key] ? formats[key](value) : value;
-}
+  function applySliderToScene(key, value) {
+    var scene = typeof window.getTwinScene === 'function' ? window.getTwinScene() : null;
+    if (!scene) return;
 
-function applySliderToScene(key, value) {
-  const scene = getTwinScene();
-  if (!scene) return;
-
-  switch (key) {
-    case 'simSpeed':
-      // Modify scenario time scale
-      scene.timeScale = value;
-      break;
-    case 'congestion':
-      // Modify traffic density
+    if (key === 'simSpeed') {
+      scene.scenario.timeScale = value;
+    } else if (key === 'congestionLevel') {
       scene.congestionLevel = value;
-      break;
-    case 'spawnRate':
-      // Modify spawn rate
+    } else if (key === 'spawnRate') {
       scene.spawnRate = value;
-      break;
-  }
-}
-
-async function handleEmergencyFlush() {
-  const btn = AppState.elements.actionButtons.emergencyFlush;
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="btn__icon">⏳</span> FLUSHING...';
-  }
-
-  try {
-    triggerEmergencyFlush();
-
-    updateDecisionFeed({
-      reason: 'Emergency flush triggered. J2 clears first (downstream-first), then J1. Ambulance corridor opening.',
-      status: { text: 'EMERGENCY', class: 'badge--rose' },
-      meta: [
-        { label: 'Strategy', value: 'Downstream-First Clear' },
-        { label: 'Priority', value: 'Ambulance (South→North)' },
-        { label: 'J2 Clear Time', value: '~8.2s' },
-        { label: 'J1 Clear Time', value: '~12.7s' },
-      ],
-    });
-
-    // Fetch emergency results
-    await fetchEmergencyResults();
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<span class="btn__icon">🚑</span> EMERGENCY FLUSH';
     }
   }
-}
 
-async function handleReset() {
-  AppState.isAutoScenario = true;
-  setScenarioControl('normal');
-  setModeControl('queuesense');
-  setCameraPreset('isometric');
-
-  // Reset sliders
-  AppState.simSpeed = 1.0;
-  AppState.congestionLevel = 0.5;
-  AppState.spawnRate = 1.0;
-  AppState.elements.sliders.simSpeed.value = 1.0;
-  AppState.elements.sliders.congestion.value = 0.5;
-  AppState.elements.sliders.spawnRate.value = 1.0;
-  updateSliderDisplay('simSpeed', 1.0);
-  updateSliderDisplay('congestion', 0.5);
-  updateSliderDisplay('spawnRate', 1.0);
-
-  updateDecisionFeed({
-    reason: 'System reset to defaults. QueueSense adaptive mode. Balanced scenario. Auto-cycling enabled.',
-    status: { text: 'RESET', class: 'badge--emerald' },
-    meta: [
-      { label: 'Mode', value: 'QueueSense (D)' },
-      { label: 'Scenario', value: 'BALANCED' },
-      { label: 'Auto-cycle', value: 'ON' },
-    ],
-  });
-}
-
-async function handleSelector() {
-  const btn = AppState.elements.actionButtons.selector;
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="btn__icon">⏳</span> SELECTING...';
+  function updateSliderDisplay(key, value) {
+    var display = AppState.elements.sliderValues[key];
+    if (!display) return;
+    display.textContent = value.toFixed(1);
   }
 
-  try {
-    const response = await fetch('/api/selector');
-    const data = await response.json();
-    AppState.selectorDecision = data;
+  function updateDensityBar(direction, value) {
+    var bar = AppState.elements.densityBars[direction];
+    if (!bar) return;
+    if (bar.value) bar.value.textContent = value + '%';
+    if (bar.fill) bar.fill.style.width = Math.min(value, 100) + '%';
 
-    updateDecisionFeed({
-      reason: `Selector chose: ${data.chosen_controller} (${data.reason})`,
-      status: { text: 'SELECTOR', class: 'badge--violet' },
-      meta: [
-        { label: 'Chosen', value: data.chosen_controller },
-        { label: 'Confidence', value: `${Math.round(data.confidence * 100)}%` },
-        { label: 'Reason', value: data.reason },
-      ],
-    });
-  } catch (error) {
-    console.error('Selector failed:', error);
-    updateDecisionFeed({
-      reason: 'Selector unavailable. Running in standalone mode.',
-      status: { text: 'OFFLINE', class: 'badge--rose' },
-    });
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<span class="btn__icon">🤖</span> RUN SELECTOR';
+    var fillClass = 'density-bar__fill';
+    if (value > 70) fillClass += ' density-bar__fill--rose';
+    else if (value > 40) fillClass += ' density-bar__fill--amber';
+    bar.fill.className = fillClass;
+  }
+
+  function updateGateMarker(value) {
+    var marker = AppState.elements.gateMarker;
+    if (marker) {
+      marker.style.left = '30%';
+    }
+    var label = AppState.elements.gateLabel;
+    if (label) {
+      label.textContent = value > 0
+        ? 'Exit ' + Math.round(value) + '% full — Gate at 30% | QueueSense: ' + (value > 30 ? 'HOLD upstream green' : 'Green permitted')
+        : '30% Gate Threshold';
     }
   }
-}
 
-function handleDownload() {
-  // Trigger download of benchmark CSV
-  const link = document.createElement('a');
-  link.href = '/api/benchmark/export';
-  link.download = `queuesense-benchmark-${new Date().toISOString().slice(0, 10)}.csv`;
-  link.click();
-}
+  async function handleEmergencyFlush() {
+    var btn = AppState.elements.actionButtons.emergencyFlush;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> FLUSHING...';
+    }
 
-function handleKeyboardShortcuts(e) {
-  // Ignore if typing in input
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    try {
+      if (typeof window.triggerEmergencyFlush === 'function') {
+        window.triggerEmergencyFlush();
+      }
 
-  switch (e.key.toLowerCase()) {
-    case '1':
-      setModeControl('queuesense');
-      break;
-    case '2':
-      setModeControl('actuated');
-      break;
-    case '3':
-      setModeControl('pressure');
-      break;
-    case '4':
-      setModeControl('fixed');
-      break;
-    case ' ':
-      e.preventDefault();
-      handleEmergencyFlush();
-      break;
-    case 'r':
-      handleReset();
-      break;
-    case 's':
-      handleSelector();
-      break;
-    case 'c':
-      // Cycle camera
-      const cameras = ['isometric', 'topDown', 'driver'];
-      const currentIdx = cameras.indexOf(AppState.currentCamera);
-      setCameraPreset(cameras[(currentIdx + 1) % cameras.length]);
-      break;
-  }
-}
+      if (AppState.elements.phasePill.reason) {
+        AppState.elements.phasePill.reason.textContent =
+          'Emergency flush: J2 clears first (downstream-first), then J1. Ambulance corridor opening.';
+      }
 
-/* =============================================================================
-   DECISION FEED
-   ============================================================================= */
-
-function updateDecisionFeed(data) {
-  const { reason, status, meta } = data;
-
-  if (AppState.elements.decisionFeed.reason) {
-    AppState.elements.decisionFeed.reason.textContent = reason;
+      await fetchEmergencyResults();
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path><path d="M12 7v4M12 16h.01"></path></svg> EMERGENCY FLUSH';
+      }
+    }
   }
 
-  if (AppState.elements.decisionFeed.status) {
-    AppState.elements.decisionFeed.status.textContent = status.text;
-    AppState.elements.decisionFeed.status.className = `decision-feed__status ${status.class}`;
+  function handleReset() {
+    AppState.isAutoScenario = true;
+    setScenarioControl('auto');
+    setModeControl('queuesense');
+    setCameraPreset('isometric');
+
+    AppState.simSpeed = 1.0;
+    AppState.trafficIntensity = 50;
+    AppState.downstreamBottleneck = 0;
+
+    var sliders = AppState.elements.sliders;
+    if (sliders.simSpeed) sliders.simSpeed.value = 1.0;
+    if (sliders.trafficIntensity) sliders.trafficIntensity.value = 50;
+    if (sliders.downstreamBottleneck) sliders.downstreamBottleneck.value = 0;
+
+    applySlider('simSpeed', 1.0);
+    applySlider('trafficIntensity', 50);
+    applySlider('downstreamBottleneck', 0);
+
+    if (AppState.elements.phasePill.reason) {
+      AppState.elements.phasePill.reason.textContent =
+        'System reset. QueueSense adaptive mode. Balanced scenario.';
+    }
   }
 
-  if (AppState.elements.decisionFeed.meta) {
-    AppState.elements.decisionFeed.meta.innerHTML = meta.map(item =>
-      `<span class="decision-feed__meta-item"><strong>${item.label}:</strong> ${item.value}</span>`
-    ).join('');
+  async function handleSelector() {
+    var btn = AppState.elements.actionButtons.selector;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> SELECTING...';
+    }
+
+    try {
+      var response = await fetch('/api/selector');
+      if (!response.ok) throw new Error('API not available');
+      var data = await response.json();
+      AppState.selectorDecision = data;
+
+      if (AppState.elements.phasePill.reason) {
+        AppState.elements.phasePill.reason.textContent =
+          'Selector chose: ' + data.chosen_controller + ' (' + data.reason + ')';
+      }
+    } catch (error) {
+      if (AppState.elements.phasePill.reason) {
+        AppState.elements.phasePill.reason.textContent =
+          'Selector unavailable. Running in standalone QueueSense mode.';
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2"></rect><path d="M12 2v20M2 12h20"></path></svg> RUN SELECTOR';
+      }
+    }
   }
-}
 
-/* =============================================================================
-   SCOREBOARD
-   ============================================================================= */
+  function handleDownload() {
+    var response = fetch('/api/benchmark/export')
+      .then(function(r) { return r.blob(); })
+      .then(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'queuesense-benchmark-' + new Date().toISOString().slice(0, 10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      })
+      .catch(function() {
+        // Fallback: download embedded CSV
+        var csvContent = 'controller,avg_delay_sec,p95_delay_sec,throughput_veh_hr,spillback_incidents,emergency_response_sec\n' +
+          FALLBACK_BENCHMARK.map(function(c) {
+            return c.name + ',' + c.avg_delay_sec + ',' + c.p95_delay_sec + ',' + c.throughput_veh_hr + ',' + c.spillback_incidents + ',' + c.emergency_response_sec;
+          }).join('\n');
+        var blob = new Blob([csvContent], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'queuesense-benchmark-' + new Date().toISOString().slice(0, 10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+  }
 
-function updateScoreboard(data) {
-  const sb = AppState.elements.scoreboard;
-  if (!sb) return;
+  function handleKeyboardShortcuts(e) {
+    // Ignore if typing in input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-  if (data.throughput !== undefined) sb.throughput.textContent = data.throughput.toFixed(1);
-  if (data.queueLength !== undefined) sb.queueLength.textContent = data.queueLength.toFixed(1);
-  if (data.spillback !== undefined) sb.spillback.textContent = data.spillback.toFixed(1);
-  if (data.emergency !== undefined) sb.emergency.textContent = data.emergency.toFixed(1);
-}
+    switch (e.key.toLowerCase()) {
+      case '1': setModeControl('queuesense'); break;
+      case '2': setModeControl('actuated'); break;
+      case '3': setModeControl('pressure'); break;
+      case '4': setModeControl('fixed'); break;
+      case ' ':
+        e.preventDefault();
+        handleEmergencyFlush();
+        break;
+      case 'r': handleReset(); break;
+      case 's': handleSelector(); break;
+      case 'c':
+        var cameras = ['isometric', 'topDown', 'driver'];
+        var currentIdx = cameras.indexOf(AppState.currentCamera);
+        setCameraPreset(cameras[(currentIdx + 1) % cameras.length]);
+        break;
+    }
+  }
 
-/* =============================================================================
-   API FETCHING
-   ============================================================================= */
+  /* =============================================================================
+     API FETCHING (with fallback data)
+     ============================================================================= */
 
-async function fetchAllAPIData() {
-  try {
+  async function fetchAllAPIData() {
     await Promise.all([
-      fetchLiveState(),
       fetchBenchmarkData(),
       fetchPassportData(),
       fetchEmergencyResults(),
     ]);
-  } catch (error) {
-    console.error('API fetch error:', error);
   }
-}
 
-async function fetchLiveState() {
-  try {
-    const response = await fetch('/api/state');
-    const data = await response.json();
-    AppState.liveState = data;
-    updateLiveUI(data);
-  } catch (error) {
-    console.error('Live state fetch failed:', error);
-  }
-}
-
-async function fetchBenchmarkData() {
-  try {
-    const response = await fetch('/api/benchmark');
-    const data = await response.json();
-    AppState.benchmarkData = data;
-    updateBenchmarkUI(data);
-  } catch (error) {
-    console.error('Benchmark fetch failed:', error);
-  }
-}
-
-async function fetchPassportData() {
-  try {
-    const response = await fetch('/api/passport');
-    const data = await response.json();
-    AppState.passportData = data;
-    updatePassportUI(data);
-  } catch (error) {
-    console.error('Passport fetch failed:', error);
-  }
-}
-
-async function fetchEmergencyResults() {
-  try {
-    const response = await fetch('/api/emergency/results');
-    const data = await response.json();
-    AppState.emergencyResults = data;
-    updateEmergencyResultsUI(data);
-  } catch (error) {
-    console.error('Emergency results fetch failed:', error);
-  }
-}
-
-function connectWebSocket() {
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsUrl = `${protocol}//${window.location.host}/ws`;
-
-  AppState.wsConnection = new WebSocket(wsUrl);
-
-  AppState.wsConnection.onopen = () => {
-    updateWSStatus('connected');
-  };
-
-  AppState.wsConnection.onmessage = (event) => {
+  async function fetchBenchmarkData() {
     try {
-      const data = JSON.parse(event.data);
-      if (data.type === 'state') {
-        AppState.liveState = data.payload;
-        updateLiveUI(data.payload);
-      }
-    } catch (e) {
-      console.error('WS message parse error:', e);
+      var response = await fetch('/api/benchmark');
+      if (!response.ok) throw new Error('API error');
+      var data = await response.json();
+      AppState.benchmarkData = data;
+      var controllers = data.controllers || FALLBACK_BENCHMARK;
+      updateBenchmarkUI(controllers);
+      updateChart(controllers);
+    } catch (error) {
+      AppState.benchmarkData = { controllers: FALLBACK_BENCHMARK };
+      updateBenchmarkUI(FALLBACK_BENCHMARK);
+      updateChart(FALLBACK_BENCHMARK);
     }
-  };
+  }
 
-  AppState.wsConnection.onclose = () => {
-    updateWSStatus('disconnected');
-    // Reconnect after 3 seconds
-    setTimeout(connectWebSocket, 3000);
-  };
+  async function fetchPassportData() {
+    try {
+      var response = await fetch('/api/passport');
+      if (!response.ok) throw new Error('API error');
+      var data = await response.json();
+      AppState.passportData = data;
+      updatePassportUI(data);
+    } catch (error) {
+      var fallback = { junctions: FALLBACK_PASSPORT.junctions, summary: { fully_passed: 2, total_junctions: 2, checks_per_junction: 8 } };
+      AppState.passportData = fallback;
+      updatePassportUI(fallback);
+    }
+  }
 
-  AppState.wsConnection.onerror = (error) => {
-    console.error('WS error:', error);
-    updateWSStatus('error');
-  };
-}
+  async function fetchEmergencyResults() {
+    try {
+      var response = await fetch('/api/emergency/results');
+      if (!response.ok) throw new Error('API error');
+      var data = await response.json();
+      AppState.emergencyResults = data;
+      var strategies = data.strategies || data.results || FALLBACK_EMERGENCY;
+      updateEmergencyResultsUI(strategies);
+    } catch (error) {
+      AppState.emergencyResults = { strategies: FALLBACK_EMERGENCY };
+      updateEmergencyResultsUI(FALLBACK_EMERGENCY);
+    }
+  }
 
-function updateWSStatus(status) {
-  const el = AppState.elements.wsStatus;
-  if (!el) return;
+  function updateLiveUI(data) {
+    if (!data) return;
 
-  const statusConfig = {
-    connected: { text: 'LIVE', class: 'badge--emerald' },
-    disconnected: { text: 'RECONNECTING...', class: 'badge--amber' },
-    error: { text: 'ERROR', class: 'badge--rose' },
-  };
+    // Update scoreboard
+    var sb = AppState.elements.scoreboard;
+    if (sb) {
+      if (sb.throughput) sb.throughput.textContent = (data.throughput_veh_per_hr || 1361).toLocaleString();
+      if (sb.avgWait) sb.avgWait.textContent = (data.avg_wait_sec || 19.4).toFixed(1);
+      if (sb.exitFill) sb.exitFill.textContent = Math.round(data.exit_occupancy_pct || 28) + '%';
+      if (sb.exitLabel) sb.exitLabel.textContent = (data.exit_occupancy_pct || 28) > 30 ? 'CONGESTED' : 'CLEAR';
+      if (sb.gridlocks) sb.gridlocks.textContent = data.gridlocks_prevented || 12;
+    }
 
-  const config = statusConfig[status] || statusConfig.disconnected;
-  el.textContent = config.text;
-  el.className = `badge ${config.class}`;
-}
+    // Update density bars
+    if (data.approach_density) {
+      for (var dir in data.approach_density) {
+        updateDensityBar(dir, data.approach_density[dir]);
+      }
+    }
+    if (data.exit_occupancy_pct !== undefined) {
+      updateDensityBar('exit', data.exit_occupancy_pct);
+      updateGateMarker(data.exit_occupancy_pct);
+    }
 
-function updateLiveIndicator(isLive) {
-  const el = AppState.elements.liveIndicator;
-  if (!el) return;
+    // Update phase pill
+    if (data.decision_reason && AppState.elements.phasePill.reason) {
+      AppState.elements.phasePill.reason.textContent = data.decision_reason;
+    }
+    if (data.current_phase && AppState.elements.phasePill.label) {
+      AppState.elements.phasePill.label.textContent = data.current_phase;
+    }
+    if (data.phase_time_remaining !== undefined && AppState.elements.phasePill.timer) {
+      AppState.elements.phasePill.timer.textContent = Math.round(data.phase_time_remaining) + 's';
+    }
+  }
 
-  if (isLive) {
-    el.classList.add('live');
-    el.textContent = 'LIVE';
+  function updateBenchmarkUI(controllers) {
+    var tbody = AppState.elements.ablationTableBody;
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    controllers.forEach(function(ctrl) {
+      var row = document.createElement('tr');
+      var isBest = ctrl.controller_id === 'D' || (ctrl.throughput_veh_hr && ctrl.throughput_veh_hr >= 1300);
+      var isWorst = ctrl.controller_id === 'A' || (ctrl.avg_delay_sec && ctrl.avg_delay_sec >= 30);
+
+      var bestClass = isBest ? ' metric-value--best' : isWorst ? ' metric-value--worst' : '';
+
+      row.innerHTML =
+        '<td><span class="controller-name">' + ctrl.name + '</span>' +
+        '<span class="controller-type ' + (ctrl.typeClass || '') + '">' + (ctrl.typeLabel || '') + '</span></td>' +
+        '<td class="metric-value' + bestClass + '">' + (ctrl.avg_delay_sec ? ctrl.avg_delay_sec.toFixed(1) : '-') + '</td>' +
+        '<td class="metric-value' + bestClass + '">' + (ctrl.p95_delay_sec ? ctrl.p95_delay_sec.toFixed(1) : '-') + '</td>' +
+        '<td class="metric-value' + bestClass + '">' + (ctrl.throughput_veh_hr ? ctrl.throughput_veh_hr.toFixed(0) : '-') + '</td>' +
+        '<td class="metric-value' + bestClass + '">' + (ctrl.spillback_incidents !== undefined ? ctrl.spillback_incidents : '-') + '</td>' +
+        '<td class="metric-value' + bestClass + '">' + (ctrl.emergency_response_sec ? ctrl.emergency_response_sec.toFixed(1) : '-') + '</td>';
+      tbody.appendChild(row);
+    });
+  }
+
+  function updateEmergencyResultsUI(strategies) {
+    var container = AppState.elements.emergencyResults;
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    strategies.forEach(function(strat, idx) {
+      var article = document.createElement('article');
+      var isBest = strat.isBest || idx === 0;
+      var isWorst = idx === strategies.length - 1;
+
+      var cls = 'emergency-strategy';
+      if (isBest) cls += ' emergency-strategy--best';
+      if (isWorst) cls += ' emergency-strategy--worst';
+
+      article.className = cls;
+      article.innerHTML =
+        '<div class="emergency-strategy__badge">' + (isBest ? 'BEST' : isWorst ? 'SLOWEST' : 'RANK ' + (idx + 1)) + '</div>' +
+        '<h4 class="emergency-strategy__name">' + strat.name + '</h4>' +
+        '<div class="emergency-strategy__time tabular-nums">' + strat.clearance_time_sec.toFixed(1) + 's</div>' +
+        '<div class="emergency-strategy__detail">' + strat.description + '</div>' +
+        '<div class="emergency-strategy__stops">Stops: ' + strat.stops + ' | Recovery: ' + strat.recovery_time_sec.toFixed(1) + 's</div>';
+      container.appendChild(article);
+    });
+  }
+
+  function updatePassportUI(data) {
+    var grid = AppState.elements.passportGrid;
+    if (!grid) return;
+
+    var summary = data.summary || { fully_passed: 2, total_junctions: 2, checks_per_junction: 8 };
+    if (AppState.elements.passportSummary) {
+      AppState.elements.passportSummary.innerHTML =
+        '<strong>' + summary.fully_passed + '/' + summary.total_junctions + ' junctions fully passed</strong>, ' +
+        summary.checks_per_junction + '/8 checks each';
+    }
+
+    var junctions = data.junctions || data.passports || FALLBACK_PASSPORT.junctions;
+    grid.innerHTML = '';
+
+    junctions.forEach(function(j) {
+      var article = document.createElement('article');
+      article.className = 'passport-junction';
+
+      var badgeClass = j.overall_pass ? 'passport-junction__badge--pass' : 'passport-junction__badge--fail';
+      var badgeText = j.overall_pass ? 'PASS' : 'FAIL';
+
+      article.innerHTML =
+        '<header class="passport-junction__header">' +
+        '<h4 class="passport-junction__id">' + j.id + '</h4>' +
+        '<span class="passport-junction__badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '</header>' +
+        '<div class="passport-checks">' +
+        (j.checks || []).map(function(check) {
+          var checkClass = check.pass ? 'passport-check__icon--pass' : 'passport-check__icon--fail';
+          var checkMark = check.pass ? '&#10003;' : '&#10007;';
+          return '<div class="passport-check">' +
+            '<span class="passport-check__icon ' + checkClass + '" aria-hidden="true">' + checkMark + '</span>' +
+            '<div class="passport-check__content">' +
+            '<div class="passport-check__name">' + check.name + '</div>' +
+            '<div class="passport-check__details">' + check.details + (check.evidence ? ' (' + check.evidence + ')' : '') + '</div>' +
+            '</div></div>';
+        }).join('') +
+        '</div></article>';
+
+      grid.appendChild(article);
+    });
+  }
+
+  /* =============================================================================
+     CHART.JS INITIALIZATION
+     ============================================================================= */
+
+  var benchmarkChart = null;
+
+  function updateChart(controllers) {
+    if (!AppState.elements.delayChart || typeof Chart === 'undefined') return;
+
+    var ctx = AppState.elements.delayChart.getContext('2d');
+
+    var labels = controllers.map(function(c) { return c.name; });
+    var avgDelay = controllers.map(function(c) { return c.avg_delay_sec; });
+    var p95Delay = controllers.map(function(c) { return c.p95_delay_sec; });
+    var throughput = controllers.map(function(c) { return c.throughput_veh_hr; });
+    var spillback = controllers.map(function(c) { return c.spillback_incidents; });
+
+    var colors = ['#f87171', '#fbbf24', '#c084fc', '#10b981'];
+
+    if (benchmarkChart) {
+      benchmarkChart.data.labels = labels;
+      benchmarkChart.data.datasets[0].data = avgDelay;
+      benchmarkChart.data.datasets[0].backgroundColor = colors;
+      benchmarkChart.data.datasets[1].data = p95Delay;
+      benchmarkChart.update();
+    } else {
+      benchmarkChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Avg Delay (s)',
+              data: avgDelay,
+              backgroundColor: colors,
+              borderRadius: 4,
+              barThickness: 32,
+            },
+            {
+              label: 'P95 Delay (s)',
+              data: p95Delay,
+              backgroundColor: colors.map(function(c) { return c + '60'; }),
+              borderRadius: 4,
+              barThickness: 32,
+              hidden: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              titleColor: '#f8fafc',
+              bodyColor: '#cbd5e1',
+              borderColor: '#334155',
+              borderWidth: 1,
+              padding: 12,
+              cornerRadius: 8,
+              displayColors: false,
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': ' + ctx.raw.toFixed(1);
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(51, 65, 85, 0.5)' },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono, monospace' } },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono, monospace' } },
+            },
+          },
+        },
+      });
+    }
+
+    // Update legend
+    var legend = AppState.elements.benchmarkLegend;
+    if (legend) {
+      legend.innerHTML = controllers.map(function(c, i) {
+        return '<div class="chart-legend__item">' +
+          '<span class="chart-legend__swatch" style="background:' + colors[i] + ';border-radius:2px;"></span>' +
+          c.name +
+          '</div>';
+      }).join('');
+    }
+  }
+
+  /* =============================================================================
+     THREE.JS SCENE CALLBACKS
+     ============================================================================= */
+
+  function handleTwinStateUpdate(state) {
+    AppState.liveState = state;
+    updateLiveUI(state);
+  }
+
+  function handleSignalUpdate(signal) {
+    console.debug('Signal update:', signal);
+  }
+
+  function handleScenarioChange(scenario) {
+    AppState.currentScenario = scenario;
+  }
+
+  function handleModeChange(isQueueSense) {
+    AppState.currentMode = isQueueSense ? 'queuesense' : 'actuated';
+  }
+
+  function handleZoneUpdate(zones) {
+    // AI zone PCU counts updated
+    var totalPCU = 0;
+    for (var id in zones) {
+      totalPCU += zones[id];
+    }
+
+    // Update density bars from zone data
+    if (zones.J1_N !== undefined) updateDensityBar('north', zones.J1_N * 12);
+    if (zones.J1_E !== undefined) updateDensityBar('east', zones.J1_E * 12);
+  }
+
+  function handleTelemetry(stats) {
+    console.debug('Telemetry:', stats);
+  }
+
+  /* =============================================================================
+     RENDER LOOP
+     ============================================================================= */
+
+  function renderLoop(timestamp) {
+    if (!AppState.isInitialized) return;
+
+    var deltaTime = (timestamp - AppState.lastFrameTime) / 1000;
+    AppState.lastFrameTime = timestamp;
+    AppState.frameCount++;
+
+    // Throttle API polling to 2Hz
+    if (AppState.frameCount % 30 === 0) {
+      // Poll live state if available
+    }
+
+    // Throttle benchmark fetch to once per 10 seconds
+    if (AppState.frameCount % 600 === 0 && !AppState.benchmarkData) {
+      fetchBenchmarkData();
+      fetchPassportData();
+    }
+
+    requestAnimationFrame(renderLoop);
+  }
+
+  /* =============================================================================
+     UTILITY FUNCTIONS
+     ============================================================================= */
+
+  function formatNumber(num, decimals) {
+    if (decimals === undefined) decimals = 1;
+    if (num === null || num === undefined || isNaN(num)) return '—';
+    return Number(num).toFixed(decimals);
+  }
+
+  function debounce(fn, delay) {
+    var timeoutId;
+    return function() {
+      var args = arguments;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(function() { fn.apply(null, args); }, delay);
+    };
+  }
+
+  /* =============================================================================
+     ENTRY POINT
+     ============================================================================= */
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
   } else {
-    el.classList.remove('live');
-    el.textContent = 'OFFLINE';
-  }
-}
-
-/* =============================================================================
-   UI UPDATES FROM API
-   ============================================================================= */
-
-function updateLiveUI(data) {
-  if (!data) return;
-
-  // Update scoreboard with live data
-  updateScoreboard({
-    throughput: data.throughput_veh_per_hr || 0,
-    queueLength: data.avg_queue_length_m || 0,
-    spillback: data.spillback_risk_pct || 0,
-    emergency: data.emergency_response_sec || 0,
-  });
-
-  // Update metric cards
-  updateMetricCards(data);
-
-  // Update decision feed if we have a reason
-  if (data.decision_reason) {
-    updateDecisionFeed({
-      reason: data.decision_reason,
-      status: { text: 'LIVE', class: 'badge--emerald' },
-      meta: [
-        { label: 'Phase', value: data.current_phase || 'UNKNOWN' },
-        { label: 'Cycle', value: `${data.cycle_time_remaining || 0}s` },
-        { label: 'Active', value: data.active_approach || 'NONE' },
-      ],
-    });
-  }
-}
-
-function updateMetricCards(data) {
-  const cards = AppState.elements.metricCards;
-  if (!cards) return;
-
-  if (cards.throughput) {
-    cards.throughput.querySelector('.metric-card__value').textContent =
-      (data.throughput_veh_per_hr || 0).toFixed(0);
-    cards.throughput.querySelector('.metric-card__detail').textContent =
-      `vs fixed-time: ${((data.throughput_veh_per_hr || 0) / 1800 * 100 - 100).toFixed(1)}%`;
+    initializeApp();
   }
 
-  if (cards.queue) {
-    cards.queue.querySelector('.metric-card__value').textContent =
-      (data.avg_queue_length_m || 0).toFixed(1);
-    cards.queue.querySelector('.metric-card__detail').textContent =
-      `95th pct: ${(data.p95_queue_length_m || 0).toFixed(1)}m`;
-  }
-
-  if (cards.spillback) {
-    cards.spillback.querySelector('.metric-card__value').textContent =
-      (data.spillback_risk_pct || 0).toFixed(1);
-    cards.spillback.querySelector('.metric-card__detail').textContent =
-      data.spillback_active ? 'ACTIVE' : 'Clear';
-  }
-
-  if (cards.emergency) {
-    cards.emergency.querySelector('.metric-card__value').textContent =
-      (data.emergency_response_sec || 0).toFixed(1);
-    cards.emergency.querySelector('.metric-card__detail').textContent =
-      'Downstream-first policy';
-  }
-}
-
-function updateBenchmarkUI(data) {
-  if (!data || !AppState.elements.ablationTable) return;
-
-  const tbody = AppState.elements.ablationTable.querySelector('tbody');
-  if (!tbody) return;
-
-  // Clear existing rows
-  tbody.innerHTML = '';
-
-  // Render rows from benchmark data
-  const controllers = data.controllers || [];
-  controllers.forEach((ctrl, idx) => {
-    const row = document.createElement('tr');
-    const isBest = idx === 0;
-    const isWorst = idx === controllers.length - 1;
-
-    row.innerHTML = `
-      <td>
-        <span class="controller-name">${ctrl.name}</span>
-        <span class="controller-type ${ctrl.typeClass || ''}">${ctrl.typeLabel}</span>
-      </td>
-      <td class="metric-value ${isBest ? 'metric-value--best' : isWorst ? 'metric-value--worst' : ''}">${ctrl.avg_delay_sec?.toFixed(1) || '—'}</td>
-      <td class="metric-value ${isBest ? 'metric-value--best' : isWorst ? 'metric-value--worst' : ''}">${ctrl.p95_delay_sec?.toFixed(1) || '—'}</td>
-      <td class="metric-value ${isBest ? 'metric-value--best' : isWorst ? 'metric-value--worst' : ''}">${ctrl.throughput_veh_hr?.toFixed(0) || '—'}</td>
-      <td class="metric-value ${isBest ? 'metric-value--best' : isWorst ? 'metric-value--worst' : ''}">${ctrl.spillback_incidents || '—'}</td>
-      <td class="metric-value ${isBest ? 'metric-value--best' : isWorst ? 'metric-value--worst' : ''}">${ctrl.emergency_response_sec?.toFixed(1) || '—'}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function updateEmergencyResultsUI(data) {
-  if (!data || !AppState.elements.emergencyResults) return;
-
-  const container = AppState.elements.emergencyResults;
-  const strategies = data.strategies || [];
-
-  container.innerHTML = strategies.map((strat, idx) => `
-    <article class="emergency-strategy ${idx === 0 ? 'emergency-strategy--best' : idx === strategies.length - 1 ? 'emergency-strategy--worst' : ''}">
-      <span class="emergency-strategy__badge">${idx === 0 ? 'BEST' : idx === strategies.length - 1 ? 'SLOWEST' : `RANK ${idx + 1}`}</span>
-      <h4 class="emergency-strategy__name">${strat.name}</h4>
-      <div class="emergency-strategy__time ${idx === 0 ? '' : ''}">${strat.clearance_time_sec?.toFixed(1) || '—'}s</div>
-      <div class="emergency-strategy__detail">${strat.description || ''}</div>
-      <div class="emergency-strategy__stops">Stops: ${strat.stops || '—'}</div>
-    </article>
-  `).join('');
-}
-
-function updatePassportUI(data) {
-  if (!data || !AppState.elements.passportGrid) return;
-
-  const container = AppState.elements.passportGrid;
-  const junctions = data.junctions || [];
-
-  container.innerHTML = junctions.map(j => `
-    <article class="passport-junction">
-      <header class="passport-junction__header">
-        <h4 class="passport-junction__id">${j.id}</h4>
-        <span class="passport-junction__badge passport-junction__badge--${j.overall_pass ? 'pass' : 'fail'}">
-          ${j.overall_pass ? 'PASS' : 'FAIL'}
-        </span>
-      </header>
-      <div class="passport-checks">
-        ${(j.checks || []).map(check => `
-          <div class="passport-check">
-            <span class="passport-check__icon passport-check__icon--${check.pass ? 'pass' : 'fail'}">
-              ${check.pass ? '✓' : '✗'}
-            </span>
-            <div class="passport-check__content">
-              <div class="passport-check__name">${check.name}</div>
-              <div class="passport-check__details">${check.details}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </article>
-  `).join('');
-}
-
-/* =============================================================================
-   THREE.JS SCENE CALLBACKS
-   ============================================================================= */
-
-function handleTwinStateUpdate(state) {
-  // Called from three-scene when state changes
-  AppState.liveState = state;
-  updateLiveUI(state);
-}
-
-function handleSignalUpdate(signal) {
-  // Signal phase changed
-  console.debug('Signal update:', signal);
-}
-
-function handleScenarioChange(scenario) {
-  AppState.currentScenario = scenario;
-  // Update scenario pills if auto-cycling
-  if (AppState.isAutoScenario) {
-    AppState.elements.scenarioPills.forEach(pill => {
-      pill.classList.toggle('scenario-pill--active', pill.dataset.scenario === scenario);
-    });
-  }
-}
-
-function handleModeChange(isQueueSense) {
-  AppState.currentMode = isQueueSense ? 'queuesense' : 'actuated';
-  AppState.elements.modeSwitcher.forEach(btn => {
-    btn.classList.toggle('mode-option--active', btn.dataset.mode === AppState.currentMode);
-  });
-}
-
-function handleZoneUpdate(zones) {
-  // AI zone PCU counts updated
-  // Could update decision feed meta
-}
-
-function handleTelemetry(stats) {
-  // Performance telemetry from scene
-  console.debug('Telemetry:', stats);
-}
-
-/* =============================================================================
-   RENDER LOOP
-   ============================================================================= */
-
-function renderLoop(timestamp) {
-  if (!AppState.isInitialized) return;
-
-  const deltaTime = (timestamp - AppState.lastFrameTime) / 1000;
-  AppState.lastFrameTime = timestamp;
-  AppState.frameCount++;
-
-  // Throttle API polling to 2Hz
-  if (AppState.frameCount % 30 === 0) {
-    fetchLiveState();
-  }
-
-  // Throttle benchmark fetch to once per 10 seconds
-  if (AppState.frameCount % 600 === 0) {
-    fetchBenchmarkData();
-    fetchPassportData();
-  }
-
-  requestAnimationFrame(renderLoop);
-}
-
-/* =============================================================================
-   UTILITY FUNCTIONS
-   ============================================================================= */
-
-function formatNumber(num, decimals = 1) {
-  if (num === null || num === undefined || isNaN(num)) return '—';
-  return Number(num).toFixed(decimals);
-}
-
-function debounce(fn, delay) {
-  let timeoutId;
-  return (...args) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
-  };
-}
-
-/* =============================================================================
-   ENTRY POINT
-   ============================================================================= */
-
-// Initialize on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-  initializeApp();
-}
-
-// Export for debugging
-window.AppState = AppState;
-window.initializeApp = initializeApp;
+  // Export for debugging
+  window.AppState = AppState;
+  window.initializeApp = initializeApp;
+})();

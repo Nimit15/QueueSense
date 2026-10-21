@@ -1,6 +1,8 @@
 /* =============================================================================
    QUEUESENSE ICCC — 3D LIVING DIGITAL TWIN
    Three.js WebGL corridor scene: J1 -> J1_to_J2 -> J2
+   Uses GLOBAL THREE (loaded via UMD script tag). NO ES modules.
+
    Emil Kowalski Design Engineering Principles Applied
    =============================================================================
 
@@ -13,91 +15,60 @@
    - Scenario Engine: autonomous cycling with manual trigger override
    ============================================================================= */
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/UnrealBloomPass.js';
-import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/effects/ShaderPass.js';
-import { FXAAShader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/shaders/FXAAShader.js';
+(function() {
+  'use strict';
 
-/* =============================================================================
-   CONSTANTS & CONFIGURATION
-   ============================================================================= */
+  var CORRIDOR_LENGTH = 60;
+  var ROAD_WIDTH = 16;
+  var LANE_WIDTH = 4;
+  var NUM_LANES = 4;
+  var JUNCTION_SIZE = 8;
+  var LANE_MARKING_WIDTH = 0.15;
+  var CROSSWALK_WIDTH = 3;
+  var MAX_VEHICLES = 80;
 
-const CORRIDOR_LENGTH = 60;        // meters, J1 center to J2 center
-const ROAD_WIDTH = 16;             // meters, total road width
-const LANE_WIDTH = 4;              // meters per lane
-const NUM_LANES = 4;               // 2 each direction
+  var PCU_WEIGHTS = {
+    car: 1.0,
+    bus: 2.2,
+    auto: 1.0,
+    bike: 0.5,
+    truck: 2.0,
+  };
 
-const JUNCTION_SIZE = 8;          // meters, intersection box
-const LANE_MARKING_WIDTH = 0.15;
-const CROSSWALK_WIDTH = 3;
+  var VEHICLE_COLORS = {
+    car: 0x3b82f6,
+    bus: 0x10b981,
+    auto: 0xf59e0b,
+    bike: 0x8b5cf6,
+    truck: 0xef4444,
+  };
 
-const MAX_VEHICLES = 80;
+  var J1_POSITION = 0;
+  var J2_POSITION = 60;
+  var CORRIDOR_LENGTH_TOTAL = 120;
 
-// PCU weights per vehicle class (IRC:SP-41)
-const PCU_WEIGHTS = {
-  car: 1.0,
-  bus: 2.2,
-  auto: 1.0,
-  bike: 0.5,
-  truck: 2.0,
-};
-
-// Vehicle colors by class
-const VEHICLE_COLORS = {
-  car: 0x3b82f6,
-  bus: 0x10b981,
-  auto: 0xf59e0b,
-  bike: 0x8b5cf6,
-  truck: 0xef4444,
-};
-
-// Corridor positions (meters)
-const J1_POSITION = 0;      // J1 center
-const J2_POSITION = 60;    // J2 center
-const CORRIDOR_LENGTH_TOTAL = 120; // total road length (start to end)
-
-/* =============================================================================
-   MAIN SCENE CLASS
-   ============================================================================= */
-
-class DigitalTwinScene {
-  constructor(canvasContainer) {
+  var DigitalTwinScene = function(canvasContainer) {
+    var self = this;
     this.container = canvasContainer;
     this.scene = null;
     this.camera = null;
     this.renderer = null;
-    this.composer = null;
     this.controls = null;
     this.clock = new THREE.Clock();
-
-    // Vehicle system
     this.vehicleMeshes = [];
     this.vehicleInstances = [];
     this.vehicleTemplate = null;
     this.vehicleGroup = new THREE.Group();
-
-    // Signal system
     this.signalGroups = {};
     this.signalState = {
       J1: { NS: 'green', EW: 'red', yellow: 0, allRed: false },
       J2: { NS: 'green', EW: 'red', yellow: 0, allRed: false },
     };
-
-    // AI detection zones
     this.aiZones = {};
     this.spillbackZone = null;
-
-    // Lighting
     this.lights = {};
-
-    // Camera presets
     this.currentPreset = 'isometric';
     this.cameraPresets = {};
-
-    // Scenario engine
     this.scenario = {
       name: 'normal',
       time: 0,
@@ -105,22 +76,21 @@ class DigitalTwinScene {
       transitionTimer: 0,
     };
     this.isQueueSenseMode = true;
-
-    // Stats
     this.frameCount = 0;
     this.lastTime = 0;
-
-    // Callback for external state updates
     this.onStateUpdate = null;
+    this.onSignalUpdate = null;
+    this.onScenarioChange = null;
+    this.onModeChange = null;
+    this.onZoneUpdate = null;
+    this.onTelemetry = null;
 
     this.init();
-  }
+  };
 
-  /* ---- Initialization ---- */
-
-  init() {
-    this.createScene();
+  DigitalTwinScene.prototype.init = function() {
     this.createRenderer();
+    this.createScene();
     this.createLights();
     this.createCameraPresets();
     this.createRoads();
@@ -131,18 +101,10 @@ class DigitalTwinScene {
     this.createSpillbackVisual();
     this.setupEventListeners();
     this.animate();
-  }
+  };
 
-  createScene() {
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x090d16);
-    this.scene.fog = new THREE.FogExp2(0x090d16, 0.002);
-
-    // Add to container
-    this.container.appendChild(this.renderer ? null : document.createElement('div'));
-  }
-
-  createRenderer() {
+  DigitalTwinScene.prototype.createRenderer = function() {
+    var self = this;
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -150,8 +112,7 @@ class DigitalTwinScene {
       stencil: false,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setAnimationLoop(() => this.animate());
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;
@@ -160,47 +121,19 @@ class DigitalTwinScene {
 
     this.container.appendChild(this.renderer.domElement);
     this.container.id = 'three-canvas';
-    this.container.appendChild(document.createElement('div')).remove();
+  };
 
-    // Post-processing
-    this.setupPostProcessing();
-  }
+  DigitalTwinScene.prototype.createScene = function() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x090d16);
+    this.scene.fog = new THREE.FogExp2(0x090d16, 0.002);
+  };
 
-  setupPostProcessing() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.setSize(width, height);
-
-    // Render pass
-    const renderPass = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(renderPass);
-
-    // Bloom pass for signal glow
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(width, height),
-      1.5,   // strength
-      0.4,   // radius
-      0.85,  // threshold
-    );
-    this.composer.addPass(bloomPass);
-    this.bloomPass = bloomPass;
-
-    // FXAA
-    const fxaaPass = new ShaderPass(FXAAShader);
-    const pixelRatio = window.devicePixelRatio;
-    fxaaPass.material.uniforms['resolution'].value.set(1 / (width * pixelRatio), 1 / (height * pixelRatio));
-    this.composer.addPass(fxaaPass);
-  }
-
-  createLights() {
-    // Ambient light
-    const ambient = new THREE.AmbientLight(0x404060, 1.5);
+  DigitalTwinScene.prototype.createLights = function() {
+    var ambient = new THREE.AmbientLight(0x404060, 1.5);
     this.scene.add(ambient);
 
-    // Directional light (sun)
-    const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+    var sun = new THREE.DirectionalLight(0xffffff, 1.0);
     sun.position.set(20, 40, 15);
     sun.castShadow = true;
     sun.shadow.mapSize.width = 2048;
@@ -215,32 +148,30 @@ class DigitalTwinScene {
     this.scene.add(sun);
     this.lights.sun = sun;
 
-    // Hemisphere light for sky gradient
-    const hemi = new THREE.HemisphereLight(0x4a6fa5, 0x1a1a2e, 0.4);
+    var hemi = new THREE.HemisphereLight(0x4a6fa5, 0x1a1a2e, 0.4);
     this.scene.add(hemi);
 
-    // Junction pool lights
     this.createJunctionPoolLights();
-  }
+  };
 
-  createJunctionPoolLights() {
-    // Soft pool lights at each junction
-    for (const [jid, zPos] of Object.entries({ J1: 0, J2: CORRIDOR_LENGTH })) {
-      const poolLight = new THREE.PointLight(0x10b981, 0.5, 15);
+  DigitalTwinScene.prototype.createJunctionPoolLights = function() {
+    var positions = { J1: J1_POSITION, J2: J2_POSITION };
+    for (var jid in positions) {
+      var zPos = positions[jid];
+      var poolLight = new THREE.PointLight(0x10b981, 0.5, 15);
       poolLight.position.set(0, 8, zPos);
       this.scene.add(poolLight);
     }
-  }
+  };
 
-  createCameraPresets() {
-    const aspect = window.innerWidth / window.innerHeight;
+  DigitalTwinScene.prototype.createCameraPresets = function() {
+    var self = this;
+    var aspect = this.container.clientWidth / this.container.clientHeight;
 
-    // Isometric
     this.cameraPresets.isometric = new THREE.PerspectiveCamera(35, aspect, 0.1, 200);
     this.cameraPresets.isometric.position.set(-25, 20, 40);
     this.cameraPresets.isometric.lookAt(0, 0, 30);
 
-    // Top-Down
     this.cameraPresets.topDown = new THREE.OrthographicCamera(
       -CORRIDOR_LENGTH_TOTAL / 2,
       CORRIDOR_LENGTH_TOTAL / 2,
@@ -253,39 +184,39 @@ class DigitalTwinScene {
     this.cameraPresets.topDown.lookAt(0, 0, CORRIDOR_LENGTH / 2);
     this.cameraPresets.topDown.rotation.x = -Math.PI / 2;
 
-    // Driver View (follows ambulance along corridor)
     this.cameraPresets.driver = new THREE.PerspectiveCamera(50, aspect, 0.1, 200);
     this.cameraPresets.driver.position.set(0, 2, 0);
     this.cameraPresets.driver.lookAt(0, 0, 10);
 
-    // Default to isometric
     this.camera = this.cameraPresets.isometric.clone();
 
-    // Orbit controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-    this.controls.minDistance = 10;
-    this.controls.maxDistance = 80;
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    // OrbitControls (available as THREE.OrbitControls from CDN)
+    if (typeof THREE.OrbitControls !== 'undefined') {
+      this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.minDistance = 10;
+      this.controls.maxDistance = 80;
+      this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    }
 
-    // Disable controls for top-down and driver view
     this.updateControlsForPreset(this.currentPreset);
-  }
+  };
 
-  updateControlsForPreset(preset) {
-    if (preset === 'isometric') {
+  DigitalTwinScene.prototype.updateControlsForPreset = function(preset) {
+    if (preset === 'isometric' && this.controls) {
       this.controls.enabled = true;
       this.controls.target.set(0, 0, CORRIDOR_LENGTH / 2);
-    } else {
+    } else if (this.controls) {
       this.controls.enabled = false;
     }
-  }
+  };
 
-  switchCameraPreset(presetName) {
+  DigitalTwinScene.prototype.switchCameraPreset = function(presetName) {
+    var target = this.cameraPresets[presetName];
+    if (!target) return;
+
     this.currentPreset = presetName;
-    const target = this.cameraPresets[presetName];
-
     if (target.isOrthographicCamera) {
       this.camera = target.clone();
       this.camera.rotation.copy(target.rotation);
@@ -295,194 +226,124 @@ class DigitalTwinScene {
     }
 
     this.updateControlsForPreset(presetName);
-    this.composer.passes[0].camera = this.camera;
 
-    // Emit event
     if (this.onPresetChange) {
       this.onPresetChange(presetName);
     }
-  }
+  };
 
-  /* ---- Road & Junction Geometry ---- */
-
-  createRoads() {
-    // Main road (asphalt)
-    const roadGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, ROAD_WIDTH * 2.5);
-    const roadMaterial = new THREE.MeshStandardMaterial({
+  DigitalTwinScene.prototype.createRoads = function() {
+    var roadGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, ROAD_WIDTH * 2.5);
+    var roadMaterial = new THREE.MeshStandardMaterial({
       color: 0x1a1a2e,
       roughness: 0.9,
       metalness: 0.1,
     });
-    const road = new THREE.Mesh(roadGeometry, roadMaterial);
+    var road = new THREE.Mesh(roadGeometry, roadMaterial);
     road.rotation.x = -Math.PI / 2;
     road.receiveShadow = true;
     this.scene.add(road);
 
-    // Road edges (curbs)
-    const curbGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, 0.5);
-    const curbMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1a1a3e,
-      roughness: 0.8,
-    });
+    var curbGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, 0.5);
+    var curbMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a3e, roughness: 0.8 });
 
-    // North side curb
-    const curbN = new THREE.Mesh(curbGeometry, curbMaterial);
+    var curbN = new THREE.Mesh(curbGeometry, curbMaterial);
     curbN.rotation.x = -Math.PI / 2;
     curbN.position.set(0, 0.01, ROAD_WIDTH + 0.25);
     curbN.receiveShadow = true;
     this.scene.add(curbN);
 
-    // South side curb
-    const curbS = curbN.clone();
+    var curbS = curbN.clone();
     curbS.position.set(0, 0.01, -(ROAD_WIDTH + 0.25));
     this.scene.add(curbS);
 
-    // Lane markings (dashed center line)
     this.createLaneMarkings();
-
-    // Side lines
     this.createSideLines();
-
-    // Background (grass/verge)
     this.createBackground();
-  }
+  };
 
-  createLaneMarkings() {
-    const laneCount = NUM_LANES;
-    const laneWidthMeters = ROAD_WIDTH / laneCount;
-
-    // Center dashed line (North-South traffic)
-    const centerLineGeometry = new THREE.PlaneGeometry(0.1, CORRIDOR_LENGTH_TOTAL);
-    const centerLineMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.3,
+  DigitalTwinScene.prototype.createLaneMarkings = function() {
+    var laneCount = NUM_LANES;
+    var laneWidthMeters = ROAD_WIDTH / laneCount;
+    var centerLineGeometry = new THREE.PlaneGeometry(0.1, CORRIDOR_LENGTH_TOTAL);
+    var centerLineMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.3,
     });
 
-    // Dashed line using InstancedMesh
-    const dashGeometry = new THREE.PlaneGeometry(0.1, 2);
-    const dashMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.8,
-      emissive: 0xffffff,
-      emissiveIntensity: 0.2,
+    var dashGeometry = new THREE.PlaneGeometry(0.1, 2);
+    var dashMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.8,
+      emissive: 0xffffff, emissiveIntensity: 0.2,
     });
 
-    for (let i = 0; i < laneCount - 1; i++) {
-      const offset = -ROAD_WIDTH / 2 + laneWidthMeters * (i + 1);
-      for (let z = 0; z < CORRIDOR_LENGTH_TOTAL; z += 4) {
-        const dash = new THREE.Mesh(dashGeometry, dashMaterial);
+    for (var i = 0; i < laneCount - 1; i++) {
+      var offset = -ROAD_WIDTH / 2 + laneWidthMeters * (i + 1);
+      for (var z = 0; z < CORRIDOR_LENGTH_TOTAL; z += 4) {
+        var dash = new THREE.Mesh(dashGeometry, dashMaterial);
         dash.rotation.x = -Math.PI / 2;
-        dash.position.set(0, 0.02, z - CORRIDOR_LENGTH_TOTAL / 2);
-        dash.position.x = offset; // Offset to lane divider position
-        // Actually position based on lane boundary
-        dash.position.x = offset - ROAD_WIDTH / 2 - ROAD_WIDTH / 2;
-        // Let me recalculate
-        dash.position.x = -ROAD_WIDTH / 2 + laneWidthMeters * (i + 1);
+        dash.position.set(offset, 0.02, z - CORRIDOR_LENGTH_TOTAL / 2);
         this.scene.add(dash);
       }
     }
 
-    // Solid center line
-    const centerLine = new THREE.Mesh(centerLineGeometry, centerLineMaterial);
+    var centerLine = new THREE.Mesh(centerLineGeometry, centerLineMaterial);
     centerLine.rotation.x = -Math.PI / 2;
     centerLine.position.y = 0.01;
     this.scene.add(centerLine);
-  }
+  };
 
-  createSideLines() {
-    const lineGeometry = new THREE.PlaneGeometry(0.1, CORRIDOR_LENGTH_TOTAL);
-    const lineMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.5,
+  DigitalTwinScene.prototype.createSideLines = function() {
+    var lineGeometry = new THREE.PlaneGeometry(0.1, CORRIDOR_LENGTH_TOTAL);
+    var lineMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.5,
     });
 
-    const leftLine = new THREE.Mesh(lineGeometry, lineMaterial);
+    var leftLine = new THREE.Mesh(lineGeometry, lineMaterial);
     leftLine.rotation.x = -Math.PI / 2;
     leftLine.position.set(-ROAD_WIDTH / 2 - 0.05, 0.02, 0);
     this.scene.add(leftLine);
 
-    const rightLine = leftLine.clone();
+    var rightLine = leftLine.clone();
     rightLine.position.set(ROAD_WIDTH / 2 + 0.05, 0.02, 0);
     this.scene.add(rightLine);
-  }
+  };
 
-  createBackground() {
-    // Ground plane (green verge)
-    const groundGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL + 20, ROAD_WIDTH * 4);
-    const groundMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0f2020,
-      roughness: 1.0,
+  DigitalTwinScene.prototype.createBackground = function() {
+    var groundGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL + 20, ROAD_WIDTH * 4);
+    var groundMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0f2020, roughness: 1.0,
     });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    var ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
-    ground.position.z = 0;
     ground.receiveShadow = true;
     this.scene.add(ground);
 
-    // Skybox (gradient)
-    this.createSkybox();
-  }
-
-  createSkybox() {
-    const vertexShader = `
-      varying vec3 vWorldPosition;
-      void main() {
-        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-        vWorldPosition = worldPosition.xyz;
-        gl_Position = projectionMatrix * worldPosition;
-      }
-    `;
-
-    const fragmentShader = `
-      uniform vec3 topColor;
-      uniform vec3 bottomColor;
-      uniform float offset;
-      uniform float exponent;
-      varying vec3 vWorldPosition;
-      void main() {
-        float height = normalize(vWorldPosition).y;
-        float factor = exp(-height * exponent + offset);
-        gl_FragColor = mix(bottomColor, topColor, factor);
-      }
-    `;
-
-    const skyGeometry = new THREE.SphereGeometry(150, 32, 32);
-    skyGeometry.scale(-1, 1, 1);
-    const skyMaterial = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: {
-        topColor: { value: new THREE.Color(0x090d16) },
-        bottomColor: { value: new THREE.Color(0x090d16) },
-        offset: { value: 0.7 },
-        exponent: { value: 0.6 },
-      },
-      side: THREE.BackSide,
+    // Simple atmospheric fog planes instead of skybox shader (avoids WebGL2 shader issues with Three.js r128)
+    var fogGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL + 40, 40);
+    var fogMaterial = new THREE.MeshStandardMaterial({
+      color: 0x090d16,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide,
+      depthWrite: false,
     });
-    const skyMesh = new THREE.Mesh(skyGeometry, skyMaterial);
-    this.scene.add(skyMesh);
-  }
+    var fogPlane = new THREE.Mesh(fogGeometry, fogMaterial);
+    fogPlane.rotation.x = -Math.PI / 2;
+    fogPlane.position.y = 5;
+    this.scene.add(fogPlane);
+  };
 
-  /* ---- Junction Creation ---- */
-
-  createJunctions() {
-    // J1 Junction
+  DigitalTwinScene.prototype.createJunctions = function() {
     this.createJunction('J1', J1_POSITION);
-    // J2 Junction
     this.createJunction('J2', J2_POSITION);
-
-    // Junction labels
     this.createJunctionLabels();
-  }
+  };
 
-  createJunction(jid, zPos) {
-    // Yellow hatched KEEP CLEAR box
-    const junctionGeometry = new THREE.PlaneGeometry(JUNCTION_SIZE, JUNCTION_SIZE);
-    const junctionTexture = this.createHatchTexture();
-    const junctionMaterial = new THREE.MeshStandardMaterial({
+  DigitalTwinScene.prototype.createJunction = function(jid, zPos) {
+    var self = this;
+    var junctionGeometry = new THREE.PlaneGeometry(JUNCTION_SIZE, JUNCTION_SIZE);
+    var junctionTexture = this.createHatchTexture();
+    var junctionMaterial = new THREE.MeshStandardMaterial({
       map: junctionTexture,
       color: 0x422008,
       roughness: 0.8,
@@ -490,52 +351,45 @@ class DigitalTwinScene {
       opacity: 0.7,
     });
 
-    const junction = new THREE.Mesh(junctionGeometry, junctionMaterial);
+    var junction = new THREE.Mesh(junctionGeometry, junctionMaterial);
     junction.rotation.x = -Math.PI / 2;
     junction.position.set(0, 0.03, zPos);
     junction.receiveShadow = true;
     this.scene.add(junction);
 
-    // Junction boundaries (raised curb)
-    const curbGeometry = new THREE.RingGeometry(JUNCTION_SIZE / 2, JUNCTION_SIZE / 2 + 0.3, 4);
-    const curbMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1a1a3e,
-      roughness: 0.7,
-    });
+    var curbGeometry = new THREE.RingGeometry(JUNCTION_SIZE / 2, JUNCTION_SIZE / 2 + 0.3, 4);
+    var curbMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a3e, roughness: 0.7 });
 
-    // Four corner curbs
-    const corners = [
+    var corners = [
       [-JUNCTION_SIZE / 2 - 0.15, 0, -JUNCTION_SIZE / 2 - 0.15],
       [JUNCTION_SIZE / 2 + 0.15, 0, -JUNCTION_SIZE / 2 - 0.15],
       [JUNCTION_SIZE / 2 + 0.15, 0, JUNCTION_SIZE / 2 + 0.15],
       [-JUNCTION_SIZE / 2 - 0.15, 0, JUNCTION_SIZE / 2 + 0.15],
     ];
 
-    corners.forEach((pos, i) => {
-      const curb = new THREE.Mesh(curbGeometry, curbMaterial);
+    for (var i = 0; i < corners.length; i++) {
+      var pos = corners[i];
+      var curb = new THREE.Mesh(curbGeometry, curbMaterial);
       curb.position.set(pos[0], 0.05, pos[2]);
       curb.rotation.x = -Math.PI / 2;
       curb.castShadow = true;
       curb.receiveShadow = true;
       this.scene.add(curb);
-    });
+    }
 
-    // Zebra crossings
     this.createZebraCrossings(jid, zPos);
 
-    // Save junction group for signal placement
     this.signalGroups[jid] = {
-      zPos,
+      zPos: zPos,
       group: new THREE.Group(),
     };
-    this.junctionZ = { ...this.junctionZ, [jid]: zPos };
-  }
+  };
 
-  createHatchTexture() {
-    const canvas = document.createElement('canvas');
+  DigitalTwinScene.prototype.createHatchTexture = function() {
+    var canvas = document.createElement('canvas');
     canvas.width = 64;
     canvas.height = 64;
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
 
     ctx.fillStyle = '#422008';
     ctx.fillRect(0, 0, 64, 64);
@@ -543,171 +397,140 @@ class DigitalTwinScene {
     ctx.strokeStyle = '#1a1a3e';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    for (let i = 0; i < 64; i += 8) {
+    for (var i = 0; i < 64; i += 8) {
       ctx.moveTo(i, 0);
       ctx.lineTo(i - 64, 64);
     }
     ctx.stroke();
 
-    const texture = new THREE.CanvasTexture(canvas);
+    var texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(JUNCTION_SIZE / 16, JUNCTION_SIZE / 16);
     return texture;
-  }
+  };
 
-  createZebraCrossings(jid, zPos) {
-    const zebraGeometry = new THREE.PlaneGeometry(2, 1.5);
-    const zebraMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.8,
-      emissive: 0xffffff,
-      emissiveIntensity: 0.5,
+  DigitalTwinScene.prototype.createZebraCrossings = function(jid, zPos) {
+    var zebraGeometry = new THREE.PlaneGeometry(2, 1.5);
+    var zebraMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.8,
+      emissive: 0xffffff, emissiveIntensity: 0.5,
     });
 
-    // Zebra crossings on each approach
-    const offsets = [
-      [0, 0.01, -JUNCTION_SIZE / 2 - 0.75], // South approach
-      [0, 0.01, JUNCTION_SIZE / 2 + 0.75],  // North approach
-      [-JUNCTION_SIZE / 2 - 1.0, 0.01, 0],  // West approach
-      [JUNCTION_SIZE / 2 + 1.0, 0.01, 0],   // East approach
+    var offsets = [
+      [0, 0.01, -JUNCTION_SIZE / 2 - 0.75],
+      [0, 0.01, JUNCTION_SIZE / 2 + 0.75],
+      [-JUNCTION_SIZE / 2 - 1.0, 0.01, 0],
+      [JUNCTION_SIZE / 2 + 1.0, 0.01, 0],
     ];
 
-    offsets.forEach((offset) => {
-      const zebra = new THREE.Mesh(zebraGeometry, zebraMaterial);
+    for (var i = 0; i < offsets.length; i++) {
+      var offset = offsets[i];
+      var zebra = new THREE.Mesh(zebraGeometry, zebraMaterial);
       zebra.rotation.x = -Math.PI / 2;
-      zebra.position.set(offset[0] + zPos, offset[1], offset[2] + zPos);
-      // Actually position relative to junction
-      zebra.position.set(offset[0], offset[1], zPos + (jid === 'J1' ? offset[2] : offset[2]));
+      zebra.position.set(offset[0], offset[1], zPos);
       this.scene.add(zebra);
-    });
-  }
+    }
+  };
 
-  createJunctionLabels() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+  DigitalTwinScene.prototype.createJunctionLabels = function() {
+    var canvas = document.createElement('canvas');
     canvas.width = 256;
     canvas.height = 64;
-
+    var ctx = canvas.getContext('2d');
     ctx.font = '24px monospace';
     ctx.fillStyle = '#10b981';
     ctx.textAlign = 'center';
     ctx.fillText('J1', 128, 32);
 
-    const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-    const sprite = new THREE.Sprite(material);
+    var texture = new THREE.CanvasTexture(canvas);
+    var material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    var sprite = new THREE.Sprite(material);
     sprite.scale.set(10, 3, 1);
     sprite.position.set(-ROAD_WIDTH / 2 - 4, 8, J1_POSITION);
     this.scene.add(sprite);
 
-    // J2 label
-    const canvas2 = canvas.cloneNode(true);
-    const ctx2 = canvas2.getContext('2d');
+    var canvas2 = document.createElement('canvas');
+    canvas2.width = 256;
+    canvas2.height = 64;
+    var ctx2 = canvas2.getContext('2d');
     ctx2.font = '24px monospace';
     ctx2.fillStyle = '#10b981';
     ctx2.textAlign = 'center';
     ctx2.fillText('J2', 128, 32);
 
-    const texture2 = new THREE.CanvasTexture(canvas2);
-    const material2 = new THREE.SpriteMaterial({ map: texture2, transparent: true });
-    const sprite2 = new THREE.Sprite(material2);
+    var texture2 = new THREE.CanvasTexture(canvas2);
+    var material2 = new THREE.SpriteMaterial({ map: texture2, transparent: true });
+    var sprite2 = new THREE.Sprite(material2);
     sprite2.scale.set(10, 3, 1);
     sprite2.position.set(-ROAD_WIDTH / 2 - 4, 8, J2_POSITION);
     this.scene.add(sprite2);
-  }
+  };
 
-  /* ---- Signal Heads ---- */
-
-  createSignals() {
+  DigitalTwinScene.prototype.createSignals = function() {
     this.createSignalAtJunction('J1', J1_POSITION);
     this.createSignalAtJunction('J2', J2_POSITION);
-  }
+  };
 
-  createSignalAtJunction(jid, zPos) {
-    const group = new THREE.Group();
+  DigitalTwinScene.prototype.createSignalAtJunction = function(jid, zPos) {
+    var group = new THREE.Group();
     group.name = jid;
 
-    // 8 signal positions (one per approach corner)
-    const signalPositions = [
-      // North approaches
-      { pos: new THREE.Vector3(-ROAD_WIDTH / 2 - 0.5, 4, zPos - JUNCTION_SIZE / 2), dir: 'north', name: 'NS_N' },
-      { pos: new THREE.Vector3(ROAD_WIDTH / 2 + 0.5, 4, zPos - JUNCTION_SIZE / 2), dir: 'north', name: 'NS_E' },
-      // South approaches
-      { pos: new THREE.Vector3(-ROAD_WIDTH / 2 - 0.5, 4, zPos + JUNCTION_SIZE / 2), dir: 'south', name: 'NS_N' },
-      { pos: new THREE.Vector3(ROAD_WIDTH / 2 + 0.5, 4, zPos + JUNCTION_SIZE / 2), dir: 'south', name: 'NS_E' },
-      // East approaches
-      { pos: new THREE.Vector3(zPos - JUNCTION_SIZE / 2, 4, -ROAD_WIDTH / 2 - 0.5), dir: 'east', name: 'EW_W' },
-      { pos: new THREE.Vector3(zPos + JUNCTION_SIZE / 2, 4, -ROAD_WIDTH / 2 - 0.5), dir: 'east', name: 'EW_E' },
-      // West approaches
-      { pos: new THREE.Vector3(zPos - JUNCTION_SIZE / 2, 4, ROAD_WIDTH / 2 + 0.5), dir: 'west', name: 'EW_W' },
-      { pos: new THREE.Vector3(zPos + JUNCTION_SIZE / 2, 4, ROAD_WIDTH / 2 + 0.5), dir: 'west', name: 'EW_E' },
-    ];
-
-    // For simplicity, place 4 signal poles at cardinal directions
-    const directions = [
+    var directions = [
       { pos: [0, 4, zPos - ROAD_WIDTH - 2], rot: [0, 0, 0], name: 'NS_approach' },
       { pos: [0, 4, zPos + ROAD_WIDTH + 2], rot: [0, Math.PI, 0], name: 'NS_approach_opposite' },
       { pos: [-ROAD_WIDTH - 2, 4, zPos], rot: [0, 0, Math.PI / 2], name: 'EW_approach' },
       { pos: [ROAD_WIDTH + 2, 4, zPos], rot: [0, -Math.PI / 2, 0], name: 'EW_approach_opposite' },
     ];
 
-    directions.forEach((dir) => {
-      const signal = this.createSignalHead(dir.pos, dir.rot, jid, dir.name);
+    for (var i = 0; i < directions.length; i++) {
+      var dir = directions[i];
+      var signal = this.createSignalHead(dir.pos, dir.rot, jid, dir.name);
       group.add(signal);
-    });
+    }
 
     this.scene.add(group);
     this.signalGroups[jid].group = group;
-  }
+  };
 
-  createSignalHead(position, rotation, junctionId, approach) {
-    const group = new THREE.Group();
-    group.position.set(...position);
-    group.rotation.set(...rotation);
+  DigitalTwinScene.prototype.createSignalHead = function(position, rotation, junctionId, approach) {
+    var group = new THREE.Group();
+    group.position.set(position[0], position[1], position[2]);
+    group.rotation.set(rotation[0], rotation[1], rotation[2]);
 
-    // Signal pole
-    const poleGeometry = new THREE.CylinderGeometry(0.15, 0.2, 6, 8);
-    const poleMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
-      metalness: 0.8,
-      roughness: 0.3,
+    var poleGeometry = new THREE.CylinderGeometry(0.15, 0.2, 6, 8);
+    var poleMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1e293b, metalness: 0.8, roughness: 0.3,
     });
-    const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+    var pole = new THREE.Mesh(poleGeometry, poleMaterial);
     pole.castShadow = true;
     pole.receiveShadow = true;
     group.add(pole);
 
-    // Signal box
-    const boxGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.5);
-    const boxMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      metalness: 0.5,
-      roughness: 0.4,
+    var boxGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.5);
+    var boxMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0f172a, metalness: 0.5, roughness: 0.4,
     });
-    const box = new THREE.Mesh(boxGeometry, boxMaterial);
+    var box = new THREE.Mesh(boxGeometry, boxMaterial);
     box.position.set(0, 5, 0);
     box.castShadow = true;
     group.add(box);
 
-    // 3 LED bulbs: Red, Yellow, Green
-    const bulbGeometry = new THREECylinderGeometry(0.25, 0.25, 0.3, 32);
-    // Actually let me use SphereGeometry for bulbs
-    const sphereGeometry = new THREE.SphereGeometry(0.22, 16, 16);
+    var sphereGeometry = new THREE.SphereGeometry(0.22, 16, 16);
 
-    const bulbPositions = [
+    var bulbPositions = [
       { y: 0.25, color: 0xff0000, name: 'red' },
       { y: 0, color: 0xffff00, name: 'yellow' },
       { y: -0.25, color: 0x00ff00, name: 'green' },
     ];
 
-    bulbPositions.forEach((bp) => {
-      const emissiveColor = bp.color === 0xff0000 ? new THREE.Color(0.5, 0, 0) :
-                           bp.color === 0xffff00 ? new THREE.Color(0.5, 0.5, 0) :
-                           new THREE.Color(0, 0.5, 0);
+    for (var i = 0; i < bulbPositions.length; i++) {
+      var bp = bulbPositions[i];
+      var emissiveColor = bp.color === 0xff0000 ? new THREE.Color(0.5, 0, 0) :
+                          bp.color === 0xffff00 ? new THREE.Color(0.5, 0.5, 0) :
+                          new THREE.Color(0, 0.5, 0);
 
-      const bulbMaterial = new THREE.MeshStandardMaterial({
+      var bulbMaterial = new THREE.MeshStandardMaterial({
         color: bp.color,
         emissive: emissiveColor,
         emissiveIntensity: 0,
@@ -715,45 +538,41 @@ class DigitalTwinScene {
         opacity: 0.3,
       });
 
-      const bulb = new THREE.Mesh(sphereGeometry, bulbMaterial);
+      var bulb = new THREE.Mesh(sphereGeometry, bulbMaterial);
       bulb.position.set(0, bp.y, 0.35);
-      bulb.userData = { color: bp.color, name: bp.name, junctionId, approach };
+      bulb.userData = { color: bp.color, name: bp.name, junctionId: junctionId, approach: approach };
       group.add(bulb);
 
-      // Store reference for animation
       if (!group.userData.bulbs) group.userData.bulbs = {};
       group.userData.bulbs[bp.name] = bulb;
-    });
+    }
 
-    // Signal housing (clear cover)
-    const coverGeometry = new THREE.BoxGeometry(0.7, 1, 0.1);
-    const coverMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x101020,
-      transparent: true,
-      opacity: 0.3,
-      roughness: 0.1,
-      metalness: 0.1,
-      transmission: 0.5,
+    var coverGeometry = new THREE.BoxGeometry(0.7, 1, 0.1);
+    var coverMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x101020, transparent: true, opacity: 0.3,
+      roughness: 0.1, metalness: 0.1, transmission: 0.5,
     });
-    const cover = new THREE.Mesh(coverGeometry, coverMaterial);
+    var cover = new THREE.Mesh(coverGeometry, coverMaterial);
     cover.position.set(0, 0, 0.55);
     group.add(cover);
 
     return group;
-  }
+  };
 
-  updateSignalColor(junctionId, direction, color) {
-    const group = this.signalGroups[junctionId]?.group;
+  DigitalTwinScene.prototype.updateSignalColor = function(junctionId, direction, color) {
+    var group = this.signalGroups[junctionId] && this.signalGroups[junctionId].group;
     if (!group) return;
 
-    group.children.forEach((signal) => {
-      if (signal.userData.bulbs) {
-        Object.entries(signal.userData.bulbs).forEach(([name, bulb]) => {
-          const bulbMat = bulb.material;
+    for (var i = 0; i < group.children.length; i++) {
+      var signal = group.children[i];
+      if (signal.userData && signal.userData.bulbs) {
+        var bulbs = signal.userData.bulbs;
+        for (var name in bulbs) {
+          var bulb = bulbs[name];
+          var bulbMat = bulb.material;
           if (name === color) {
-            bulbMat.emissive Intensity = 0.8;
+            bulbMat.emissiveIntensity = 0.8;
             bulbMat.opacity = 1;
-            // Spring-like glow
             bulb.scale.setScalar(1.1);
           } else {
             bulbMat.emissiveIntensity = 0;
@@ -761,7 +580,6 @@ class DigitalTwinScene {
             bulb.scale.setScalar(1);
           }
 
-          // Update emissive color based on which is active
           if (name === 'red' && color === 'red') {
             bulbMat.emissive = new THREE.Color(0.6, 0.1, 0.1);
             bulbMat.color.set(0xff4444);
@@ -776,34 +594,29 @@ class DigitalTwinScene {
             bulbMat.color.set(0x333333);
             bulbMat.opacity = 0.15;
           }
-        });
+        }
       }
-    });
-  }
+    }
+  };
 
-  /* ---- Vehicle System ---- */
-
-  createVehicles() {
-    // Create instanced mesh for each vehicle class
+  DigitalTwinScene.prototype.createVehicles = function() {
     this.vehicleGroup = new THREE.Group();
     this.scene.add(this.vehicleGroup);
 
-    // Vehicle templates (InstancedMesh for performance)
     this.createVehicleInstance('car', 20);
     this.createVehicleInstance('bus', 5);
     this.createVehicleInstance('auto', 15);
     this.createVehicleInstance('bike', 20);
     this.createVehicleInstance('truck', 5);
 
-    // Populate with initial vehicles
     this.populateVehicles();
-  }
+  };
 
-  createVehicleInstance(classType, count) {
-    const geometry = this.getVehicleGeometry(classType);
-    const color = VEHICLE_COLORS[classType];
+  DigitalTwinScene.prototype.createVehicleInstance = function(classType, count) {
+    var geometry = this.getVehicleGeometry(classType);
+    var color = VEHICLE_COLORS[classType];
 
-    const material = new THREE.MeshStandardMaterial({
+    var material = new THREE.MeshStandardMaterial({
       color: color,
       roughness: 0.4,
       metalness: 0.6,
@@ -811,157 +624,134 @@ class DigitalTwinScene {
       opacity: classType === 'bike' ? 0.8 : 1,
     });
 
-    const instanced = new THREE.InstancedMesh(geometry, material, count);
+    var instanced = new THREE.InstancedMesh(geometry, material, count);
     instanced.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     instanced.frustumCulled = false;
-    instanced.userData = { classType, count, color };
+    instanced.userData = { classType: classType, count: count, color: color };
 
     this.vehicleGroup.add(instanced);
     this.vehicleInstances[classType] = { mesh: instanced, instances: [] };
-  }
+  };
 
-  getVehicleGeometry(classType) {
-    let geometry;
-
+  DigitalTwinScene.prototype.getVehicleGeometry = function(classType) {
+    var geometry;
     switch (classType) {
-      case 'car':
-        geometry = new THREE.BoxGeometry(1.2, 0.5, 2.0);
-        break;
-      case 'bus':
-        geometry = new THREE.BoxGeometry(2.8, 0.7, 8.0);
-        break;
-      case 'auto':
-        geometry = new THREE.BoxGeometry(0.8, 0.6, 1.6);
-        break;
-      case 'bike':
-        geometry = new THREE.BoxGeometry(0.4, 0.3, 0.8);
-        break;
-      case 'truck':
-        geometry = new THREE.BoxGeometry(2.0, 0.8, 5.0);
-        break;
-      default:
-        geometry = new THREE.BoxGeometry(1.0, 0.5, 1.5);
+      case 'car': geometry = new THREE.BoxGeometry(1.2, 0.5, 2.0); break;
+      case 'bus': geometry = new THREE.BoxGeometry(2.8, 0.7, 8.0); break;
+      case 'auto': geometry = new THREE.BoxGeometry(0.8, 0.6, 1.6); break;
+      case 'bike': geometry = new THREE.BoxGeometry(0.4, 0.3, 0.8); break;
+      case 'truck': geometry = new THREE.BoxGeometry(2.0, 0.8, 5.0); break;
+      default: geometry = new THREE.BoxGeometry(1.0, 0.5, 1.5);
     }
 
-    // Add rounded edges
-    const roundedGeometry = new THREE.BufferGeometryUtils ?
-      THREE.BufferGeometryUtils.toCreasedNormals(geometry) : geometry;
-
+    if (THREE.BufferGeometryUtils) {
+      return THREE.BufferGeometryUtils.toCreasedNormals(geometry);
+    }
     return geometry;
-  }
+  };
 
-  populateVehicles() {
-    // Place vehicles along the corridor in traffic
-    const now = Date.now();
-    const timeOfDay = (now / 1000) % 1;
-
-    // North-South lanes (Z direction)
-    for (let lane = 0; lane < 2; lane++) {
-      const laneX = -ROAD_WIDTH / 4 + (lane - 0.5) * (ROAD_WIDTH / 2);
-      const count = 8 + Math.floor(Math.random() * 6);
-      for (let i = 0; i < count; i++) {
-        const z = (i / count) * CORRIDOR_LENGTH_TOTAL - CORRIDOR_LENGTH_TOTAL / 2;
+  DigitalTwinScene.prototype.populateVehicles = function() {
+    for (var lane = 0; lane < 2; lane++) {
+      var laneX = -ROAD_WIDTH / 4 + (lane - 0.5) * (ROAD_WIDTH / 2);
+      var count = 8 + Math.floor(Math.random() * 6);
+      for (var i = 0; i < count; i++) {
+        var z = (i / count) * CORRIDOR_LENGTH_TOTAL - CORRIDOR_LENGTH_TOTAL / 2;
         if (z < J1_POSITION - JUNCTION_SIZE || z > J1_POSITION + JUNCTION_SIZE) {
           this.addVehicleInstance('car', laneX, z, 0, 0, Math.random() * 0.1 - 0.05);
         }
       }
     }
 
-    // East-West lanes (X direction) at junctions
-    for (const zPos of [J1_POSITION, J2_POSITION]) {
-      const count = 4 + Math.floor(Math.random() * 4);
-      for (let i = 0; i < count; i++) {
-        const x = (i / count) * ROAD_WIDTH - ROAD_WIDTH / 2;
+    for (var zi = 0; zi < [J1_POSITION, J2_POSITION].length; zi++) {
+      var zPos = [J1_POSITION, J2_POSITION][zi];
+      var c = 4 + Math.floor(Math.random() * 4);
+      for (var j = 0; j < c; j++) {
+        var x = (j / c) * ROAD_WIDTH - ROAD_WIDTH / 2;
         if (x < -JUNCTION_SIZE || x > JUNCTION_SIZE) {
-          const laneZ = -ROAD_WIDTH / 4 + Math.random() * 2;
+          var laneZ = -ROAD_WIDTH / 4 + Math.random() * 2;
           this.addVehicleInstance('auto', x, zPos + laneZ, 0, 0, Math.PI / 2);
         }
       }
 
-      // Add some buses
       if (Math.random() > 0.5) {
-        const x = -JUNCTION_SIZE - 5 - Math.random() * 3;
-        this.addVehicleInstance('bus', x, zPos, 0, 0, Math.PI / 2);
+        var bx = -JUNCTION_SIZE - 5 - Math.random() * 3;
+        this.addVehicleInstance('bus', bx, zPos, 0, 0, Math.PI / 2);
       }
     }
 
-    // Add bikes
-    for (let i = 0; i < 10; i++) {
-      const z = Math.random() * CORRIDOR_LENGTH_TOTAL - CORRIDOR_LENGTH_TOTAL / 2;
-      const x = -ROAD_WIDTH / 2 + Math.random() * ROAD_WIDTH;
-      this.addVehicleInstance('bike', x, z, 0, 0, Math.random() > 0.5 ? 0 : Math.PI);
+    for (var bi = 0; bi < 10; bi++) {
+      var bz = Math.random() * CORRIDOR_LENGTH_TOTAL - CORRIDOR_LENGTH_TOTAL / 2;
+      var bx = -ROAD_WIDTH / 2 + Math.random() * ROAD_WIDTH;
+      this.addVehicleInstance('bike', bx, bz, 0, 0, Math.random() > 0.5 ? 0 : Math.PI);
     }
 
-    // Add trucks
-    for (let i = 0; i < 3; i++) {
-      const z = 10 + i * 15;
-      if (z < CORRIDOR_LENGTH_TOTAL - 10) {
-        this.addVehicleInstance('truck', ROAD_WIDTH / 4, z, 0, 0, 0);
+    for (var ti = 0; ti < 3; ti++) {
+      var tz = 10 + ti * 15;
+      if (tz < CORRIDOR_LENGTH_TOTAL - 10) {
+        this.addVehicleInstance('truck', ROAD_WIDTH / 4, tz, 0, 0, 0);
       }
     }
-  }
+  };
 
-  addVehicleInstance(classType, x, z, y, tilt, rotation, speed = 0.02) {
-    const instance = this.vehicleInstances[classType];
+  DigitalTwinScene.prototype.addVehicleInstance = function(classType, x, z, y, tilt, rotation, speed) {
+    if (speed === undefined) speed = 0.02;
+    var instance = this.vehicleInstances[classType];
     if (!instance || !instance.instances) return;
 
-    const instanceId = instance.instances.length;
+    var instanceId = instance.instances.length;
     if (instanceId >= instance.count) return;
 
-    const dummy = new THREE.Object3D();
+    var dummy = new THREE.Object3D();
     dummy.position.set(x, y + (classType === 'bike' ? 0.2 : 0.15), z);
     dummy.rotation.y = rotation;
     dummy.updateMatrix();
 
     instance.mesh.setMatrixAt(instanceId, dummy.matrix);
 
-    const vehicleData = {
-      id: `${classType}_${instanceId}_${Date.now()}`,
-      classType,
-      x,
-      z,
-      y,
+    var vehicleData = {
+      id: classType + '_' + instanceId + '_' + Date.now(),
+      classType: classType,
+      x: x,
+      z: z,
+      y: y,
       rotationY: rotation,
       speed: speed * (0.5 + Math.random() * 0.5),
       targetX: x,
       targetZ: z,
       targetRotation: rotation,
-      instanceId,
-      dummy,
+      instanceId: instanceId,
+      dummy: dummy,
     };
 
     instance.instances.push(vehicleData);
     instance.mesh.instanceMatrix.needsUpdate = true;
 
     return vehicleData;
-  }
+  };
 
-  updateVehicles(deltaTime) {
-    Object.entries(this.vehicleInstances).forEach(([classType, instance]) => {
-      if (!instance.instances) return;
+  DigitalTwinScene.prototype.updateVehicles = function(deltaTime) {
+    for (var classType in this.vehicleInstances) {
+      var instance = this.vehicleInstances[classType];
+      if (!instance.instances) continue;
 
-      instance.instances.forEach((v, idx) => {
-        // Move vehicles along traffic flow
-        const speed = v.speed * (this.scenario.name === 'surge' ? 2 : 1);
+      for (var i = 0; i < instance.instances.length; i++) {
+        var v = instance.instances[i];
+        var speed = v.speed * (this.scenario.name === 'surge' ? 2 : 1);
 
         if (v.rotationY < Math.PI / 4 || v.rotationY > Math.PI * 6 / 4) {
-          // NS movement (Z direction)
           v.targetZ += speed * deltaTime * 60;
           if (v.targetZ > CORRIDOR_LENGTH_TOTAL / 2) {
             v.targetZ = -CORRIDOR_LENGTH_TOTAL / 2;
           }
         } else {
-          // EW movement (X direction)
           v.targetX += speed * deltaTime * 60;
           if (Math.abs(v.targetX) > ROAD_WIDTH / 2 + 2) {
             v.targetX = -ROAD_WIDTH / 2 - 2;
           }
         }
 
-        // Check if stopped at red light
         this.applyTrafficLightLogic(v, deltaTime);
 
-        // Update position
         v.dummy.position.lerp(
           new THREE.Vector3(v.targetX, v.y + (v.classType === 'bike' ? 0.2 : 0.15), v.targetZ),
           0.1
@@ -969,59 +759,47 @@ class DigitalTwinScene {
         v.dummy.rotation.y = THREE.MathUtils.damp(v.dummy.rotation.y, v.targetRotation, 2, deltaTime);
         v.dummy.updateMatrix();
         instance.mesh.setMatrixAt(v.instanceId, v.dummy.matrix);
-      });
+      }
 
       instance.mesh.instanceMatrix.needsUpdate = true;
-    });
-  }
+    }
+  };
 
-  applyTrafficLightLogic(vehicle, deltaTime) {
-    const z = vehicle.z;
-    const x = vehicle.x;
+  DigitalTwinScene.prototype.applyTrafficLightLogic = function(vehicle, deltaTime) {
+    var z = vehicle.z;
+    var x = vehicle.x;
 
-    // Check if vehicle is near J1 or J2
-    for (const jid of ['J1', 'J2']) {
-      const zPos = jid === 'J1' ? J1_POSITION : J2_POSITION;
-      const distToJunction = Math.abs(z - zPos);
+    var junctions = ['J1', 'J2'];
+    for (var ji = 0; ji < junctions.length; ji++) {
+      var jid = junctions[ji];
+      var zPos = jid === 'J1' ? J1_POSITION : J2_POSITION;
+      var distToJunction = Math.abs(z - zPos);
 
       if (distToJunction < JUNCTION_SIZE * 1.5) {
-        const direction = z < zPos ? 'north' : 'south';
-        const approach = direction === 'north' ? 'south' : 'north';
-        const signal = this.signalState[jid];
-
-        // NS traffic (Z direction) should stop when EW is green
-        const isStopped = vehicle.rotationY < Math.PI / 4;
-        const shouldStop = signal.EW === 'green' || signal.EW === 'yellow';
+        var isStopped = vehicle.rotationY < Math.PI / 4;
+        var signal = this.signalState[jid];
+        var shouldStop = signal.EW === 'green' || signal.EW === 'yellow';
 
         if (isStopped && shouldStop) {
-          vehicle.targetZ = z; // Hold position
+          vehicle.targetZ = z;
           vehicle.speed = 0;
         } else if (vehicle.speed === 0) {
           vehicle.speed = 0.02 * (0.5 + Math.random() * 0.5);
         }
       }
     }
-  }
+  };
 
-  /* ---- AI Detection Zones ---- */
-
-  createAIZones() {
-    // Detection zone at J1 approach (North)
+  DigitalTwinScene.prototype.createAIZones = function() {
     this.createAIDetectionZone('J1_N', new THREE.Vector3(0, 2, J1_POSITION - 10), 'north');
-
-    // Detection zone at J1 approach (East)
     this.createAIDetectionZone('J1_E', new THREE.Vector3(-10, 2, J1_POSITION), 'east');
-
-    // Detection zone at J2 approach
     this.createAIDetectionZone('J2_N', new THREE.Vector3(0, 2, J2_POSITION - 10), 'north');
-
-    // Downstream exit zone
     this.createAIDetectionZone('exit_east', new THREE.Vector3(0, 1, J2_POSITION + 15), 'exit');
-  }
+  };
 
-  createAIDetectionZone(zoneId, position, direction) {
-    const geometry = new THREE.RingGeometry(6, 8, 32);
-    const material = new THREE.MeshStandardMaterial({
+  DigitalTwinScene.prototype.createAIDetectionZone = function(zoneId, position, direction) {
+    var geometry = new THREE.RingGeometry(6, 8, 32);
+    var material = new THREE.MeshStandardMaterial({
       color: 0x06b6d4,
       transparent: true,
       opacity: 0.2,
@@ -1030,7 +808,7 @@ class DigitalTwinScene {
       emissiveIntensity: 0.3,
     });
 
-    const zone = new THREE.Mesh(geometry, material);
+    var zone = new THREE.Mesh(geometry, material);
     zone.position.copy(position);
 
     if (direction === 'north' || direction === 'south') {
@@ -1039,17 +817,16 @@ class DigitalTwinScene {
       zone.rotation.z = Math.PI / 2;
     }
 
-    zone.userData = { zoneId, direction, pcuCount: 0 };
+    zone.userData = { zoneId: zoneId, direction: direction, pcuCount: 0 };
     this.scene.add(zone);
     this.aiZones[zoneId] = zone;
 
-    // Scan line animation
     this.animateScanLine(zone, direction);
-  }
+  };
 
-  animateScanLine(zone, direction) {
-    const geometry = new THREE.PlaneGeometry(8, 0.2);
-    const material = new THREE.MeshStandardMaterial({
+  DigitalTwinScene.prototype.animateScanLine = function(zone, direction) {
+    var geometry = new THREE.PlaneGeometry(8, 0.2);
+    var material = new THREE.MeshStandardMaterial({
       color: 0x06b6d4,
       transparent: true,
       opacity: 0.6,
@@ -1057,15 +834,15 @@ class DigitalTwinScene {
       emissiveIntensity: 0.5,
     });
 
-    const scanLine = new THREE.Mesh(geometry, material);
+    var scanLine = new THREE.Mesh(geometry, material);
     zone.add(scanLine);
 
-    // Animate scan
-    const animate = () => {
-      if (this.scenario.phase !== 'running') return;
+    var self = this;
+    function animate() {
+      if (self.scenario.phase !== 'running') return;
 
-      const elapsed = this.clock.getElapsedTime();
-      const sweep = (Math.sin(elapsed * 0.5) * 0.5 + 0.5) * 6;
+      var elapsed = self.clock.getElapsedTime();
+      var sweep = (Math.sin(elapsed * 0.5) * 0.5 + 0.5) * 6;
 
       if (direction === 'north' || direction === 'south') {
         scanLine.position.z = sweep - 3;
@@ -1074,16 +851,13 @@ class DigitalTwinScene {
       }
 
       requestAnimationFrame(animate);
-    };
+    }
     animate();
-  }
+  };
 
-  /* ---- Spillback Visualization ---- */
-
-  createSpillbackVisual() {
-    // Crimson zone overlay on J1_to_J2 link
-    const geometry = new THREE.PlaneGeometry(10, ROAD_WIDTH * 2.5);
-    const material = new THREE.MeshStandardMaterial({
+  DigitalTwinScene.prototype.createSpillbackVisual = function() {
+    var geometry = new THREE.PlaneGeometry(10, ROAD_WIDTH * 2.5);
+    var material = new THREE.MeshStandardMaterial({
       color: 0x7f1d1d,
       transparent: true,
       opacity: 0,
@@ -1096,12 +870,13 @@ class DigitalTwinScene {
     this.spillbackZone.rotation.x = -Math.PI / 2;
     this.spillbackZone.position.set(0, 0.05, CORRIDOR_LENGTH / 2);
     this.scene.add(this.spillbackZone);
-  }
+  };
 
-  setSpillbackActive(active, occupancy = 0) {
+  DigitalTwinScene.prototype.setSpillbackActive = function(active, occupancy) {
     if (!this.spillbackZone) return;
+    if (occupancy === undefined) occupancy = 0.85;
 
-    const material = this.spillbackZone.material;
+    var material = this.spillbackZone.material;
     if (active) {
       material.opacity = 0.4 + occupancy * 0.3;
       material.emissiveIntensity = 0.3 + occupancy * 0.2;
@@ -1109,28 +884,24 @@ class DigitalTwinScene {
       material.opacity = 0;
       material.emissiveIntensity = 0;
     }
-  }
+  };
 
-  /* ---- Signal Timing & Phase Updates ---- */
-
-  updateSignalPhase(junctionId, direction, color, duration = 0) {
+  DigitalTwinScene.prototype.updateSignalPhase = function(junctionId, direction, color, duration) {
+    if (!duration) duration = 0;
     this.signalState[junctionId][direction] = color;
     this.updateSignalColor(junctionId, direction, color);
 
-    // Emit signal timing for external consumption
     if (this.onSignalUpdate) {
       this.onSignalUpdate({
         junction: junctionId,
-        direction,
-        color,
-        duration,
+        direction: direction,
+        color: color,
+        duration: duration,
       });
     }
-  }
+  };
 
-  /* ---- Scenario Engine ---- */
-
-  setScenario(scenarioName) {
+  DigitalTwinScene.prototype.setScenario = function(scenarioName) {
     this.scenario.name = scenarioName;
     this.scenario.time = 0;
     this.scenario.phase = 'running';
@@ -1150,14 +921,13 @@ class DigitalTwinScene {
         this.updateSignalPhase('J1', 'EW', 'red');
         this.updateSignalPhase('J2', 'NS', 'green');
         this.updateSignalPhase('J2', 'EW', 'red');
-        // Add surge vehicles
         this.spawnSurgeVehicles();
         break;
 
       case 'spillback':
         this.setSpillbackActive(true, 0.85);
         this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'red'); // EW blocked
+        this.updateSignalPhase('J1', 'EW', 'red');
         this.updateSignalPhase('J2', 'NS', 'green');
         this.updateSignalPhase('J2', 'EW', 'red');
         break;
@@ -1171,21 +941,26 @@ class DigitalTwinScene {
         break;
 
       case 'emergency':
-        // Emergency ambulance corridor
         this.setSpillbackActive(false);
         this.updateSignalPhase('J1', 'NS', 'green');
         this.updateSignalPhase('J1', 'EW', 'red');
         this.updateSignalPhase('J2', 'NS', 'green');
         this.updateSignalPhase('J2', 'EW', 'red');
-        // J2 flushes first, then J1 (downstream-first)
         this.spawnAmbulance();
         break;
 
       case 'sensor_fault':
-        // Simulate camera dropout, fallback to fixed-time
         this.updateSignalPhase('J1', 'NS', 'yellow');
         this.updateSignalPhase('J1', 'EW', 'red');
         this.updateSignalPhase('J2', 'NS', 'yellow');
+        this.updateSignalPhase('J2', 'EW', 'red');
+        break;
+
+      case 'recovery':
+        this.setSpillbackActive(false);
+        this.updateSignalPhase('J1', 'NS', 'green');
+        this.updateSignalPhase('J1', 'EW', 'red');
+        this.updateSignalPhase('J2', 'NS', 'green');
         this.updateSignalPhase('J2', 'EW', 'red');
         break;
     }
@@ -1193,90 +968,82 @@ class DigitalTwinScene {
     if (this.onScenarioChange) {
       this.onScenarioChange(scenarioName);
     }
-  }
+  };
 
-  spawnSurgeVehicles() {
-    // Add extra vehicles for surge scenario
-    for (let i = 0; i < 15; i++) {
-      const z = Math.random() * 20 - 10 + J1_POSITION;
+  DigitalTwinScene.prototype.spawnSurgeVehicles = function() {
+    for (var i = 0; i < 15; i++) {
+      var z = Math.random() * 20 - 10 + J1_POSITION;
       this.addVehicleInstance('car', ROAD_WIDTH / 4 + 1, z, 0, 0, 0, 0.05);
     }
-    for (let i = 0; i < 5; i++) {
-      const z = Math.random() * 15 + J1_POSITION;
-      this.addVehicleInstance('bus', ROAD_WIDTH / 4 + 1, z, 0, 0, 0, 0.04);
+    for (var j = 0; j < 5; j++) {
+      var zb = Math.random() * 15 + J1_POSITION;
+      this.addVehicleInstance('bus', ROAD_WIDTH / 4 + 1, zb, 0, 0, 0, 0.04);
     }
-  }
+  };
 
-  spawnAmbulance() {
-    // Add a prominent ambulance (emergency vehicle)
-    const geometry = new THREE.BoxGeometry(1.0, 0.6, 2.5);
-    const material = new THREE.MeshStandardMaterial({
+  DigitalTwinScene.prototype.spawnAmbulance = function() {
+    var geometry = new THREE.BoxGeometry(1.0, 0.6, 2.5);
+    var material = new THREE.MeshStandardMaterial({
       color: 0xef4444,
       emissive: 0xef4444,
       emissiveIntensity: 0.5,
     });
 
-    const ambulance = new THREE.Mesh(geometry, material);
+    var ambulance = new THREE.Mesh(geometry, material);
     ambulance.position.set(0, 0.5, J1_POSITION - 15);
     ambulance.rotation.y = 0;
     ambulance.userData = { type: 'ambulance', corridorPos: 0 };
     this.scene.add(ambulance);
     this.ambulance = ambulance;
 
-    // Add flashing lights
-    const lightGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-    const redLight = new THREE.Mesh(lightGeometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+    var lightGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+    var redLight = new THREE.Mesh(lightGeometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
     redLight.position.set(-0.5, 0.8, 0);
     ambulance.add(redLight);
 
-    const blueLight = new THREE.Mesh(lightGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+    var blueLight = new THREE.Mesh(lightGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff }));
     blueLight.position.set(0.5, 0.8, 0);
     ambulance.add(blueLight);
 
-    this.ambulanceLights = { red: redLight, blue: blueLight, ambulance };
-  }
+    this.ambulanceLights = { red: redLight, blue: blueLight, ambulance: ambulance };
+  };
 
-  updateAmbulance(deltaTime) {
+  DigitalTwinScene.prototype.updateAmbulance = function(deltaTime) {
     if (!this.ambulance) return;
 
-    const speed = 0.5 * deltaTime * 60;
+    var speed = 0.5 * deltaTime * 60;
     this.ambulance.position.z += speed;
 
-    // Flash lights
-    const elapsed = this.clock.getElapsedTime();
+    var elapsed = this.clock.getElapsedTime();
     if (this.ambulanceLights) {
-      const intensity = Math.abs(Math.sin(elapsed * 10)) * 0.5 + 0.5;
+      var intensity = Math.abs(Math.sin(elapsed * 10)) * 0.5 + 0.5;
       this.ambulanceLights.red.material.emissiveIntensity = intensity;
       this.ambulanceLights.blue.material.emissiveIntensity = intensity;
     }
 
-    // Check if ambulance reached J2
     if (this.ambulance.position.z > J2_POSITION + 5) {
       this.ambulance = null;
       this.ambulanceLights = null;
       this.setScenario('recovery');
     }
-  }
+  };
 
-  /* ---- Mode Toggle ---- */
-
-  setMode(mode) {
+  DigitalTwinScene.prototype.setMode = function(mode) {
     this.isQueueSenseMode = mode === 'queuesense';
 
-    // Update scene appearance
     if (this.isQueueSenseMode) {
-      // QueueSense: show AI zones, clean traffic flow
-      Object.values(this.aiZones).forEach(zone => {
-        zone.visible = true;
-      });
-      this.setSpillbackActive(this.scenario.name === 'spillback' || this.scenario.name === 'bottleneck');
+      for (var id in this.aiZones) {
+        this.aiZones[id].visible = true;
+      }
+      var sc = this.scenario.name;
+      this.setSpillbackActive(sc === 'spillback' || sc === 'bottleneck');
     } else {
-      // Traditional: hide AI zones, show gridlock on congested scenarios
-      Object.values(this.aiZones).forEach(zone => {
-        zone.visible = false;
-      });
+      for (var id2 in this.aiZones) {
+        this.aiZones[id2].visible = false;
+      }
 
-      if (this.scenario.name === 'spillback' || this.scenario.name === 'bottleneck') {
+      var sc2 = this.scenario.name;
+      if (sc2 === 'spillback' || sc2 === 'bottleneck') {
         this.setGridlockVisualization(true);
       } else {
         this.setGridlockVisualization(false);
@@ -1286,49 +1053,49 @@ class DigitalTwinScene {
     if (this.onModeChange) {
       this.onModeChange(this.isQueueSenseMode);
     }
-  }
+  };
 
-  setGridlockVisualization(active) {
-    // Visual gridlock: red overlay on entire corridor
-    const overlayMaterial = active ? this.getGridlockOverlay() : null;
+  DigitalTwinScene.prototype.setGridlockVisualization = function(active) {
+    if (active) {
+      var geometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, ROAD_WIDTH * 3);
+      var material = new THREE.MeshStandardMaterial({
+        color: 0x7f1d1d,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
 
-    // Change vehicle speeds
-    Object.values(this.vehicleInstances).forEach(instance => {
-      if (instance.instances) {
-        instance.instances.forEach(v => {
-          v.speed = v.speed * (active ? 0.3 : 3);
+      var overlay = new THREE.Mesh(geometry, material);
+      overlay.rotation.x = -Math.PI / 2;
+      overlay.position.y = 0.02;
+      this.scene.add(overlay);
+      this.gridlockOverlay = overlay;
+    } else {
+      if (this.gridlockOverlay) {
+        this.scene.remove(this.gridlockOverlay);
+        this.gridlockOverlay.geometry.dispose();
+        this.gridlockOverlay.material.dispose();
+        this.gridlockOverlay = null;
+      }
+    }
+
+    Object.keys(this.vehicleInstances).forEach(function(classType) {
+      var instance = self.vehicleInstances[classType];
+      if (instance && instance.instances) {
+        instance.instances.forEach(function(v) {
+          v.speed = v.speed * (active ? 0.3 : 3.3);
         });
       }
     });
-  }
+  };
 
-  getGridlockOverlay() {
-    const geometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, ROAD_WIDTH * 3);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x7f1d1d,
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-
-    const overlay = new THREE.Mesh(geometry, material);
-    overlay.rotation.x = -Math.PI / 2;
-    overlay.position.y = 0.02;
-    this.scene.add(overlay);
-    this.gridlockOverlay = overlay;
-    return material;
-  }
-
-  /* ---- Autonomous Scenario Cycling ---- */
-
-  updateScenarioEngine(deltaTime) {
+  DigitalTwinScene.prototype.updateScenarioEngine = function(deltaTime) {
     this.scenario.time += deltaTime;
     this.scenario.transitionTimer += deltaTime;
 
-    // Auto-cycle scenarios in normal mode (if not manually set)
     if (this.scenario.phase === 'running') {
-      const durations = {
+      var durations = {
         normal: 30,
         surge: 20,
         spillback: 25,
@@ -1337,60 +1104,56 @@ class DigitalTwinScene {
         sensor_fault: 10,
       };
 
-      const duration = durations[this.scenario.name] || 15;
+      var duration = durations[this.scenario.name] || 15;
 
       if (this.scenario.transitionTimer > duration) {
-        const nextScenario = this.getNextScenario();
+        var nextScenario = this.getNextScenario();
         this.setScenario(nextScenario);
         this.scenario.transitionTimer = 0;
       }
     }
 
-    // Update PCU counts in AI zones
     this.updateZonePCUs();
-
-    // Update signal timing
     this.updateSignalCycle(deltaTime);
-
-    // Flash pedestrian crossing
     this.updatePedestrianFlash(deltaTime);
-  }
+  };
 
-  getNextScenario() {
-    const sequence = ['normal', 'surge', 'spillback', 'emergency', 'recovery', 'normal'];
-    const currentIndex = sequence.indexOf(this.scenario.name);
+  DigitalTwinScene.prototype.getNextScenario = function() {
+    var sequence = ['normal', 'surge', 'spillback', 'emergency', 'recovery', 'normal'];
+    var currentIndex = sequence.indexOf(this.scenario.name);
     return sequence[(currentIndex + 1) % sequence.length];
-  }
+  };
 
-  updateZonePCUs() {
-    Object.values(this.aiZones).forEach(zone => {
-      const count = Math.floor(Math.random() * 8) + 1;
+  DigitalTwinScene.prototype.updateZonePCUs = function() {
+    for (var id in this.aiZones) {
+      var zone = this.aiZones[id];
+      var count = Math.floor(Math.random() * 8) + 1;
       zone.userData.pcuCount = count;
 
-      // Update zone opacity based on PCU count
-      const material = zone.material;
-      const intensity = Math.min(count / 12, 1);
+      var material = zone.material;
+      var intensity = Math.min(count / 12, 1);
       material.opacity = 0.2 + intensity * 0.3;
       material.emissiveIntensity = 0.3 + intensity * 0.4;
-    });
+    }
 
     if (this.onZoneUpdate) {
-      this.onZoneUpdate(Object.fromEntries(
-        Object.entries(this.aiZones).map(([id, zone]) => [id, zone.userData.pcuCount])
-      ));
+      var zones = {};
+      for (var id2 in this.aiZones) {
+        zones[id2] = this.aiZones[id2].userData.pcuCount;
+      }
+      this.onZoneUpdate(zones);
     }
-  }
+  };
 
-  updateSignalCycle(deltaTime) {
-    // Simulate signal phase timing
+  DigitalTwinScene.prototype.updateSignalCycle = function(deltaTime) {
     this.signalTime = (this.signalTime || 0) + deltaTime;
 
     if (this.signalTime > 30) {
       this.signalTime = 0;
 
-      const states = this.signalState;
-      for (const jid of Object.keys(states)) {
-        const state = states[jid];
+      var states = this.signalState;
+      for (var jid in states) {
+        var state = states[jid];
         if (state.NS === 'green') {
           this.updateSignalPhase(jid, 'NS', 'yellow', 5);
         } else if (state.NS === 'yellow') {
@@ -1404,51 +1167,36 @@ class DigitalTwinScene {
         }
       }
     }
-  }
+  };
 
-  updatePedestrianFlash(deltaTime) {
-    // Flash pedestrian crossing at J2
-    const elapsed = this.clock.getElapsedTime();
+  DigitalTwinScene.prototype.updatePedestrianFlash = function(deltaTime) {
+    var elapsed = this.clock.getElapsedTime();
     if (Math.floor(elapsed) % 2 === 0 && this.pedestrianCrossing) {
       this.pedestrianCrossing.material.emissiveIntensity = Math.abs(Math.sin(elapsed * 3)) * 0.5;
     }
-  }
+  };
 
-  /* ---- Animation Loop ---- */
-
-  animate() {
-    const deltaTime = Math.min(this.clock.getDelta(), 0.1);
+  DigitalTwinScene.prototype.animate = function() {
+    var self = this;
+    var deltaTime = Math.min(this.clock.getDelta(), 0.1);
     this.frameCount++;
 
-    // Update controls
     if (this.controls && this.controls.enabled) {
       this.controls.update();
     }
 
-    // Update vehicles
     this.updateVehicles(deltaTime);
 
-    // Update ambulance if active
     if (this.ambulance) {
       this.updateAmbulance(deltaTime);
     }
 
-    // Update scenario engine
     this.updateScenarioEngine(deltaTime);
 
-    // Update bloom pass for signal glow
-    if (this.bloomPass) {
-      this.bloomPass.strength = this.isQueueSenseMode ? 1.2 : 0.6;
-    }
-
-    // Render
-    if (this.composer) {
-      this.composer.render();
-    } else {
+    if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }
 
-    // Performance telemetry
     if (this.frameCount % 60 === 0 && this.onTelemetry) {
       this.onTelemetry({
         fps: Math.round(1 / deltaTime),
@@ -1457,129 +1205,103 @@ class DigitalTwinScene {
         mode: this.isQueueSenseMode ? 'queuesense' : 'traditional',
       });
     }
-  }
 
-  getTotalVehicleCount() {
-    let total = 0;
-    Object.values(this.vehicleInstances).forEach(instance => {
-      if (instance.instances) {
+    requestAnimationFrame(function() { self.animate(); });
+  };
+
+  DigitalTwinScene.prototype.getTotalVehicleCount = function() {
+    var total = 0;
+    for (var classType in this.vehicleInstances) {
+      var instance = this.vehicleInstances[classType];
+      if (instance && instance.instances) {
         total += instance.instances.length;
       }
-    });
+    }
     return total;
-  }
+  };
 
-  /* ---- Event Listeners ---- */
+  DigitalTwinScene.prototype.setupEventListeners = function() {
+    var self = this;
+    window.addEventListener('resize', function() { self.onWindowResize(); });
+  };
 
-  setupEventListeners() {
-    window.addEventListener('resize', () => this.onWindowResize());
-
-    // Expose globally for external control
-    window.digitalTwinScene = this;
-  }
-
-  onWindowResize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+  DigitalTwinScene.prototype.onWindowResize = function() {
+    var width = this.container.clientWidth;
+    var height = this.container.clientHeight;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(window.devicePixelRatio);
+  };
 
-    if (this.composer) {
-      this.composer.setSize(width, height);
-    }
-  }
-
-  /* ---- Public API ---- */
-
-  destroy() {
-    this.controls?.dispose();
-    this.renderer?.dispose();
-    this.composer?.dispose();
-    this.scene?.clear();
+  DigitalTwinScene.prototype.destroy = function() {
+    this.controls && this.controls.dispose();
+    this.renderer && this.renderer.dispose();
+    this.scene && this.scene.clear();
 
     if (this.container.contains(this.renderer.domElement)) {
       this.container.removeChild(this.renderer.domElement);
     }
-  }
-}
-
-/* =============================================================================
-   INITIALIZATION
-   ============================================================================= */
-
-let twinScene = null;
-
-export function initDigitalTwin(canvasContainer) {
-  twinScene = new DigitalTwinScene(canvasContainer);
-
-  // Wire up callbacks for external UI updates
-  twinScene.onStateUpdate = (state) => {
-    if (window.onTwinStateUpdate) {
-      window.onTwinStateUpdate(state);
-    }
   };
 
-  twinScene.onSignalUpdate = (signal) => {
-    if (window.onSignalUpdate) {
-      window.onSignalUpdate(signal);
-    }
+  /* =============================================================================
+     GLOBAL EXPOSURE
+     ============================================================================= */
+
+  var twinScene = null;
+
+  window.initDigitalTwin = function(canvasContainer) {
+    twinScene = new DigitalTwinScene(canvasContainer);
+
+    twinScene.onStateUpdate = function(state) {
+      if (window.onTwinStateUpdate) window.onTwinStateUpdate(state);
+    };
+    twinScene.onSignalUpdate = function(signal) {
+      if (window.onSignalUpdate) window.onSignalUpdate(signal);
+    };
+    twinScene.onScenarioChange = function(scenario) {
+      if (window.onScenarioChange) window.onScenarioChange(scenario);
+    };
+    twinScene.onModeChange = function(isQueueSense) {
+      if (window.onModeChange) window.onModeChange(isQueueSense);
+    };
+    twinScene.onZoneUpdate = function(zones) {
+      if (window.onZoneUpdate) window.onZoneUpdate(zones);
+    };
+    twinScene.onTelemetry = function(stats) {
+      if (window.onTwinTelemetry) window.onTwinTelemetry(stats);
+    };
+
+    return twinScene;
   };
 
-  twinScene.onScenarioChange = (scenario) => {
-    if (window.onScenarioChange) {
-      window.onScenarioChange(scenario);
-    }
+  window.getTwinScene = function() {
+    return twinScene;
   };
 
-  twinScene.onModeChange = (isQueueSense) => {
-    if (window.onModeChange) {
-      window.onModeChange(isQueueSense);
-    }
+  window.switchCameraPreset = function(preset) {
+    if (twinScene) twinScene.switchCameraPreset(preset);
   };
 
-  twinScene.onZoneUpdate = (zones) => {
-    if (window.onZoneUpdate) {
-      window.onZoneUpdate(zones);
-    }
+  window.setScenario = function(scenario) {
+    if (twinScene) twinScene.setScenario(scenario);
   };
 
-  twinScene.onTelemetry = (stats) => {
-    if (window.onTwinTelemetry) {
-      window.onTwinTelemetry(stats);
-    }
+  window.setMode = function(mode) {
+    if (twinScene) twinScene.setMode(mode);
   };
 
-  return twinScene;
-}
+  window.triggerEmergencyFlush = function() {
+    if (twinScene) twinScene.setScenario('emergency');
+  };
 
-export function getTwinScene() {
-  return twinScene;
-}
+  window.setSpillbackActive = function(active, occupancy) {
+    if (twinScene) twinScene.setSpillbackActive(active, occupancy);
+  };
 
-export function switchCameraPreset(preset) {
-  twinScene?.switchCameraPreset(preset);
-}
-
-export function setScenario(scenario) {
-  twinScene?.setScenario(scenario);
-}
-
-export function setMode(mode) {
-  twinScene?.setMode(mode);
-}
-
-export function triggerEmergencyFlush() {
-  twinScene?.setScenario('emergency');
-}
-
-export function setSpillbackActive(active, occupancy = 0.85) {
-  twinScene?.setSpillbackActive(active, occupancy);
-}
-
-export function updateSignalPhase(junctionId, direction, color, duration = 0) {
-  twinScene?.updateSignalPhase(junctionId, direction, color, duration);
-}
+  window.updateSignalPhase = function(junctionId, direction, color, duration) {
+    if (twinScene) twinScene.updateSignalPhase(junctionId, direction, color, duration);
+  };
+})();

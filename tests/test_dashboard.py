@@ -38,16 +38,22 @@ def test_index_page_serves_html(client):
     assert "app.js" in response.text, (
         "Index page should load the main application script"
     )
-    assert "three.module.js" in response.text, (
-        "Index page should import Three.js via importmap"
+    assert "three.min.js" in response.text, (
+        "Index page should load Three.js via UMD CDN"
     )
-    assert "hero__controls" in response.text, (
-        "Index page should include interactive controls"
+    assert "chart.umd.min.js" in response.text, (
+        "Index page should load Chart.js via UMD CDN"
     )
-    assert "decision-feed" in response.text, (
-        "Index page should include AI decision feed"
+    assert "hero__stage" in response.text, (
+        "Index page should include the studio split-stage hero"
     )
-    assert "scoreboard" in response.text, (
+    assert "hero__control-dock" in response.text, (
+        "Index page should include the bento control dock"
+    )
+    assert "hud-pill--phase" in response.text, (
+        "Index page should include Live Decision Receipt HUD (phase pill)"
+    )
+    assert "hud-pill--scoreboard" in response.text, (
         "Index page should include real-time scoreboard"
     )
 
