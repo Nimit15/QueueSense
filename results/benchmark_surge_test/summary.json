@@ -1,0 +1,257 @@
+{
+  "total_runs": 4,
+  "successful_runs": 4,
+  "failed_runs": 0,
+  "scenarios": [
+    "surge"
+  ],
+  "controllers": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "seeds": [
+    42
+  ],
+  "metrics": {
+    "completed": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 80.0,
+        "std": NaN,
+        "min": 80,
+        "max": 80
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 84.0,
+        "std": NaN,
+        "min": 84,
+        "max": 84
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 84.0,
+        "std": NaN,
+        "min": 84,
+        "max": 84
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 68.0,
+        "std": NaN,
+        "min": 68,
+        "max": 68
+      }
+    ],
+    "queue_north": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 9.0,
+        "std": NaN,
+        "min": 9,
+        "max": 9
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 12.0,
+        "std": NaN,
+        "min": 12,
+        "max": 12
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 20.0,
+        "std": NaN,
+        "min": 20,
+        "max": 20
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "queue_south": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "queue_east": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 4.0,
+        "std": NaN,
+        "min": 4,
+        "max": 4
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 6.0,
+        "std": NaN,
+        "min": 6,
+        "max": 6
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 4.0,
+        "std": NaN,
+        "min": 4,
+        "max": 4
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "queue_west": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 5.0,
+        "std": NaN,
+        "min": 5,
+        "max": 5
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 2.0,
+        "std": NaN,
+        "min": 2,
+        "max": 2
+      }
+    ],
+    "spillback_ns": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "spillback_ew": [
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "csv": "results\\benchmark_v2_250_corrected\\B_seed51_surge_seed51.csv",
+  "seed": 51,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 42,
+  "remaining_expected": 111,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 0,
+  "phase_switches": 66,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "spillback_gate": false,
+  "total_wait_seconds": 32142.0,
+  "mean_wait_seconds": 133.36929460580913,
+  "teleports": 0
+}

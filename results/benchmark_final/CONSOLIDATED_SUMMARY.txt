@@ -1,0 +1,230 @@
+QueueSense Benchmark - Consolidated Summary
+============================================================
+
+Generated: 2026-10-15 01:35:13
+
+Total expected runs: 200 (5 scenarios × 4 controllers × 10 seeds)
+Total consolidated runs: 170
+
+
+light:
+  Total runs: 40
+  Successful: 40
+  Failed: 0
+  Controller breakdown:
+    Controller A: 10 runs
+    Controller B: 10 runs
+    Controller C: 10 runs
+    Controller D: 10 runs
+
+balanced:
+  Total runs: 40
+  Successful: 40
+  Failed: 0
+  Controller breakdown:
+    Controller A: 10 runs
+    Controller B: 10 runs
+    Controller C: 10 runs
+    Controller D: 10 runs
+
+bottleneck:
+  Total runs: 40
+  Successful: 40
+  Failed: 0
+  Controller breakdown:
+    Controller A: 10 runs
+    Controller B: 10 runs
+    Controller C: 10 runs
+    Controller D: 10 runs
+
+surge:
+  Total runs: 37
+  Successful: 37
+  Failed: 0
+  Controller breakdown:
+    Controller A: 10 runs
+    Controller B: 10 runs
+    Controller C: 10 runs
+    Controller D: 7 runs
+
+uneven:
+  Total runs: 13
+  Successful: 13
+  Failed: 0
+  Controller breakdown:
+    Controller A: 10 runs
+    Controller B: 3 runs
+    Controller C: 0 runs
+    Controller D: 0 runs
+
+Consolidated files:
+  balanced/Controller A/Seed 42: A_seed42_20261014_204530.csv
+  balanced/Controller A/Seed 43: A_seed43_20261014_204557.csv
+  balanced/Controller A/Seed 44: A_seed44_20261014_204624.csv
+  balanced/Controller A/Seed 45: A_seed45_20261014_204651.csv
+  balanced/Controller A/Seed 46: A_seed46_20261014_204719.csv
+  balanced/Controller A/Seed 47: A_seed47_20261014_204746.csv
+  balanced/Controller A/Seed 48: A_seed48_20261014_204813.csv
+  balanced/Controller A/Seed 49: A_seed49_20261014_204840.csv
+  balanced/Controller A/Seed 50: A_seed50_20261014_204907.csv
+  balanced/Controller A/Seed 51: A_seed51_20261014_204935.csv
+  balanced/Controller B/Seed 42: B_seed42_20261014_205004.csv
+  balanced/Controller B/Seed 43: B_seed43_20261014_205033.csv
+  balanced/Controller B/Seed 44: B_seed44_20261014_205101.csv
+  balanced/Controller B/Seed 45: B_seed45_20261014_205130.csv
+  balanced/Controller B/Seed 46: B_seed46_20261014_205200.csv
+  balanced/Controller B/Seed 47: B_seed47_20261014_205228.csv
+  balanced/Controller B/Seed 48: B_seed48_20261014_205257.csv
+  balanced/Controller B/Seed 49: B_seed49_20261014_205326.csv
+  balanced/Controller B/Seed 50: B_seed50_20261014_205355.csv
+  balanced/Controller B/Seed 51: B_seed51_20261014_205424.csv
+  balanced/Controller C/Seed 42: C_seed42_20261014_205502.csv
+  balanced/Controller C/Seed 43: C_seed43_20261014_205539.csv
+  balanced/Controller C/Seed 44: C_seed44_20261014_205616.csv
+  balanced/Controller C/Seed 45: C_seed45_20261014_205653.csv
+  balanced/Controller C/Seed 46: C_seed46_20261014_205730.csv
+  balanced/Controller C/Seed 47: C_seed47_20261014_205809.csv
+  balanced/Controller C/Seed 48: C_seed48_20261014_205847.csv
+  balanced/Controller C/Seed 49: C_seed49_20261014_205924.csv
+  balanced/Controller C/Seed 50: C_seed50_20261014_205958.csv
+  balanced/Controller C/Seed 51: C_seed51_20261014_210035.csv
+  balanced/Controller D/Seed 42: D_seed42_20261014_210102.csv
+  balanced/Controller D/Seed 43: D_seed43_20261014_210130.csv
+  balanced/Controller D/Seed 44: D_seed44_20261014_210158.csv
+  balanced/Controller D/Seed 45: D_seed45_20261014_210225.csv
+  balanced/Controller D/Seed 46: D_seed46_20261014_210251.csv
+  balanced/Controller D/Seed 47: D_seed47_20261014_210319.csv
+  balanced/Controller D/Seed 48: D_seed48_20261014_210346.csv
+  balanced/Controller D/Seed 49: D_seed49_20261014_210411.csv
+  balanced/Controller D/Seed 50: D_seed50_20261014_210438.csv
+  balanced/Controller D/Seed 51: D_seed51_20261014_210504.csv
+  bottleneck/Controller A/Seed 42: A_seed42_20261014_220320.csv
+  bottleneck/Controller A/Seed 43: A_seed43_20261014_220356.csv
+  bottleneck/Controller A/Seed 44: A_seed44_20261014_220434.csv
+  bottleneck/Controller A/Seed 45: A_seed45_20261014_220516.csv
+  bottleneck/Controller A/Seed 46: A_seed46_20261014_221056.csv
+  bottleneck/Controller A/Seed 47: A_seed47_20261014_221131.csv
+  bottleneck/Controller A/Seed 48: A_seed48_20261014_221205.csv
+  bottleneck/Controller A/Seed 49: A_seed49_20261014_221245.csv
+  bottleneck/Controller A/Seed 50: A_seed50_20261014_221324.csv
+  bottleneck/Controller A/Seed 51: A_seed51_20261014_221358.csv
+  bottleneck/Controller B/Seed 42: B_seed42_20261014_221435.csv
+  bottleneck/Controller B/Seed 43: B_seed43_20261014_221514.csv
+  bottleneck/Controller B/Seed 44: B_seed44_20261014_221558.csv
+  bottleneck/Controller B/Seed 45: B_seed45_20261014_221654.csv
+  bottleneck/Controller B/Seed 46: B_seed46_20261014_221756.csv
+  bottleneck/Controller B/Seed 47: B_seed47_20261014_221843.csv
+  bottleneck/Controller B/Seed 48: B_seed48_20261014_221935.csv
+  bottleneck/Controller B/Seed 49: B_seed49_20261014_222026.csv
+  bottleneck/Controller B/Seed 50: B_seed50_20261014_222120.csv
+  bottleneck/Controller B/Seed 51: B_seed51_20261014_222223.csv
+  bottleneck/Controller C/Seed 42: C_seed42_20261014_222321.csv
+  bottleneck/Controller C/Seed 43: C_seed43_20261014_222412.csv
+  bottleneck/Controller C/Seed 44: C_seed44_20261014_222504.csv
+  bottleneck/Controller C/Seed 45: C_seed45_20261014_222553.csv
+  bottleneck/Controller C/Seed 46: C_seed46_20261014_222635.csv
+  bottleneck/Controller C/Seed 47: C_seed47_20261014_222722.csv
+  bottleneck/Controller C/Seed 48: C_seed48_20261014_222807.csv
+  bottleneck/Controller C/Seed 49: C_seed49_20261014_222853.csv
+  bottleneck/Controller C/Seed 50: C_seed50_20261014_222946.csv
+  bottleneck/Controller C/Seed 51: C_seed51_20261014_223037.csv
+  bottleneck/Controller D/Seed 42: D_seed42_20261014_223145.csv
+  bottleneck/Controller D/Seed 43: D_seed43_20261014_223257.csv
+  bottleneck/Controller D/Seed 44: D_seed44_20261014_223404.csv
+  bottleneck/Controller D/Seed 45: D_seed45_20261014_223517.csv
+  bottleneck/Controller D/Seed 46: D_seed46_20261014_223630.csv
+  bottleneck/Controller D/Seed 47: D_seed47_20261014_223805.csv
+  bottleneck/Controller D/Seed 48: D_seed48_20261014_223943.csv
+  bottleneck/Controller D/Seed 49: D_seed49_20261014_224115.csv
+  bottleneck/Controller D/Seed 50: D_seed50_20261014_224245.csv
+  bottleneck/Controller D/Seed 51: D_seed51_20261014_224417.csv
+  light/Controller A/Seed 42: A_seed42_20261014_202532.csv
+  light/Controller A/Seed 43: A_seed43_20261014_202554.csv
+  light/Controller A/Seed 44: A_seed44_20261014_202616.csv
+  light/Controller A/Seed 45: A_seed45_20261014_202640.csv
+  light/Controller A/Seed 46: A_seed46_20261014_202702.csv
+  light/Controller A/Seed 47: A_seed47_20261014_202725.csv
+  light/Controller A/Seed 48: A_seed48_20261014_202748.csv
+  light/Controller A/Seed 49: A_seed49_20261014_202811.csv
+  light/Controller A/Seed 50: A_seed50_20261014_202832.csv
+  light/Controller A/Seed 51: A_seed51_20261014_202855.csv
+  light/Controller B/Seed 42: B_seed42_20261014_202917.csv
+  light/Controller B/Seed 43: B_seed43_20261014_202939.csv
+  light/Controller B/Seed 44: B_seed44_20261014_203001.csv
+  light/Controller B/Seed 45: B_seed45_20261014_203023.csv
+  light/Controller B/Seed 46: B_seed46_20261014_203045.csv
+  light/Controller B/Seed 47: B_seed47_20261014_203107.csv
+  light/Controller B/Seed 48: B_seed48_20261014_203130.csv
+  light/Controller B/Seed 49: B_seed49_20261014_203152.csv
+  light/Controller B/Seed 50: B_seed50_20261014_203214.csv
+  light/Controller B/Seed 51: B_seed51_20261014_203236.csv
+  light/Controller C/Seed 42: C_seed42_20261014_203310.csv
+  light/Controller C/Seed 43: C_seed43_20261014_203344.csv
+  light/Controller C/Seed 44: C_seed44_20261014_203417.csv
+  light/Controller C/Seed 45: C_seed45_20261014_203451.csv
+  light/Controller C/Seed 46: C_seed46_20261014_203525.csv
+  light/Controller C/Seed 47: C_seed47_20261014_203558.csv
+  light/Controller C/Seed 48: C_seed48_20261014_203633.csv
+  light/Controller C/Seed 49: C_seed49_20261014_203708.csv
+  light/Controller C/Seed 50: C_seed50_20261014_203743.csv
+  light/Controller C/Seed 51: C_seed51_20261014_203818.csv
+  light/Controller D/Seed 42: D_seed42_20261014_203839.csv
+  light/Controller D/Seed 43: D_seed43_20261014_203900.csv
+  light/Controller D/Seed 44: D_seed44_20261014_203921.csv
+  light/Controller D/Seed 45: D_seed45_20261014_203941.csv
+  light/Controller D/Seed 46: D_seed46_20261014_204002.csv
+  light/Controller D/Seed 47: D_seed47_20261014_204023.csv
+  light/Controller D/Seed 48: D_seed48_20261014_204044.csv
+  light/Controller D/Seed 49: D_seed49_20261014_204105.csv
+  light/Controller D/Seed 50: D_seed50_20261014_204125.csv
+  light/Controller D/Seed 51: D_seed51_20261014_204146.csv
+  surge/Controller A/Seed 42: A_seed42_20261014_211330.csv
+  surge/Controller A/Seed 43: A_seed43_20261014_211413.csv
+  surge/Controller A/Seed 44: A_seed44_20261014_211457.csv
+  surge/Controller A/Seed 45: A_seed45_20261014_211541.csv
+  surge/Controller A/Seed 46: A_seed46_20261014_211625.csv
+  surge/Controller A/Seed 47: A_seed47_20261014_211711.csv
+  surge/Controller A/Seed 48: A_seed48_20261014_211755.csv
+  surge/Controller A/Seed 49: A_seed49_20261014_211840.csv
+  surge/Controller A/Seed 50: A_seed50_20261014_211925.csv
+  surge/Controller A/Seed 51: A_seed51_20261014_212008.csv
+  surge/Controller B/Seed 42: B_seed42_20261014_212054.csv
+  surge/Controller B/Seed 43: B_seed43_20261014_212139.csv
+  surge/Controller B/Seed 44: B_seed44_20261014_212224.csv
+  surge/Controller B/Seed 45: B_seed45_20261014_212310.csv
+  surge/Controller B/Seed 46: B_seed46_20261014_212356.csv
+  surge/Controller B/Seed 47: B_seed47_20261014_212441.csv
+  surge/Controller B/Seed 48: B_seed48_20261014_212527.csv
+  surge/Controller B/Seed 49: B_seed49_20261014_212613.csv
+  surge/Controller B/Seed 50: B_seed50_20261014_212658.csv
+  surge/Controller B/Seed 51: B_seed51_20261014_212744.csv
+  surge/Controller C/Seed 42: C_seed42_20261014_212829.csv
+  surge/Controller C/Seed 43: C_seed43_20261014_212915.csv
+  surge/Controller C/Seed 44: C_seed44_20261014_213000.csv
+  surge/Controller C/Seed 45: C_seed45_20261014_213046.csv
+  surge/Controller C/Seed 46: C_seed46_20261014_213131.csv
+  surge/Controller C/Seed 47: C_seed47_20261014_213221.csv
+  surge/Controller C/Seed 48: C_seed48_20261014_213314.csv
+  surge/Controller C/Seed 49: C_seed49_20261014_213408.csv
+  surge/Controller C/Seed 50: C_seed50_20261014_213502.csv
+  surge/Controller C/Seed 51: C_seed51_20261014_213547.csv
+  surge/Controller D/Seed 42: D_seed42_20261014_213626.csv
+  surge/Controller D/Seed 43: D_seed43_20261014_213705.csv
+  surge/Controller D/Seed 44: D_seed44_20261014_213745.csv
+  surge/Controller D/Seed 45: D_seed45_20261014_213827.csv
+  surge/Controller D/Seed 46: D_seed46_20261014_213908.csv
+  surge/Controller D/Seed 47: D_seed47_20261014_213946.csv
+  surge/Controller D/Seed 48: D_seed48_20261014_214023.csv
+  uneven/Controller A/Seed 42: A_seed42_20261014_214147.csv
+  uneven/Controller A/Seed 43: A_seed43_20261014_214220.csv
+  uneven/Controller A/Seed 44: A_seed44_20261015_012338.csv
+  uneven/Controller A/Seed 45: A_seed45_20261015_012417.csv
+  uneven/Controller A/Seed 46: A_seed46_20261015_012457.csv
+  uneven/Controller A/Seed 47: A_seed47_20261015_012536.csv
+  uneven/Controller A/Seed 48: A_seed48_20261015_012615.csv
+  uneven/Controller A/Seed 49: A_seed49_20261015_012654.csv
+  uneven/Controller A/Seed 50: A_seed50_20261015_012733.csv
+  uneven/Controller A/Seed 51: A_seed51_20261015_012812.csv
+  uneven/Controller B/Seed 42: B_seed42_20261015_012858.csv
+  uneven/Controller B/Seed 43: B_seed43_20261015_012945.csv
+  uneven/Controller B/Seed 44: B_seed44_20261015_013024.csv

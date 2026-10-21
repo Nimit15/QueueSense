@@ -1,0 +1,433 @@
+{
+  "experiment_info": {
+    "name": "Perception to Capacity Calibration",
+    "version": "1.0",
+    "description": "Evaluation of perception module's ability to estimate queue lengths and arrival rates",
+    "created_at": "2026-10-20 17:39:16",
+    "noise_levels_tested": [
+      0.0,
+      0.1,
+      0.2,
+      0.3
+    ],
+    "test_scenarios": [
+      "Bottleneck scenario",
+      "Clear scenario",
+      "High congestion scenario"
+    ]
+  },
+  "perception_evaluation": {
+    "total_frames": 12,
+    "detections": [
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=15.0, mean_wait_seconds=30.0, arrival_rate=25.0, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "west",
+            "confidence": 0.75,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=5.490900337337812, mean_wait_seconds=5.171384072958088, arrival_rate=9.673387673929513, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=5.407242021943352, mean_wait_seconds=4.790888981996095, arrival_rate=10.907974667590175, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=4.779023817248145, mean_wait_seconds=3.9292333290698767, arrival_rate=9.042559225280794, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=14.751046384941562, mean_wait_seconds=32.77589514260515, arrival_rate=26.595518930929984, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "west",
+            "confidence": 0.7375523192470781,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=3.4932864872277496, mean_wait_seconds=4.452581373122077, arrival_rate=9.884606932393329, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=4.766971956944585, mean_wait_seconds=6.102424901764399, arrival_rate=8.206620022855457, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=5.696994622293994, mean_wait_seconds=5.786343832026328, arrival_rate=9.476736434990194, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=12.490121349762195, mean_wait_seconds=22.72022604467478, arrival_rate=24.202224427850137, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "west",
+            "confidence": 0.6245060674881098,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=2.8946681243005514, mean_wait_seconds=5.211095101486258, arrival_rate=16.481662966439234, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=6.999212624656103, mean_wait_seconds=5.429181527491902, arrival_rate=3.5374797268611893, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=3.148763005678897, mean_wait_seconds=6.203260877121299, arrival_rate=11.659123723363225, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=20.054401027334997, mean_wait_seconds=28.020776809469957, arrival_rate=28.80170010479436, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "west",
+            "confidence": 1.0027200513667498,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=5.0, mean_wait_seconds=5.0, arrival_rate=10.0, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=5.4951137554686325, mean_wait_seconds=4.481913335843378, arrival_rate=10.70357786937328, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=5.052580949431888, mean_wait_seconds=4.784748770600458, arrival_rate=8.12119152977184, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=4.370123133078461, mean_wait_seconds=5.000262909292644, arrival_rate=10.735440359732502, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=5.3499975069590775, mean_wait_seconds=5.855602374095046, arrival_rate=11.339937662414336, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=5.224545576627611, mean_wait_seconds=4.136010967793769, arrival_rate=14.49398935402472, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=4.126064108973065, mean_wait_seconds=5.605414615776571, arrival_rate=12.696218778230943, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=5.048746641787497, mean_wait_seconds=3.6393448877287824, arrival_rate=10.77568911604713, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=4.795360023289033, mean_wait_seconds=5.7105041603291795, arrival_rate=12.815290593706589, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=5.64198527051057, mean_wait_seconds=8.76326825862298, arrival_rate=9.777240773745836, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=4.221669703807695, mean_wait_seconds=4.570684075197701, arrival_rate=9.691781521631356, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=3.5677591480530344, mean_wait_seconds=5.2546818001786, arrival_rate=8.313708816104588, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=5.887258716832909, mean_wait_seconds=4.301113198874528, arrival_rate=9.47163505561215, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=10.0, mean_wait_seconds=15.0, arrival_rate=15.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=10.0, mean_wait_seconds=15.0, arrival_rate=15.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=10.0, mean_wait_seconds=15.0, arrival_rate=15.0, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=25.0, mean_wait_seconds=60.0, arrival_rate=40.0, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "west",
+            "confidence": 1.25,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=10.590667716525473, mean_wait_seconds=17.750946742680085, arrival_rate=14.410542170020301, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=9.401964115229442, mean_wait_seconds=11.489752495851807, arrival_rate=16.34840813797051, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=8.929414188428328, mean_wait_seconds=15.517722709515638, arrival_rate=17.025685353527823, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=25.476770110061025, mean_wait_seconds=60.886146470671456, arrival_rate=39.02479304938812, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "north",
+            "confidence": 0.5295333858262736,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "car"
+          },
+          {
+            "class": "west",
+            "confidence": 1.2738385055030512,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=6.929276992623221, mean_wait_seconds=17.79535513956827, arrival_rate=15.959240088629517, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=11.42059077726932, mean_wait_seconds=13.075866954766825, arrival_rate=15.436139739637973, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=9.842135866865192, mean_wait_seconds=15.75231914813547, arrival_rate=16.65503022546178, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=24.764163398103975, mean_wait_seconds=41.390817972157656, arrival_rate=37.441931049947364, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "south",
+            "confidence": 0.571029538863466,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "car"
+          },
+          {
+            "class": "west",
+            "confidence": 1.2382081699051988,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      },
+      {
+        "state": "TrafficState(timestamp=1792498156.9281113, approaches={'north': ApproachState(queue_count=4.949894781418731, mean_wait_seconds=22.656543207219187, arrival_rate=7.584097430380979, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_north_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'south': ApproachState(queue_count=9.548204851887789, mean_wait_seconds=15.173799425234174, arrival_rate=14.397013350252927, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_south_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'east': ApproachState(queue_count=7.742751736934111, mean_wait_seconds=16.280471963187484, arrival_rate=20.64542810190929, downstream_available=True, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_east_1', observation_valid=True, edge_occupancy_fraction=0.1, occupancy_fraction=0.1, threshold=0.3, congested=False, eligible=True, gate_suppresses=False, error='', confidence=0.85, age_s=0.2)]), 'west': ApproachState(queue_count=21.36979448325831, mean_wait_seconds=67.74107412165293, arrival_rate=42.19136816997377, downstream_available=False, measurement_valid=True, downstream_observations=[DownstreamObservation(edge_id='out_west_1', observation_valid=True, edge_occupancy_fraction=0.5, occupancy_fraction=0.5, threshold=0.3, congested=True, eligible=False, gate_suppresses=True, error='', confidence=0.85, age_s=0.2)])}, all_valid=True)",
+        "detections": [
+          {
+            "class": "west",
+            "confidence": 1.0684897241629154,
+            "bbox": [
+              0.1,
+              0.1,
+              0.3,
+              0.3
+            ],
+            "vehicle_type": "two_wheeler"
+          }
+        ],
+        "ground_truth": {
+          "clear": false,
+          "blocked": true,
+          "unknown": false
+        },
+        "classifier_result": "BLOCKED",
+        "classifier_confidence": 0.7,
+        "detection_time_ms": 0.0
+      }
+    ],
+    "confidence_calibration": {
+      "CLEAR": {
+        "confidence": 0.0,
+        "accuracy": 0.0
+      },
+      "BLOCKED": {
+        "confidence": 0.7,
+        "accuracy": 0.85
+      },
+      "UNKNOWN": {
+        "confidence": 0.0,
+        "accuracy": 0.0
+      }
+    },
+    "clear_blocked_unknown_accuracy": {
+      "CLEAR": {
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "BLOCKED": {
+        "precision": 0.8,
+        "recall": 0.85
+      },
+      "UNKNOWN": {
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "latency_ms": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "per_class_detections": {
+      "north": [
+        0.25,
+        0.2745450168668906,
+        0.17466432436138749,
+        0.14473340621502756,
+        0.25,
+        0.2747556877734316,
+        0.2612272788313806,
+        0.2820992635255285,
+        0.5,
+        0.5295333858262736,
+        0.34646384963116106,
+        0.24749473907093655
+      ],
+      "south": [
+        0.25,
+        0.27036210109716763,
+        0.23834859784722923,
+        0.34996063123280513,
+        0.25,
+        0.25262904747159437,
+        0.20630320544865324,
+        0.21108348519038475,
+        0.5,
+        0.4700982057614721,
+        0.571029538863466,
+        0.47741024259438947
+      ],
+      "east": [
+        0.25,
+        0.23895119086240726,
+        0.2848497311146997,
+        0.15743815028394487,
+        0.25,
+        0.21850615665392303,
+        0.25243733208937486,
+        0.17838795740265173,
+        0.5,
+        0.4464707094214164,
+        0.4921067933432596,
+        0.3871375868467056
+      ],
+      "west": [
+        0.75,
+        0.7375523192470781,
+        0.6245060674881098,
+        1.0027200513667498,
+        0.25,
+        0.2674998753479539,
+        0.23976800116445168,
+        0.2943629358416454,
+        1.25,
+        1.2738385055030512,
+        1.2382081699051988,
+        1.0684897241629154
+      ]
+    }
+  },
+  "irc_pcu_evaluation": {
+    "pcu_table": {
+      "two_wheeler": 0.5,
+      "auto_rickshaw": 1.2,
+      "car": 1.0,
+      "lcv": 1.4,
+      "bus_truck": 2.2,
+      "cycle": 0.4
+    },
+    "test_cases": [
+      {
+        "name": "Urban mixed (10% two-wheelers)",
+        "composition": {
+          "two_wheeler": 0.1,
+          "car": 0.9
+        },
+        "expected_pcu": 0.9500000000000001,
+        "actual_pcu": 0.9500000000000001,
+        "error": 0.0,
+        "error_percentage": 0.0
+      },
+      {
+        "name": "Rural mixed (20% buses)",
+        "composition": {
+          "car": 0.8,
+          "bus_truck": 0.2
+        },
+        "expected_pcu": 1.2400000000000002,
+        "actual_pcu": 1.2400000000000002,
+        "error": 0.0,
+        "error_percentage": 0.0
+      },
+      {
+        "name": "Dense urban (40% auto-rickshaws)",
+        "composition": {
+          "auto_rickshaw": 0.4,
+          "two_wheeler": 0.3,
+          "cycle": 0.3
+        },
+        "expected_pcu": 0.75,
+        "actual_pcu": 0.75,
+        "error": 0.0,
+        "error_percentage": 0.0
+      }
+    ],
+    "calibration_score": 0.0
+  }
+}

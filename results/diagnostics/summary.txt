@@ -1,0 +1,8 @@
+QueueSense Baseline Benchmark Summary
+==================================================
+Total runs: 8
+Successful: 8
+Failed: 0
+Scenarios: balanced, light
+Controllers: A, B, C, D
+Seeds: 42

@@ -1,0 +1,83 @@
+{
+  "csv": "results\\stage5_selector_closed_loop\\surge\\S_seed50_surge_seed50.csv",
+  "seed": 50,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 45,
+  "remaining_expected": 108,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 15,
+  "phase_switches": 96,
+  "gate_interventions": 6,
+  "gate_intervention_details": [
+    {
+      "time": 135.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3253,
+      "gate_event": "hold",
+      "ungated_phase": "NORTH_SOUTH",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 136.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3203,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 137.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 138.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 180.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 181.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3029,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    }
+  ],
+  "physical_congestion_observations": 15,
+  "gate_restrictions": 15,
+  "gate_phase_change_interventions": 5,
+  "gate_caused_holds": 1,
+  "spillback_gate": true,
+  "total_wait_seconds": 20771.0,
+  "mean_wait_seconds": 86.18672199170125,
+  "teleports": 0,
+  "decision_trace": "results\\stage5_selector_closed_loop\\surge\\S_seed50_surge_seed50_decision_trace.csv"
+}

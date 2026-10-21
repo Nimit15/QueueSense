@@ -1,0 +1,122 @@
+{
+  "scenarios": [
+    {
+      "scenario": "light",
+      "seed": 42,
+      "baseline_controller": "D1",
+      "total_steps_evaluated": 723,
+      "clear_steps": 723,
+      "elevated_risk_steps": 0,
+      "blocked_steps": 0,
+      "unknown_steps": 0,
+      "gate_interventions_shadow": 0,
+      "wasted_green_on_blocked_exit_seconds": 0.0,
+      "mode_distribution": {
+        "C": 723,
+        "D2": 0,
+        "FALLBACK": 0
+      },
+      "capacity_status_distribution": {
+        "CLEAR": 723,
+        "ELEVATED_RISK": 0,
+        "BLOCKED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "scenario": "balanced",
+      "seed": 42,
+      "baseline_controller": "D1",
+      "total_steps_evaluated": 723,
+      "clear_steps": 723,
+      "elevated_risk_steps": 0,
+      "blocked_steps": 0,
+      "unknown_steps": 0,
+      "gate_interventions_shadow": 0,
+      "wasted_green_on_blocked_exit_seconds": 0.0,
+      "mode_distribution": {
+        "C": 723,
+        "D2": 0,
+        "FALLBACK": 0
+      },
+      "capacity_status_distribution": {
+        "CLEAR": 723,
+        "ELEVATED_RISK": 0,
+        "BLOCKED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "scenario": "uneven",
+      "seed": 42,
+      "baseline_controller": "D1",
+      "total_steps_evaluated": 723,
+      "clear_steps": 723,
+      "elevated_risk_steps": 0,
+      "blocked_steps": 0,
+      "unknown_steps": 0,
+      "gate_interventions_shadow": 0,
+      "wasted_green_on_blocked_exit_seconds": 0.0,
+      "mode_distribution": {
+        "C": 723,
+        "D2": 0,
+        "FALLBACK": 0
+      },
+      "capacity_status_distribution": {
+        "CLEAR": 723,
+        "ELEVATED_RISK": 0,
+        "BLOCKED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "scenario": "bottleneck",
+      "seed": 42,
+      "baseline_controller": "D1",
+      "total_steps_evaluated": 723,
+      "clear_steps": 632,
+      "elevated_risk_steps": 23,
+      "blocked_steps": 68,
+      "unknown_steps": 0,
+      "gate_interventions_shadow": 0,
+      "wasted_green_on_blocked_exit_seconds": 0.0,
+      "mode_distribution": {
+        "C": 655,
+        "D2": 68,
+        "FALLBACK": 0
+      },
+      "capacity_status_distribution": {
+        "CLEAR": 632,
+        "ELEVATED_RISK": 23,
+        "BLOCKED": 68,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "scenario": "surge",
+      "seed": 42,
+      "baseline_controller": "D1",
+      "total_steps_evaluated": 723,
+      "clear_steps": 595,
+      "elevated_risk_steps": 79,
+      "blocked_steps": 49,
+      "unknown_steps": 0,
+      "gate_interventions_shadow": 0,
+      "wasted_green_on_blocked_exit_seconds": 0.0,
+      "mode_distribution": {
+        "C": 674,
+        "D2": 49,
+        "FALLBACK": 0
+      },
+      "capacity_status_distribution": {
+        "CLEAR": 595,
+        "ELEVATED_RISK": 79,
+        "BLOCKED": 49,
+        "UNKNOWN": 0
+      }
+    }
+  ],
+  "total_wasted_green_seconds": 0.0,
+  "seed": 42,
+  "baseline_controller": "D1"
+}

@@ -62,7 +62,7 @@
 
   /* ===== Typography ===== */
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --font-mono: 'Space Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -206,10 +206,18 @@ button {
   text-decoration: none;
   letter-spacing: -0.02em;
   transition: color var(--duration-base) var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2xs);
 }
 
 .nav__brand:hover {
   color: var(--accent);
+}
+
+.brand__mark {
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .nav__status {
@@ -228,6 +236,12 @@ button {
   border-radius: 50%;
   background: var(--signal-green);
   box-shadow: 0 0 8px var(--signal-green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .nav__status-text {
@@ -336,7 +350,7 @@ button {
   height: calc(100vh - var(--nav-height));
   align-items: stretch;
   gap: var(--gap);
-  padding: 2rem calc(0.75rem) 4rem;
+  padding: 2rem var(--s-sm) 4rem;
   margin-top: var(--nav-height);
 }
 
@@ -678,6 +692,10 @@ button {
   margin-bottom: 0.5rem;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .action-btn:active {
@@ -727,13 +745,13 @@ button {
   gap: 0.3rem;
 }
 
-.ai-reason__label::before {
-  content: '';
+.ai-reason__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 6px var(--accent);
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .ai-reason__text {

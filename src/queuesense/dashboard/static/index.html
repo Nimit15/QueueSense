@@ -7,21 +7,37 @@
   <title>QueueSense — Edge-AI Traffic Control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Three.js from CDN with defer -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.166.0/build/three.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.166.0/examples/js/controls/OrbitControls.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css">
+  <!-- Three.js ESM (via importmap) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/static/lib/three.module.min.js",
+      "three/OrbitControls": "/static/lib/OrbitControls.module.js"
+    }
+  }
+  </script>
+  <!-- GSAP and Chart.js as UMD globals -->
+  <script src="/static/lib/gsap.min.js"></script>
+  <script src="/static/lib/chart.umd.min.js"></script>
+  <script type="module" src="/static/three-scene.js"></script>
+  <script type="module" src="/static/app.js"></script>
 </head>
 <body>
   <!-- ===== Navigation ===== -->
-  <nav class="navbar" id="navbar">
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
     <div class="nav__container container">
-      <a href="#" class="nav__brand">QueueSense</a>
-      <div class="nav__status">
-        <span class="nav__status-dot"></span>
+      <a href="#" class="nav__brand" aria-label="QueueSense Home">
+        <svg class="brand__mark" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 2L4 7v10l8 5 8-5V7L12 2z"/>
+          <path d="M12 7v10"/>
+          <path d="M4 7l8 5 8-5"/>
+        </svg>
+        QueueSense
+      </a>
+      <div class="nav__status" aria-live="polite">
+        <span class="nav__status-dot" aria-hidden="true"></span>
         <span class="nav__status-text">Live Simulation</span>
       </div>
       <div class="nav__links">
@@ -31,10 +47,10 @@
         <a href="#data">Data Sources</a>
       </div>
       <div class="nav__mode-switch">
-        <button class="mode-toggle" data-mode="queuesense" id="modeQS">
+        <button class="mode-toggle" data-mode="queuesense" id="modeQS" aria-pressed="true">
           <span class="mode-toggle__label">QueueSense AI</span>
         </button>
-        <button class="mode-toggle mode-toggle--alt" data-mode="traditional" id="modeTrad">
+        <button class="mode-toggle mode-toggle--alt" data-mode="traditional" id="modeTrad" aria-pressed="false">
           <span class="mode-toggle__label">Traditional</span>
         </button>
       </div>
@@ -43,23 +59,26 @@
 
   <!-- ===== Hero / 3D Sandbox ===== -->
   <section class="hero" id="sandbox" aria-labelledby="hero-title">
-    <div class="hero__canvas">
+    <div class="hero__canvas" role="application" aria-label="Interactive 3D traffic intersection">
       <h1 id="hero-title" class="visually-hidden">QueueSense — Edge-AI Adaptive Traffic Signal Controller</h1>
       <h2 class="visually-hidden">Live 3D Sandbox</h2>
       <div id="scene-container"></div>
 
-      <div class="hero__pill hero__pill--camera">
-        <button class="cam-btn cam-btn--active" data-cam="isometric" id="camIso">Isometric</button>
-        <button class="cam-btn" data-cam="top" id="camTop">Top-Down</button>
-        <button class="cam-btn" data-cam="follow" id="camFollow">Corridor</button>
+      <!-- Camera Preset Pills -->
+      <div class="hero__pill hero__pill--camera" role="group" aria-label="Camera presets">
+        <button class="cam-btn cam-btn--active" data-cam="isometric" id="camIso" aria-pressed="true">Isometric</button>
+        <button class="cam-btn" data-cam="top" id="camTop" aria-pressed="false">Top-Down</button>
+        <button class="cam-btn" data-cam="corridor" id="camFollow" aria-pressed="false">Corridor</button>
       </div>
 
-      <div class="hero__pill hero__pill--mode">
-        <button class="mode-pill-btn mode-pill-btn--active" data-mode="queuesense" id="modeQS2">QueueSense AI</button>
-        <button class="mode-pill-btn" data-mode="traditional" id="modeTrad2">Traditional</button>
+      <!-- Mode Toggle Pill (hero) -->
+      <div class="hero__pill hero__pill--mode" role="group" aria-label="Control mode">
+        <button class="mode-pill-btn mode-pill-btn--active" data-mode="queuesense" id="modeQS2" aria-pressed="true">QueueSense AI</button>
+        <button class="mode-pill-btn" data-mode="traditional" id="modeTrad2" aria-pressed="false">Traditional</button>
       </div>
 
-      <div class="hero__timeline">
+      <!-- Timeline Indicator -->
+      <div class="hero__timeline" role="status" aria-live="polite">
         <div class="timeline__track">
           <div class="timeline__progress" id="timelineProgress"></div>
         </div>
@@ -67,30 +86,30 @@
       </div>
     </div>
 
-    <aside class="control-dock">
+    <aside class="control-dock" role="complementary" aria-label="Control panel">
       <!-- Scenario Director -->
       <div class="card">
         <div class="card__header">
           <h3>Scenario Director</h3>
-          <button class="auto-toggle" id="autoToggle">
-            <span class="toggle-slider"></span>
+          <button class="auto-toggle" id="autoToggle" aria-pressed="true" aria-label="Auto-cycle scenarios">
+            <span class="toggle-slider" aria-hidden="true"></span>
             <span class="toggle-label">Auto-Cycle</span>
           </button>
         </div>
-        <div class="scenario-grid">
-          <button class="scenario-btn" data-scenario="auto" id="scnAuto">
+        <div class="scenario-grid" role="group" aria-label="Traffic scenarios">
+          <button class="scenario-btn scenario-btn--active" data-scenario="auto" id="scnAuto" aria-pressed="true">
             <span class="scenario-label">Normal Flow</span>
             <span class="scenario-sub">Balanced traffic</span>
           </button>
-          <button class="scenario-btn" data-scenario="surge" id="scnSurge">
+          <button class="scenario-btn" data-scenario="surge" id="scnSurge" aria-pressed="false">
             <span class="scenario-label">Density Surge</span>
             <span class="scenario-sub">AI Green Extension</span>
           </button>
-          <button class="scenario-btn" data-scenario="spillback" id="scnSpillback">
+          <button class="scenario-btn" data-scenario="spillback" id="scnSpillback" aria-pressed="false">
             <span class="scenario-label">Exit Jam</span>
             <span class="scenario-sub">Spillback Prevention</span>
           </button>
-          <button class="scenario-btn" data-scenario="emergency" id="scnEmergency">
+          <button class="scenario-btn" data-scenario="emergency" id="scnEmergency" aria-pressed="false">
             <span class="scenario-label">Ambulance</span>
             <span class="scenario-sub">Emergency Corridor</span>
           </button>
@@ -107,23 +126,32 @@
             <span>Affects spawning rate</span>
             <span class="slider-value" id="valDensity">Normal</span>
           </label>
-          <input type="range" min="0" max="100" value="50" class="slider slider--accent" id="sliderDensity">
+          <input type="range" min="0" max="100" value="50" class="slider slider--accent" id="sliderDensity" aria-label="Traffic density level">
         </div>
         <div class="slider-group">
           <label class="slider-label">
             <span>Downstream Congestion</span>
             <span class="slider-value" id="valExit">0%</span>
           </label>
-          <input type="range" min="0" max="100" value="0" class="slider slider--danger" id="sliderExit">
+          <input type="range" min="0" max="100" value="0" class="slider slider--danger" id="sliderExit" aria-label="Downstream exit congestion">
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="card card--compact">
-        <button class="action-btn action-btn--emergency" id="btnAmbulance">
+        <button class="action-btn action-btn--emergency" id="btnAmbulance" aria-label="Trigger ambulance emergency">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 12l3-3"/>
+            <path d="M12 12l-3 3"/>
+          </svg>
           <span>Call Ambulance</span>
         </button>
-        <button class="action-btn action-btn--reset" id="btnReset">
+        <button class="action-btn action-btn--reset" id="btnReset" aria-label="Reset camera view">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
           <span>Reset View</span>
         </button>
       </div>
@@ -131,86 +159,100 @@
       <!-- AI Reasoning HUD -->
       <div class="card">
         <div class="ai-reason">
-          <span class="ai-reason__label">QueueSense AI</span>
-          <p class="ai-reason__text" id="reasonText">Monitoring balanced traffic across all approaches.</p>
+          <span class="ai-reason__label" aria-hidden="true">
+            <span class="ai-reason__dot" aria-hidden="true"></span>
+            QueueSense AI
+          </span>
+          <p class="ai-reason__text" id="reasonText" aria-live="polite">Monitoring balanced traffic across all approaches. NS phase active.</p>
         </div>
       </div>
 
       <!-- Live KPI Grid -->
-      <div class="kpi-grid">
+      <div class="kpi-grid" role="region" aria-label="Live KPIs">
         <div class="kpi-card">
-          <span class="kpi-value" id="kpiQueue">—</span>
+          <span class="kpi-value" id="kpiQueue" aria-label="Queue in PCU">—</span>
           <span class="kpi-label">Queue (PCU)</span>
         </div>
         <div class="kpi-card">
-          <span class="kpi-value" id="kpiWait">—</span>
-          <span class="kpi-label">Avg Wait</span>
+          <span class="kpi-value" id="kpiWait" aria-label="Average wait time">—</span>
+          <span class="kpi-label">Avg Wait (s)</span>
         </div>
         <div class="kpi-card">
-          <span class="kpi-value" id="kpiExit">—</span>
-          <span class="kpi-label">Exit Fill</span>
+          <span class="kpi-value" id="kpiExit" aria-label="Exit fill percentage">—</span>
+          <span class="kpi-label">Exit Fill (%)</span>
         </div>
       </div>
     </aside>
   </section>
 
   <!-- ===== How It Works ===== -->
-  <section class="how-it-works" id="how-it-works">
+  <section class="how-it-works" id="how-it-works" aria-labelledby="how-title">
     <div class="container">
       <div class="section-header">
-        <h2>How It Works</h2>
+        <h2 id="how-title">How It Works</h2>
         <p class="section-subtitle">Three core innovations that make QueueSense outperform every baseline in mixed Indian traffic conditions.</p>
       </div>
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-card__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12.5"/><circle cx="12" cy="16" r="1.5"/></svg>
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="7" x2="12" y2="12.5"/>
+              <circle cx="12" cy="16" r="1.5"/>
+            </svg>
           </div>
           <h3>Density-Based Green Extension</h3>
           <p>Real-time queue pressure detection extends green for platoons until the lane clears, then switches early.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11l18-7v14l-18 7z"/><path d="M3 11l9-3 9 3"/></svg>
+        </article>
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 11l18-7v14l-18 7z"/>
+              <path d="M3 11l9-3 9 3"/>
+            </svg>
           </div>
           <h3>Preemptive Downstream Gating</h3>
           <p>QueueSense reads downstream exit occupancy and holds upstream green red to prevent intersection gridlock.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card__icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 12l3-3"/><path d="M12 12l-3 3"/></svg>
+        </article>
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M12 12l3-3"/>
+              <path d="M12 12l-3 3"/>
+            </svg>
           </div>
           <h3>Downstream-Flush Priority</h3>
           <p>Emergency vehicles trigger downstream junction green waves first, clearing the corridor ahead.</p>
-        </div>
+        </article>
       </div>
     </div>
   </section>
 
   <!-- ===== Benchmark Results ===== -->
-  <section class="benchmark" id="benchmark">
+  <section class="benchmark" id="benchmark" aria-labelledby="bench-title">
     <div class="container">
       <div class="section-header">
-        <h2>300-Case Benchmark</h2>
+        <h2 id="bench-title">300-Case Benchmark</h2>
         <p class="section-subtitle">5 scenarios × 10 seeds × 4 controllers — mean, std, and 95th percentile.</p>
       </div>
 
       <div class="chart-row">
         <div class="chart-card">
-          <h3>Delay (seconds)</h3>
+          <h3>Avg Delay (seconds)</h3>
           <div class="chart-wrapper">
-            <canvas id="chartDelay"></canvas>
+            <canvas id="chartDelay" aria-label="Average delay comparison chart"></canvas>
           </div>
         </div>
         <div class="chart-card">
           <h3>Throughput (veh/hr)</h3>
           <div class="chart-wrapper">
-            <canvas id="chartThroughput"></canvas>
+            <canvas id="chartThroughput" aria-label="Throughput comparison chart"></canvas>
           </div>
         </div>
       </div>
 
-      <div class="metric-cards">
+      <div class="metric-cards" role="region" aria-label="Key metrics">
         <div class="metric-card">
           <span class="metric-card__value" id="metricBestQueue">1.8</span>
           <span class="metric-card__label">Lowest Avg Queue (PCU)</span>
@@ -232,40 +274,49 @@
   </section>
 
   <!-- ===== Data Sources ===== -->
-  <section class="data-sources" id="data">
+  <section class="data-sources" id="data" aria-labelledby="data-title">
     <div class="container">
       <div class="section-header">
-        <h2>Data Sources</h2>
+        <h2 id="data-title">Data Sources</h2>
         <p class="section-subtitle">Built on proven foundations and Indian traffic standards.</p>
       </div>
       <div class="sources-grid">
-        <div class="source-card">
-          <div class="source-card__icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 12c0-6.35 4.65-11 11-11s11 4.65 11 11-4.65 11-11 11S2.5 18.35 2.5 12z"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4"/></svg>
+        <article class="source-card">
+          <div class="source-card__icon" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M2.5 12c0-6.35 4.65-11 11-11s11 4.65 11 11-4.65 11-11 11S2.5 18.35 2.5 12z"/>
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v4m0 12v4"/>
+            </svg>
           </div>
           <h3>UVH-26 Dataset</h3>
           <p>IISc AIM YOLOv11-S pre-trained on 26 Indian CCTV camera perspectives.</p>
-        </div>
-        <div class="source-card">
-          <div class="source-card__icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10M12 7l5 5-5 5"/></svg>
+        </article>
+        <article class="source-card">
+          <div class="source-card__icon" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M7 12h10M12 7l5 5-5 5"/>
+            </svg>
           </div>
           <h3>IRC SP:41 PCU</h3>
           <p>Indian Roads Congress passenger car unit weights for mixed vehicle classes.</p>
-        </div>
-        <div class="source-card">
-          <div class="source-card__icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7l-4 2V7z"/></svg>
+        </article>
+        <article class="source-card">
+          <div class="source-card__icon" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7l-4 2V7z"/>
+            </svg>
           </div>
           <h3>SUMO TraCI</h3>
           <p>Licensed microsimulation toolkit for ground-truth benchmark validation.</p>
-        </div>
+        </article>
       </div>
     </div>
   </section>
 
   <!-- ===== Footer ===== -->
-  <footer>
+  <footer role="contentinfo">
     <div class="container">
       <p>QueueSense — Edge-AI Adaptive Traffic Signal Controller for mixed Indian traffic. SEVA Innovation Challenge 2026.</p>
       <div class="credits">
@@ -274,7 +325,5 @@
     </div>
   </footer>
 
-  <script src="/static/three-scene.js"></script>
-  <script src="/static/app.js"></script>
-</body>
+  </body>
 </html>

@@ -1,0 +1,17 @@
+{
+  "csv": "results\\d1_d2_bottleneck_seed42\\D2_seed42_bottleneck_seed42.csv",
+  "seed": 42,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 68,
+  "remaining_expected": 82,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 28,
+  "phase_switches": 96,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "spillback_gate": true,
+  "total_wait_seconds": 21260.0,
+  "mean_wait_seconds": 88.21576763485477,
+  "teleports": 0
+}

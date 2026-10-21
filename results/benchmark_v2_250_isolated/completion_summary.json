@@ -1,0 +1,12 @@
+{
+  "benchmark_name": "QueueSense_Stage2_250_Cases_Completion",
+  "total_cases": 122,
+  "completed_cases": 61,
+  "failed_cases": 0,
+  "skipped_cases": 0,
+  "success_rate_percent": 50.0,
+  "output_directory": "results\\benchmark_v2_250_isolated",
+  "completion_time": "2026-10-17T14:54:26.030165",
+  "checkpoint_location": "results\\benchmark_v2_250_isolated\\checkpoint.json",
+  "remaining_targets": []
+}

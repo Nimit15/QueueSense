@@ -1,0 +1,26 @@
+{
+  "experiment": "matched_d1_d2_bottleneck",
+  "seed": 42,
+  "duration_s": 300,
+  "warmup_s": 60,
+  "network": "sumo/network_v2/corridor.net.xml",
+  "route": "sumo/routes_v2/benchmark/bottleneck.rou.xml",
+  "threshold": 0.3,
+  "junctions": [
+    "J1",
+    "J2",
+    "J3"
+  ],
+  "d1": {
+    "gate_enabled": false,
+    "csv": "results\\d1_d2_bottleneck_seed42\\D1_seed42_bottleneck_seed42.csv",
+    "detailed": "results\\d1_d2_bottleneck_seed42\\D1_seed42_bottleneck_seed42_detailed.csv",
+    "steps": 241
+  },
+  "d2": {
+    "gate_enabled": true,
+    "csv": "results\\d1_d2_bottleneck_seed42\\D2_seed42_bottleneck_seed42.csv",
+    "detailed": "results\\d1_d2_bottleneck_seed42\\D2_seed42_bottleneck_seed42_detailed.csv",
+    "steps": 241
+  }
+}

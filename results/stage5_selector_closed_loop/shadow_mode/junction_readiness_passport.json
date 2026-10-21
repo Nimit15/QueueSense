@@ -1,0 +1,204 @@
+{
+  "passports": [
+    {
+      "junction_id": "J1",
+      "timestamp": "2026-10-20T10:33:07.663502+00:00",
+      "overall_pass": true,
+      "pass_count": 8,
+      "total_checks": 8,
+      "checks": [
+        {
+          "check_id": 1,
+          "name": "Movement-to-receiving-edge topology mapping",
+          "passed": true,
+          "details": "All 4 approaches have valid receiving edges in SUMO network",
+          "evidence": "Verified: {'north': ['out_north_1'], 'east': ['art_west_1'], 'west': ['in_west']}"
+        },
+        {
+          "check_id": 2,
+          "name": "Camera ROI polygon validity & stop-line coverage",
+          "passed": true,
+          "details": "All 4 approaches have valid ROI polygons covering stop-line zones",
+          "evidence": "Config: data\\roi_configs\\default.json"
+        },
+        {
+          "check_id": 3,
+          "name": "Safety supervisor timings",
+          "passed": true,
+          "details": "min_green>=10s, yellow>=3s, all_red>=2s verified",
+          "evidence": "min_green=10.0, yellow=5.0, all_red=2.0"
+        },
+        {
+          "check_id": 4,
+          "name": "Watchdog 3-strike fallback active",
+          "passed": true,
+          "details": "Watchdog triggers fallback after 3 consecutive invalid states",
+          "evidence": "consecutive_invalid=3, max=3"
+        },
+        {
+          "check_id": 5,
+          "name": "UNKNOWN sensor state isolation",
+          "passed": true,
+          "details": "UNKNOWN state correctly isolated (never mapped to CLEAR)",
+          "evidence": "capacity_status=UNKNOWN"
+        },
+        {
+          "check_id": 6,
+          "name": "Schmitt hysteresis bounds (0.22 < 0.30)",
+          "passed": true,
+          "details": "clear_exit=0.22 < soft_risk=0.24 < spillback=0.3 verified",
+          "evidence": "clear_exit=0.22, soft_risk=0.24, spillback=0.3"
+        },
+        {
+          "check_id": 7,
+          "name": "Per-junction instance isolation",
+          "passed": true,
+          "details": "J1, J2, J3 have independent selector instances",
+          "evidence": "ids=[1878873968080, 1878873842192, 1878874133696]"
+        },
+        {
+          "check_id": 8,
+          "name": "Shadow-mode receipt logging",
+          "passed": true,
+          "details": "DecisionReceipt emitted with all 13 required fields",
+          "evidence": "Fields: ['timestamp', 'junction_id', 'capacity_status', 'selected_mode', 'max_downstream_occupancy', 'trigger_edge_id', 'ungated_phase', 'gated_phase', 'gate_intervened', 'safety_override', 'applied_phase', 'reason_code', 'reason']"
+        }
+      ]
+    },
+    {
+      "junction_id": "J2",
+      "timestamp": "2026-10-20T10:33:07.666507+00:00",
+      "overall_pass": true,
+      "pass_count": 8,
+      "total_checks": 8,
+      "checks": [
+        {
+          "check_id": 1,
+          "name": "Movement-to-receiving-edge topology mapping",
+          "passed": true,
+          "details": "All 4 approaches have valid receiving edges in SUMO network",
+          "evidence": "Verified: {'north': ['out_north_2'], 'east': ['art_west_2'], 'west': ['art_east_1']}"
+        },
+        {
+          "check_id": 2,
+          "name": "Camera ROI polygon validity & stop-line coverage",
+          "passed": true,
+          "details": "All 4 approaches have valid ROI polygons covering stop-line zones",
+          "evidence": "Config: data\\roi_configs\\default.json"
+        },
+        {
+          "check_id": 3,
+          "name": "Safety supervisor timings",
+          "passed": true,
+          "details": "min_green>=10s, yellow>=3s, all_red>=2s verified",
+          "evidence": "min_green=10.0, yellow=5.0, all_red=2.0"
+        },
+        {
+          "check_id": 4,
+          "name": "Watchdog 3-strike fallback active",
+          "passed": true,
+          "details": "Watchdog triggers fallback after 3 consecutive invalid states",
+          "evidence": "consecutive_invalid=3, max=3"
+        },
+        {
+          "check_id": 5,
+          "name": "UNKNOWN sensor state isolation",
+          "passed": true,
+          "details": "UNKNOWN state correctly isolated (never mapped to CLEAR)",
+          "evidence": "capacity_status=UNKNOWN"
+        },
+        {
+          "check_id": 6,
+          "name": "Schmitt hysteresis bounds (0.22 < 0.30)",
+          "passed": true,
+          "details": "clear_exit=0.22 < soft_risk=0.24 < spillback=0.3 verified",
+          "evidence": "clear_exit=0.22, soft_risk=0.24, spillback=0.3"
+        },
+        {
+          "check_id": 7,
+          "name": "Per-junction instance isolation",
+          "passed": true,
+          "details": "J1, J2, J3 have independent selector instances",
+          "evidence": "ids=[1878592301024, 1878874141520, 1878874140992]"
+        },
+        {
+          "check_id": 8,
+          "name": "Shadow-mode receipt logging",
+          "passed": true,
+          "details": "DecisionReceipt emitted with all 13 required fields",
+          "evidence": "Fields: ['timestamp', 'junction_id', 'capacity_status', 'selected_mode', 'max_downstream_occupancy', 'trigger_edge_id', 'ungated_phase', 'gated_phase', 'gate_intervened', 'safety_override', 'applied_phase', 'reason_code', 'reason']"
+        }
+      ]
+    },
+    {
+      "junction_id": "J3",
+      "timestamp": "2026-10-20T10:33:07.671689+00:00",
+      "overall_pass": true,
+      "pass_count": 8,
+      "total_checks": 8,
+      "checks": [
+        {
+          "check_id": 1,
+          "name": "Movement-to-receiving-edge topology mapping",
+          "passed": true,
+          "details": "All 4 approaches have valid receiving edges in SUMO network",
+          "evidence": "Verified: {'north': ['out_north_3'], 'east': ['in_east'], 'west': ['art_east_2']}"
+        },
+        {
+          "check_id": 2,
+          "name": "Camera ROI polygon validity & stop-line coverage",
+          "passed": true,
+          "details": "All 4 approaches have valid ROI polygons covering stop-line zones",
+          "evidence": "Config: data\\roi_configs\\default.json"
+        },
+        {
+          "check_id": 3,
+          "name": "Safety supervisor timings",
+          "passed": true,
+          "details": "min_green>=10s, yellow>=3s, all_red>=2s verified",
+          "evidence": "min_green=10.0, yellow=5.0, all_red=2.0"
+        },
+        {
+          "check_id": 4,
+          "name": "Watchdog 3-strike fallback active",
+          "passed": true,
+          "details": "Watchdog triggers fallback after 3 consecutive invalid states",
+          "evidence": "consecutive_invalid=3, max=3"
+        },
+        {
+          "check_id": 5,
+          "name": "UNKNOWN sensor state isolation",
+          "passed": true,
+          "details": "UNKNOWN state correctly isolated (never mapped to CLEAR)",
+          "evidence": "capacity_status=UNKNOWN"
+        },
+        {
+          "check_id": 6,
+          "name": "Schmitt hysteresis bounds (0.22 < 0.30)",
+          "passed": true,
+          "details": "clear_exit=0.22 < soft_risk=0.24 < spillback=0.3 verified",
+          "evidence": "clear_exit=0.22, soft_risk=0.24, spillback=0.3"
+        },
+        {
+          "check_id": 7,
+          "name": "Per-junction instance isolation",
+          "passed": true,
+          "details": "J1, J2, J3 have independent selector instances",
+          "evidence": "ids=[1878873841760, 1878874411744, 1878874411264]"
+        },
+        {
+          "check_id": 8,
+          "name": "Shadow-mode receipt logging",
+          "passed": true,
+          "details": "DecisionReceipt emitted with all 13 required fields",
+          "evidence": "Fields: ['timestamp', 'junction_id', 'capacity_status', 'selected_mode', 'max_downstream_occupancy', 'trigger_edge_id', 'ungated_phase', 'gated_phase', 'gate_intervened', 'safety_override', 'applied_phase', 'reason_code', 'reason']"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_junctions": 3,
+    "fully_passed": 3,
+    "checks_per_junction": 8
+  }
+}

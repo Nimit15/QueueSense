@@ -1,0 +1,33 @@
+{
+  "experiment": "stage2_end_to_end_matched_d1_d2_surge49",
+  "seed": 49,
+  "scenario": "surge",
+  "duration_s": 300,
+  "warmup_s": 60,
+  "network": "sumo/network_v2/corridor.net.xml",
+  "route": "sumo/routes_v2/benchmark/surge.rou.xml",
+  "threshold": 0.3,
+  "junctions": [
+    "J1",
+    "J2",
+    "J3"
+  ],
+  "controller_instances_per_junction": true,
+  "only_controller_difference": "spillback_gate_enabled",
+  "d1": {
+    "gate_enabled": false,
+    "csv": "results\\stage2_surge_seed49_end_to_end\\D1_seed49_surge_seed49.csv",
+    "detailed": "results\\stage2_surge_seed49_end_to_end\\D1_seed49_surge_seed49_detailed.csv",
+    "trace": "results\\stage2_surge_seed49_end_to_end\\D1_seed49_surge_seed49_decision_trace.csv",
+    "summary": "results\\stage2_surge_seed49_end_to_end\\D1_seed49_surge_seed49_summary.json",
+    "steps": 241
+  },
+  "d2": {
+    "gate_enabled": true,
+    "csv": "results\\stage2_surge_seed49_end_to_end\\D2_seed49_surge_seed49.csv",
+    "detailed": "results\\stage2_surge_seed49_end_to_end\\D2_seed49_surge_seed49_detailed.csv",
+    "trace": "results\\stage2_surge_seed49_end_to_end\\D2_seed49_surge_seed49_decision_trace.csv",
+    "summary": "results\\stage2_surge_seed49_end_to_end\\D2_seed49_surge_seed49_summary.json",
+    "steps": 241
+  }
+}

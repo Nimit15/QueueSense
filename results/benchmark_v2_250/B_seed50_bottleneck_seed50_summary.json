@@ -1,0 +1,17 @@
+{
+  "csv": "results\\benchmark_v2_250\\B_seed50_bottleneck_seed50.csv",
+  "seed": 50,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 69,
+  "remaining_expected": 80,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 0,
+  "phase_switches": 66,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "spillback_gate": false,
+  "total_wait_seconds": 21122.0,
+  "mean_wait_seconds": 87.64315352697095,
+  "teleports": 0
+}

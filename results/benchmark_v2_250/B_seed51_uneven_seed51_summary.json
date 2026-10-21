@@ -1,0 +1,17 @@
+{
+  "csv": "results\\benchmark_v2_250\\B_seed51_uneven_seed51.csv",
+  "seed": 51,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 70,
+  "remaining_expected": 59,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 0,
+  "phase_switches": 66,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "spillback_gate": false,
+  "total_wait_seconds": 15472.0,
+  "mean_wait_seconds": 64.19917012448133,
+  "teleports": 0
+}

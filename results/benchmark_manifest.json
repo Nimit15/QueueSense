@@ -1,0 +1,4809 @@
+{
+  "expected": 200,
+  "found": 200,
+  "missing": [],
+  "duplicates": {
+    "balanced/A/42": [
+      "results\\benchmark_full\\balanced\\A_seed42_20261014_143251.csv",
+      "results\\benchmark_full\\balanced\\A_seed42_20261014_143522.csv"
+    ],
+    "balanced/A/43": [
+      "results\\benchmark_full\\balanced\\A_seed43_20261014_143252.csv",
+      "results\\benchmark_full\\balanced\\A_seed43_20261014_143523.csv"
+    ],
+    "balanced/A/44": [
+      "results\\benchmark_full\\balanced\\A_seed44_20261014_143253.csv",
+      "results\\benchmark_full\\balanced\\A_seed44_20261014_143524.csv"
+    ],
+    "balanced/A/45": [
+      "results\\benchmark_full\\balanced\\A_seed45_20261014_143254.csv",
+      "results\\benchmark_full\\balanced\\A_seed45_20261014_143525.csv"
+    ],
+    "balanced/A/46": [
+      "results\\benchmark_full\\balanced\\A_seed46_20261014_143255.csv",
+      "results\\benchmark_full\\balanced\\A_seed46_20261014_143526.csv"
+    ],
+    "balanced/A/47": [
+      "results\\benchmark_full\\balanced\\A_seed47_20261014_143256.csv",
+      "results\\benchmark_full\\balanced\\A_seed47_20261014_143528.csv"
+    ],
+    "balanced/A/48": [
+      "results\\benchmark_full\\balanced\\A_seed48_20261014_143257.csv",
+      "results\\benchmark_full\\balanced\\A_seed48_20261014_143529.csv"
+    ],
+    "balanced/A/49": [
+      "results\\benchmark_full\\balanced\\A_seed49_20261014_143258.csv",
+      "results\\benchmark_full\\balanced\\A_seed49_20261014_143530.csv"
+    ],
+    "balanced/A/50": [
+      "results\\benchmark_full\\balanced\\A_seed50_20261014_143259.csv",
+      "results\\benchmark_full\\balanced\\A_seed50_20261014_143531.csv"
+    ],
+    "balanced/A/51": [
+      "results\\benchmark_full\\balanced\\A_seed51_20261014_143300.csv",
+      "results\\benchmark_full\\balanced\\A_seed51_20261014_143532.csv"
+    ],
+    "balanced/B/42": [
+      "results\\benchmark_full\\balanced\\B_seed42_20261014_143301.csv",
+      "results\\benchmark_full\\balanced\\B_seed42_20261014_143533.csv"
+    ],
+    "balanced/B/43": [
+      "results\\benchmark_full\\balanced\\B_seed43_20261014_143302.csv",
+      "results\\benchmark_full\\balanced\\B_seed43_20261014_143534.csv"
+    ],
+    "balanced/B/44": [
+      "results\\benchmark_full\\balanced\\B_seed44_20261014_143304.csv",
+      "results\\benchmark_full\\balanced\\B_seed44_20261014_143535.csv"
+    ],
+    "balanced/B/45": [
+      "results\\benchmark_full\\balanced\\B_seed45_20261014_143305.csv",
+      "results\\benchmark_full\\balanced\\B_seed45_20261014_143536.csv"
+    ],
+    "balanced/B/46": [
+      "results\\benchmark_full\\balanced\\B_seed46_20261014_143306.csv",
+      "results\\benchmark_full\\balanced\\B_seed46_20261014_143537.csv"
+    ],
+    "balanced/B/47": [
+      "results\\benchmark_full\\balanced\\B_seed47_20261014_143307.csv",
+      "results\\benchmark_full\\balanced\\B_seed47_20261014_143538.csv"
+    ],
+    "balanced/B/48": [
+      "results\\benchmark_full\\balanced\\B_seed48_20261014_143308.csv",
+      "results\\benchmark_full\\balanced\\B_seed48_20261014_143539.csv"
+    ],
+    "balanced/B/49": [
+      "results\\benchmark_full\\balanced\\B_seed49_20261014_143309.csv",
+      "results\\benchmark_full\\balanced\\B_seed49_20261014_143540.csv"
+    ],
+    "balanced/B/50": [
+      "results\\benchmark_full\\balanced\\B_seed50_20261014_143310.csv",
+      "results\\benchmark_full\\balanced\\B_seed50_20261014_143541.csv"
+    ],
+    "balanced/B/51": [
+      "results\\benchmark_full\\balanced\\B_seed51_20261014_143311.csv",
+      "results\\benchmark_full\\balanced\\B_seed51_20261014_143542.csv"
+    ],
+    "balanced/C/42": [
+      "results\\benchmark_full\\balanced\\C_seed42_20261014_143312.csv",
+      "results\\benchmark_full\\balanced\\C_seed42_20261014_143544.csv"
+    ],
+    "balanced/C/43": [
+      "results\\benchmark_full\\balanced\\C_seed43_20261014_143313.csv",
+      "results\\benchmark_full\\balanced\\C_seed43_20261014_143545.csv"
+    ],
+    "balanced/C/44": [
+      "results\\benchmark_full\\balanced\\C_seed44_20261014_143314.csv",
+      "results\\benchmark_full\\balanced\\C_seed44_20261014_143546.csv"
+    ],
+    "balanced/C/45": [
+      "results\\benchmark_full\\balanced\\C_seed45_20261014_143315.csv",
+      "results\\benchmark_full\\balanced\\C_seed45_20261014_143547.csv"
+    ],
+    "balanced/C/46": [
+      "results\\benchmark_full\\balanced\\C_seed46_20261014_143316.csv",
+      "results\\benchmark_full\\balanced\\C_seed46_20261014_143548.csv"
+    ],
+    "balanced/C/47": [
+      "results\\benchmark_full\\balanced\\C_seed47_20261014_143317.csv",
+      "results\\benchmark_full\\balanced\\C_seed47_20261014_143549.csv"
+    ],
+    "balanced/C/48": [
+      "results\\benchmark_full\\balanced\\C_seed48_20261014_143318.csv",
+      "results\\benchmark_full\\balanced\\C_seed48_20261014_143550.csv"
+    ],
+    "balanced/C/49": [
+      "results\\benchmark_full\\balanced\\C_seed49_20261014_143319.csv",
+      "results\\benchmark_full\\balanced\\C_seed49_20261014_143551.csv"
+    ],
+    "balanced/C/50": [
+      "results\\benchmark_full\\balanced\\C_seed50_20261014_143320.csv",
+      "results\\benchmark_full\\balanced\\C_seed50_20261014_143552.csv"
+    ],
+    "balanced/C/51": [
+      "results\\benchmark_full\\balanced\\C_seed51_20261014_143321.csv",
+      "results\\benchmark_full\\balanced\\C_seed51_20261014_143553.csv"
+    ],
+    "balanced/D/42": [
+      "results\\benchmark_full\\balanced\\D_seed42_20261014_143322.csv",
+      "results\\benchmark_full\\balanced\\D_seed42_20261014_143554.csv"
+    ],
+    "balanced/D/43": [
+      "results\\benchmark_full\\balanced\\D_seed43_20261014_143323.csv",
+      "results\\benchmark_full\\balanced\\D_seed43_20261014_143555.csv"
+    ],
+    "balanced/D/44": [
+      "results\\benchmark_full\\balanced\\D_seed44_20261014_143324.csv",
+      "results\\benchmark_full\\balanced\\D_seed44_20261014_143556.csv"
+    ],
+    "balanced/D/45": [
+      "results\\benchmark_full\\balanced\\D_seed45_20261014_143325.csv",
+      "results\\benchmark_full\\balanced\\D_seed45_20261014_143557.csv"
+    ],
+    "balanced/D/46": [
+      "results\\benchmark_full\\balanced\\D_seed46_20261014_143326.csv",
+      "results\\benchmark_full\\balanced\\D_seed46_20261014_143558.csv"
+    ],
+    "balanced/D/47": [
+      "results\\benchmark_full\\balanced\\D_seed47_20261014_143327.csv",
+      "results\\benchmark_full\\balanced\\D_seed47_20261014_143559.csv"
+    ],
+    "balanced/D/48": [
+      "results\\benchmark_full\\balanced\\D_seed48_20261014_143328.csv",
+      "results\\benchmark_full\\balanced\\D_seed48_20261014_143600.csv"
+    ],
+    "balanced/D/49": [
+      "results\\benchmark_full\\balanced\\D_seed49_20261014_143329.csv",
+      "results\\benchmark_full\\balanced\\D_seed49_20261014_143601.csv"
+    ],
+    "balanced/D/50": [
+      "results\\benchmark_full\\balanced\\D_seed50_20261014_143330.csv",
+      "results\\benchmark_full\\balanced\\D_seed50_20261014_143601.csv"
+    ],
+    "balanced/D/51": [
+      "results\\benchmark_full\\balanced\\D_seed51_20261014_143331.csv",
+      "results\\benchmark_full\\balanced\\D_seed51_20261014_143602.csv"
+    ],
+    "bottleneck/A/42": [
+      "results\\benchmark_full\\bottleneck\\A_seed42_20261014_143413.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed42_20261014_143646.csv"
+    ],
+    "bottleneck/A/43": [
+      "results\\benchmark_full\\bottleneck\\A_seed43_20261014_143414.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed43_20261014_143647.csv"
+    ],
+    "bottleneck/A/44": [
+      "results\\benchmark_full\\bottleneck\\A_seed44_20261014_143415.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed44_20261014_143648.csv"
+    ],
+    "bottleneck/A/45": [
+      "results\\benchmark_full\\bottleneck\\A_seed45_20261014_143416.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed45_20261014_143649.csv"
+    ],
+    "bottleneck/A/46": [
+      "results\\benchmark_full\\bottleneck\\A_seed46_20261014_143418.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed46_20261014_143650.csv"
+    ],
+    "bottleneck/A/47": [
+      "results\\benchmark_full\\bottleneck\\A_seed47_20261014_143419.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed47_20261014_143652.csv"
+    ],
+    "bottleneck/A/48": [
+      "results\\benchmark_full\\bottleneck\\A_seed48_20261014_143420.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed48_20261014_143653.csv"
+    ],
+    "bottleneck/A/49": [
+      "results\\benchmark_full\\bottleneck\\A_seed49_20261014_143421.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed49_20261014_143654.csv"
+    ],
+    "bottleneck/A/50": [
+      "results\\benchmark_full\\bottleneck\\A_seed50_20261014_143422.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed50_20261014_143655.csv"
+    ],
+    "bottleneck/A/51": [
+      "results\\benchmark_full\\bottleneck\\A_seed51_20261014_143423.csv",
+      "results\\benchmark_full\\bottleneck\\A_seed51_20261014_143656.csv"
+    ],
+    "bottleneck/B/42": [
+      "results\\benchmark_full\\bottleneck\\B_seed42_20261014_143425.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed42_20261014_143658.csv"
+    ],
+    "bottleneck/B/43": [
+      "results\\benchmark_full\\bottleneck\\B_seed43_20261014_143426.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed43_20261014_143659.csv"
+    ],
+    "bottleneck/B/44": [
+      "results\\benchmark_full\\bottleneck\\B_seed44_20261014_143427.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed44_20261014_143700.csv"
+    ],
+    "bottleneck/B/45": [
+      "results\\benchmark_full\\bottleneck\\B_seed45_20261014_143428.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed45_20261014_143701.csv"
+    ],
+    "bottleneck/B/46": [
+      "results\\benchmark_full\\bottleneck\\B_seed46_20261014_143429.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed46_20261014_143702.csv"
+    ],
+    "bottleneck/B/47": [
+      "results\\benchmark_full\\bottleneck\\B_seed47_20261014_143430.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed47_20261014_143703.csv"
+    ],
+    "bottleneck/B/48": [
+      "results\\benchmark_full\\bottleneck\\B_seed48_20261014_143431.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed48_20261014_143705.csv"
+    ],
+    "bottleneck/B/49": [
+      "results\\benchmark_full\\bottleneck\\B_seed49_20261014_143432.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed49_20261014_143706.csv"
+    ],
+    "bottleneck/B/50": [
+      "results\\benchmark_full\\bottleneck\\B_seed50_20261014_143434.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed50_20261014_143707.csv"
+    ],
+    "bottleneck/B/51": [
+      "results\\benchmark_full\\bottleneck\\B_seed51_20261014_143435.csv",
+      "results\\benchmark_full\\bottleneck\\B_seed51_20261014_143708.csv"
+    ],
+    "bottleneck/C/42": [
+      "results\\benchmark_full\\bottleneck\\C_seed42_20261014_143436.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed42_20261014_143709.csv"
+    ],
+    "bottleneck/C/43": [
+      "results\\benchmark_full\\bottleneck\\C_seed43_20261014_143437.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed43_20261014_143710.csv"
+    ],
+    "bottleneck/C/44": [
+      "results\\benchmark_full\\bottleneck\\C_seed44_20261014_143438.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed44_20261014_143712.csv"
+    ],
+    "bottleneck/C/45": [
+      "results\\benchmark_full\\bottleneck\\C_seed45_20261014_143439.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed45_20261014_143713.csv"
+    ],
+    "bottleneck/C/46": [
+      "results\\benchmark_full\\bottleneck\\C_seed46_20261014_143440.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed46_20261014_143714.csv"
+    ],
+    "bottleneck/C/47": [
+      "results\\benchmark_full\\bottleneck\\C_seed47_20261014_143441.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed47_20261014_143715.csv"
+    ],
+    "bottleneck/C/48": [
+      "results\\benchmark_full\\bottleneck\\C_seed48_20261014_143442.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed48_20261014_143716.csv"
+    ],
+    "bottleneck/C/49": [
+      "results\\benchmark_full\\bottleneck\\C_seed49_20261014_143443.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed49_20261014_143717.csv"
+    ],
+    "bottleneck/C/50": [
+      "results\\benchmark_full\\bottleneck\\C_seed50_20261014_143444.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed50_20261014_143718.csv"
+    ],
+    "bottleneck/C/51": [
+      "results\\benchmark_full\\bottleneck\\C_seed51_20261014_143445.csv",
+      "results\\benchmark_full\\bottleneck\\C_seed51_20261014_143720.csv"
+    ],
+    "bottleneck/D/42": [
+      "results\\benchmark_full\\bottleneck\\D_seed42_20261014_143446.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed42_20261014_143721.csv"
+    ],
+    "bottleneck/D/43": [
+      "results\\benchmark_full\\bottleneck\\D_seed43_20261014_143447.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed43_20261014_143722.csv"
+    ],
+    "bottleneck/D/44": [
+      "results\\benchmark_full\\bottleneck\\D_seed44_20261014_143449.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed44_20261014_143723.csv"
+    ],
+    "bottleneck/D/45": [
+      "results\\benchmark_full\\bottleneck\\D_seed45_20261014_143450.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed45_20261014_143724.csv"
+    ],
+    "bottleneck/D/46": [
+      "results\\benchmark_full\\bottleneck\\D_seed46_20261014_143451.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed46_20261014_143725.csv"
+    ],
+    "bottleneck/D/47": [
+      "results\\benchmark_full\\bottleneck\\D_seed47_20261014_143453.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed47_20261014_143727.csv"
+    ],
+    "bottleneck/D/48": [
+      "results\\benchmark_full\\bottleneck\\D_seed48_20261014_143454.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed48_20261014_143728.csv"
+    ],
+    "bottleneck/D/49": [
+      "results\\benchmark_full\\bottleneck\\D_seed49_20261014_143455.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed49_20261014_143729.csv"
+    ],
+    "bottleneck/D/50": [
+      "results\\benchmark_full\\bottleneck\\D_seed50_20261014_143456.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed50_20261014_143730.csv"
+    ],
+    "bottleneck/D/51": [
+      "results\\benchmark_full\\bottleneck\\D_seed51_20261014_143458.csv",
+      "results\\benchmark_full\\bottleneck\\D_seed51_20261014_143731.csv"
+    ],
+    "light/A/42": [
+      "results\\benchmark_full\\light\\A_seed42_20261014_143212.csv",
+      "results\\benchmark_full\\light\\A_seed42_20261014_143445.csv"
+    ],
+    "light/A/43": [
+      "results\\benchmark_full\\light\\A_seed43_20261014_143214.csv",
+      "results\\benchmark_full\\light\\A_seed43_20261014_143446.csv"
+    ],
+    "light/A/44": [
+      "results\\benchmark_full\\light\\A_seed44_20261014_143215.csv",
+      "results\\benchmark_full\\light\\A_seed44_20261014_143447.csv"
+    ],
+    "light/A/45": [
+      "results\\benchmark_full\\light\\A_seed45_20261014_143216.csv",
+      "results\\benchmark_full\\light\\A_seed45_20261014_143448.csv"
+    ],
+    "light/A/46": [
+      "results\\benchmark_full\\light\\A_seed46_20261014_143217.csv",
+      "results\\benchmark_full\\light\\A_seed46_20261014_143449.csv"
+    ],
+    "light/A/47": [
+      "results\\benchmark_full\\light\\A_seed47_20261014_143218.csv",
+      "results\\benchmark_full\\light\\A_seed47_20261014_143450.csv"
+    ],
+    "light/A/48": [
+      "results\\benchmark_full\\light\\A_seed48_20261014_143219.csv",
+      "results\\benchmark_full\\light\\A_seed48_20261014_143451.csv"
+    ],
+    "light/A/49": [
+      "results\\benchmark_full\\light\\A_seed49_20261014_143220.csv",
+      "results\\benchmark_full\\light\\A_seed49_20261014_143452.csv"
+    ],
+    "light/A/50": [
+      "results\\benchmark_full\\light\\A_seed50_20261014_143221.csv",
+      "results\\benchmark_full\\light\\A_seed50_20261014_143453.csv"
+    ],
+    "light/A/51": [
+      "results\\benchmark_full\\light\\A_seed51_20261014_143222.csv",
+      "results\\benchmark_full\\light\\A_seed51_20261014_143454.csv"
+    ],
+    "light/B/42": [
+      "results\\benchmark_full\\light\\B_seed42_20261014_143222.csv",
+      "results\\benchmark_full\\light\\B_seed42_20261014_143455.csv"
+    ],
+    "light/B/43": [
+      "results\\benchmark_full\\light\\B_seed43_20261014_143223.csv",
+      "results\\benchmark_full\\light\\B_seed43_20261014_143456.csv"
+    ],
+    "light/B/44": [
+      "results\\benchmark_full\\light\\B_seed44_20261014_143224.csv",
+      "results\\benchmark_full\\light\\B_seed44_20261014_143457.csv"
+    ],
+    "light/B/45": [
+      "results\\benchmark_full\\light\\B_seed45_20261014_143225.csv",
+      "results\\benchmark_full\\light\\B_seed45_20261014_143458.csv"
+    ],
+    "light/B/46": [
+      "results\\benchmark_full\\light\\B_seed46_20261014_143226.csv",
+      "results\\benchmark_full\\light\\B_seed46_20261014_143459.csv"
+    ],
+    "light/B/47": [
+      "results\\benchmark_full\\light\\B_seed47_20261014_143227.csv",
+      "results\\benchmark_full\\light\\B_seed47_20261014_143500.csv"
+    ],
+    "light/B/48": [
+      "results\\benchmark_full\\light\\B_seed48_20261014_143228.csv",
+      "results\\benchmark_full\\light\\B_seed48_20261014_143501.csv"
+    ],
+    "light/B/49": [
+      "results\\benchmark_full\\light\\B_seed49_20261014_143229.csv",
+      "results\\benchmark_full\\light\\B_seed49_20261014_143501.csv"
+    ],
+    "light/B/50": [
+      "results\\benchmark_full\\light\\B_seed50_20261014_143230.csv",
+      "results\\benchmark_full\\light\\B_seed50_20261014_143502.csv"
+    ],
+    "light/B/51": [
+      "results\\benchmark_full\\light\\B_seed51_20261014_143231.csv",
+      "results\\benchmark_full\\light\\B_seed51_20261014_143503.csv"
+    ],
+    "light/C/42": [
+      "results\\benchmark_full\\light\\C_seed42_20261014_143232.csv",
+      "results\\benchmark_full\\light\\C_seed42_20261014_143504.csv"
+    ],
+    "light/C/43": [
+      "results\\benchmark_full\\light\\C_seed43_20261014_143233.csv",
+      "results\\benchmark_full\\light\\C_seed43_20261014_143505.csv"
+    ],
+    "light/C/44": [
+      "results\\benchmark_full\\light\\C_seed44_20261014_143234.csv",
+      "results\\benchmark_full\\light\\C_seed44_20261014_143506.csv"
+    ],
+    "light/C/45": [
+      "results\\benchmark_full\\light\\C_seed45_20261014_143235.csv",
+      "results\\benchmark_full\\light\\C_seed45_20261014_143507.csv"
+    ],
+    "light/C/46": [
+      "results\\benchmark_full\\light\\C_seed46_20261014_143236.csv",
+      "results\\benchmark_full\\light\\C_seed46_20261014_143508.csv"
+    ],
+    "light/C/47": [
+      "results\\benchmark_full\\light\\C_seed47_20261014_143237.csv",
+      "results\\benchmark_full\\light\\C_seed47_20261014_143509.csv"
+    ],
+    "light/C/48": [
+      "results\\benchmark_full\\light\\C_seed48_20261014_143238.csv",
+      "results\\benchmark_full\\light\\C_seed48_20261014_143510.csv"
+    ],
+    "light/C/49": [
+      "results\\benchmark_full\\light\\C_seed49_20261014_143239.csv",
+      "results\\benchmark_full\\light\\C_seed49_20261014_143511.csv"
+    ],
+    "light/C/50": [
+      "results\\benchmark_full\\light\\C_seed50_20261014_143240.csv",
+      "results\\benchmark_full\\light\\C_seed50_20261014_143512.csv"
+    ],
+    "light/C/51": [
+      "results\\benchmark_full\\light\\C_seed51_20261014_143241.csv",
+      "results\\benchmark_full\\light\\C_seed51_20261014_143513.csv"
+    ],
+    "light/D/42": [
+      "results\\benchmark_full\\light\\D_seed42_20261014_143242.csv",
+      "results\\benchmark_full\\light\\D_seed42_20261014_143513.csv"
+    ],
+    "light/D/43": [
+      "results\\benchmark_full\\light\\D_seed43_20261014_143243.csv",
+      "results\\benchmark_full\\light\\D_seed43_20261014_143514.csv"
+    ],
+    "light/D/44": [
+      "results\\benchmark_full\\light\\D_seed44_20261014_143243.csv",
+      "results\\benchmark_full\\light\\D_seed44_20261014_143515.csv"
+    ],
+    "light/D/45": [
+      "results\\benchmark_full\\light\\D_seed45_20261014_143244.csv",
+      "results\\benchmark_full\\light\\D_seed45_20261014_143516.csv"
+    ],
+    "light/D/46": [
+      "results\\benchmark_full\\light\\D_seed46_20261014_143245.csv",
+      "results\\benchmark_full\\light\\D_seed46_20261014_143517.csv"
+    ],
+    "light/D/47": [
+      "results\\benchmark_full\\light\\D_seed47_20261014_143246.csv",
+      "results\\benchmark_full\\light\\D_seed47_20261014_143518.csv"
+    ],
+    "light/D/48": [
+      "results\\benchmark_full\\light\\D_seed48_20261014_143247.csv",
+      "results\\benchmark_full\\light\\D_seed48_20261014_143519.csv"
+    ],
+    "light/D/49": [
+      "results\\benchmark_full\\light\\D_seed49_20261014_143248.csv",
+      "results\\benchmark_full\\light\\D_seed49_20261014_143520.csv"
+    ],
+    "light/D/50": [
+      "results\\benchmark_full\\light\\D_seed50_20261014_143249.csv",
+      "results\\benchmark_full\\light\\D_seed50_20261014_143520.csv"
+    ],
+    "light/D/51": [
+      "results\\benchmark_full\\light\\D_seed51_20261014_143250.csv",
+      "results\\benchmark_full\\light\\D_seed51_20261014_143521.csv"
+    ],
+    "surge/A/42": [
+      "results\\benchmark_full\\surge\\A_seed42_20261014_143459.csv",
+      "results\\benchmark_full\\surge\\A_seed42_20261014_143733.csv"
+    ],
+    "surge/A/43": [
+      "results\\benchmark_full\\surge\\A_seed43_20261014_143501.csv",
+      "results\\benchmark_full\\surge\\A_seed43_20261014_143734.csv"
+    ],
+    "surge/A/44": [
+      "results\\benchmark_full\\surge\\A_seed44_20261014_143502.csv",
+      "results\\benchmark_full\\surge\\A_seed44_20261014_143736.csv"
+    ],
+    "surge/A/45": [
+      "results\\benchmark_full\\surge\\A_seed45_20261014_143504.csv",
+      "results\\benchmark_full\\surge\\A_seed45_20261014_143737.csv"
+    ],
+    "surge/A/46": [
+      "results\\benchmark_full\\surge\\A_seed46_20261014_143505.csv",
+      "results\\benchmark_full\\surge\\A_seed46_20261014_143739.csv"
+    ],
+    "surge/A/47": [
+      "results\\benchmark_full\\surge\\A_seed47_20261014_143507.csv",
+      "results\\benchmark_full\\surge\\A_seed47_20261014_143740.csv"
+    ],
+    "surge/A/48": [
+      "results\\benchmark_full\\surge\\A_seed48_20261014_143508.csv",
+      "results\\benchmark_full\\surge\\A_seed48_20261014_143742.csv"
+    ],
+    "surge/A/49": [
+      "results\\benchmark_full\\surge\\A_seed49_20261014_143510.csv",
+      "results\\benchmark_full\\surge\\A_seed49_20261014_143744.csv"
+    ],
+    "surge/A/50": [
+      "results\\benchmark_full\\surge\\A_seed50_20261014_143511.csv",
+      "results\\benchmark_full\\surge\\A_seed50_20261014_143745.csv"
+    ],
+    "surge/A/51": [
+      "results\\benchmark_full\\surge\\A_seed51_20261014_143513.csv",
+      "results\\benchmark_full\\surge\\A_seed51_20261014_143747.csv"
+    ],
+    "surge/B/42": [
+      "results\\benchmark_full\\surge\\B_seed42_20261014_143514.csv",
+      "results\\benchmark_full\\surge\\B_seed42_20261014_143748.csv"
+    ],
+    "surge/B/43": [
+      "results\\benchmark_full\\surge\\B_seed43_20261014_143516.csv",
+      "results\\benchmark_full\\surge\\B_seed43_20261014_143750.csv"
+    ],
+    "surge/B/44": [
+      "results\\benchmark_full\\surge\\B_seed44_20261014_143517.csv",
+      "results\\benchmark_full\\surge\\B_seed44_20261014_143751.csv"
+    ],
+    "surge/B/45": [
+      "results\\benchmark_full\\surge\\B_seed45_20261014_143518.csv",
+      "results\\benchmark_full\\surge\\B_seed45_20261014_143753.csv"
+    ],
+    "surge/B/46": [
+      "results\\benchmark_full\\surge\\B_seed46_20261014_143520.csv",
+      "results\\benchmark_full\\surge\\B_seed46_20261014_143754.csv"
+    ],
+    "surge/B/47": [
+      "results\\benchmark_full\\surge\\B_seed47_20261014_143521.csv",
+      "results\\benchmark_full\\surge\\B_seed47_20261014_143755.csv"
+    ],
+    "surge/B/48": [
+      "results\\benchmark_full\\surge\\B_seed48_20261014_143523.csv",
+      "results\\benchmark_full\\surge\\B_seed48_20261014_143757.csv"
+    ],
+    "surge/B/49": [
+      "results\\benchmark_full\\surge\\B_seed49_20261014_143524.csv",
+      "results\\benchmark_full\\surge\\B_seed49_20261014_143758.csv"
+    ],
+    "surge/B/50": [
+      "results\\benchmark_full\\surge\\B_seed50_20261014_143526.csv",
+      "results\\benchmark_full\\surge\\B_seed50_20261014_143800.csv"
+    ],
+    "surge/B/51": [
+      "results\\benchmark_full\\surge\\B_seed51_20261014_143527.csv",
+      "results\\benchmark_full\\surge\\B_seed51_20261014_143801.csv"
+    ],
+    "surge/C/42": [
+      "results\\benchmark_full\\surge\\C_seed42_20261014_143528.csv",
+      "results\\benchmark_full\\surge\\C_seed42_20261014_143803.csv"
+    ],
+    "surge/C/43": [
+      "results\\benchmark_full\\surge\\C_seed43_20261014_143530.csv",
+      "results\\benchmark_full\\surge\\C_seed43_20261014_143805.csv"
+    ],
+    "surge/C/44": [
+      "results\\benchmark_full\\surge\\C_seed44_20261014_143531.csv",
+      "results\\benchmark_full\\surge\\C_seed44_20261014_143806.csv"
+    ],
+    "surge/C/45": [
+      "results\\benchmark_full\\surge\\C_seed45_20261014_143533.csv",
+      "results\\benchmark_full\\surge\\C_seed45_20261014_143808.csv"
+    ],
+    "surge/C/46": [
+      "results\\benchmark_full\\surge\\C_seed46_20261014_143534.csv",
+      "results\\benchmark_full\\surge\\C_seed46_20261014_143809.csv"
+    ],
+    "surge/C/47": [
+      "results\\benchmark_full\\surge\\C_seed47_20261014_143536.csv",
+      "results\\benchmark_full\\surge\\C_seed47_20261014_143811.csv"
+    ],
+    "surge/C/48": [
+      "results\\benchmark_full\\surge\\C_seed48_20261014_143538.csv",
+      "results\\benchmark_full\\surge\\C_seed48_20261014_143812.csv"
+    ],
+    "surge/C/49": [
+      "results\\benchmark_full\\surge\\C_seed49_20261014_143539.csv",
+      "results\\benchmark_full\\surge\\C_seed49_20261014_143814.csv"
+    ],
+    "surge/C/50": [
+      "results\\benchmark_full\\surge\\C_seed50_20261014_143540.csv",
+      "results\\benchmark_full\\surge\\C_seed50_20261014_143815.csv"
+    ],
+    "surge/C/51": [
+      "results\\benchmark_full\\surge\\C_seed51_20261014_143542.csv",
+      "results\\benchmark_full\\surge\\C_seed51_20261014_143817.csv"
+    ],
+    "surge/D/42": [
+      "results\\benchmark_full\\surge\\D_seed42_20261014_143543.csv",
+      "results\\benchmark_full\\surge\\D_seed42_20261014_143818.csv"
+    ],
+    "surge/D/43": [
+      "results\\benchmark_full\\surge\\D_seed43_20261014_143545.csv",
+      "results\\benchmark_full\\surge\\D_seed43_20261014_143819.csv"
+    ],
+    "surge/D/44": [
+      "results\\benchmark_full\\surge\\D_seed44_20261014_143546.csv",
+      "results\\benchmark_full\\surge\\D_seed44_20261014_143820.csv"
+    ],
+    "surge/D/45": [
+      "results\\benchmark_full\\surge\\D_seed45_20261014_143547.csv",
+      "results\\benchmark_full\\surge\\D_seed45_20261014_143822.csv"
+    ],
+    "surge/D/46": [
+      "results\\benchmark_full\\surge\\D_seed46_20261014_143548.csv",
+      "results\\benchmark_full\\surge\\D_seed46_20261014_143823.csv"
+    ],
+    "surge/D/47": [
+      "results\\benchmark_full\\surge\\D_seed47_20261014_143550.csv",
+      "results\\benchmark_full\\surge\\D_seed47_20261014_143824.csv"
+    ],
+    "surge/D/48": [
+      "results\\benchmark_full\\surge\\D_seed48_20261014_143551.csv",
+      "results\\benchmark_full\\surge\\D_seed48_20261014_143826.csv"
+    ],
+    "surge/D/49": [
+      "results\\benchmark_full\\surge\\D_seed49_20261014_143552.csv",
+      "results\\benchmark_full\\surge\\D_seed49_20261014_143827.csv"
+    ],
+    "surge/D/50": [
+      "results\\benchmark_full\\surge\\D_seed50_20261014_143554.csv",
+      "results\\benchmark_full\\surge\\D_seed50_20261014_143828.csv"
+    ],
+    "surge/D/51": [
+      "results\\benchmark_full\\surge\\D_seed51_20261014_143555.csv",
+      "results\\benchmark_full\\surge\\D_seed51_20261014_143830.csv"
+    ],
+    "uneven/A/42": [
+      "results\\benchmark_full\\uneven\\A_seed42_20261014_143332.csv",
+      "results\\benchmark_full\\uneven\\A_seed42_20261014_143603.csv"
+    ],
+    "uneven/A/43": [
+      "results\\benchmark_full\\uneven\\A_seed43_20261014_143333.csv",
+      "results\\benchmark_full\\uneven\\A_seed43_20261014_143604.csv"
+    ],
+    "uneven/A/44": [
+      "results\\benchmark_full\\uneven\\A_seed44_20261014_143334.csv",
+      "results\\benchmark_full\\uneven\\A_seed44_20261014_143606.csv"
+    ],
+    "uneven/A/45": [
+      "results\\benchmark_full\\uneven\\A_seed45_20261014_143335.csv",
+      "results\\benchmark_full\\uneven\\A_seed45_20261014_143607.csv"
+    ],
+    "uneven/A/46": [
+      "results\\benchmark_full\\uneven\\A_seed46_20261014_143336.csv",
+      "results\\benchmark_full\\uneven\\A_seed46_20261014_143608.csv"
+    ],
+    "uneven/A/47": [
+      "results\\benchmark_full\\uneven\\A_seed47_20261014_143337.csv",
+      "results\\benchmark_full\\uneven\\A_seed47_20261014_143609.csv"
+    ],
+    "uneven/A/48": [
+      "results\\benchmark_full\\uneven\\A_seed48_20261014_143338.csv",
+      "results\\benchmark_full\\uneven\\A_seed48_20261014_143610.csv"
+    ],
+    "uneven/A/49": [
+      "results\\benchmark_full\\uneven\\A_seed49_20261014_143339.csv",
+      "results\\benchmark_full\\uneven\\A_seed49_20261014_143611.csv"
+    ],
+    "uneven/A/50": [
+      "results\\benchmark_full\\uneven\\A_seed50_20261014_143340.csv",
+      "results\\benchmark_full\\uneven\\A_seed50_20261014_143612.csv"
+    ],
+    "uneven/A/51": [
+      "results\\benchmark_full\\uneven\\A_seed51_20261014_143341.csv",
+      "results\\benchmark_full\\uneven\\A_seed51_20261014_143613.csv"
+    ],
+    "uneven/B/42": [
+      "results\\benchmark_full\\uneven\\B_seed42_20261014_143342.csv",
+      "results\\benchmark_full\\uneven\\B_seed42_20261014_143614.csv"
+    ],
+    "uneven/B/43": [
+      "results\\benchmark_full\\uneven\\B_seed43_20261014_143343.csv",
+      "results\\benchmark_full\\uneven\\B_seed43_20261014_143615.csv"
+    ],
+    "uneven/B/44": [
+      "results\\benchmark_full\\uneven\\B_seed44_20261014_143344.csv",
+      "results\\benchmark_full\\uneven\\B_seed44_20261014_143616.csv"
+    ],
+    "uneven/B/45": [
+      "results\\benchmark_full\\uneven\\B_seed45_20261014_143345.csv",
+      "results\\benchmark_full\\uneven\\B_seed45_20261014_143617.csv"
+    ],
+    "uneven/B/46": [
+      "results\\benchmark_full\\uneven\\B_seed46_20261014_143346.csv",
+      "results\\benchmark_full\\uneven\\B_seed46_20261014_143618.csv"
+    ],
+    "uneven/B/47": [
+      "results\\benchmark_full\\uneven\\B_seed47_20261014_143347.csv",
+      "results\\benchmark_full\\uneven\\B_seed47_20261014_143619.csv"
+    ],
+    "uneven/B/48": [
+      "results\\benchmark_full\\uneven\\B_seed48_20261014_143348.csv",
+      "results\\benchmark_full\\uneven\\B_seed48_20261014_143620.csv"
+    ],
+    "uneven/B/49": [
+      "results\\benchmark_full\\uneven\\B_seed49_20261014_143349.csv",
+      "results\\benchmark_full\\uneven\\B_seed49_20261014_143621.csv"
+    ],
+    "uneven/B/50": [
+      "results\\benchmark_full\\uneven\\B_seed50_20261014_143350.csv",
+      "results\\benchmark_full\\uneven\\B_seed50_20261014_143622.csv"
+    ],
+    "uneven/B/51": [
+      "results\\benchmark_full\\uneven\\B_seed51_20261014_143352.csv",
+      "results\\benchmark_full\\uneven\\B_seed51_20261014_143623.csv"
+    ],
+    "uneven/C/42": [
+      "results\\benchmark_full\\uneven\\C_seed42_20261014_143353.csv",
+      "results\\benchmark_full\\uneven\\C_seed42_20261014_143624.csv"
+    ],
+    "uneven/C/43": [
+      "results\\benchmark_full\\uneven\\C_seed43_20261014_143354.csv",
+      "results\\benchmark_full\\uneven\\C_seed43_20261014_143626.csv"
+    ],
+    "uneven/C/44": [
+      "results\\benchmark_full\\uneven\\C_seed44_20261014_143355.csv",
+      "results\\benchmark_full\\uneven\\C_seed44_20261014_143627.csv"
+    ],
+    "uneven/C/45": [
+      "results\\benchmark_full\\uneven\\C_seed45_20261014_143355.csv",
+      "results\\benchmark_full\\uneven\\C_seed45_20261014_143628.csv"
+    ],
+    "uneven/C/46": [
+      "results\\benchmark_full\\uneven\\C_seed46_20261014_143356.csv",
+      "results\\benchmark_full\\uneven\\C_seed46_20261014_143629.csv"
+    ],
+    "uneven/C/47": [
+      "results\\benchmark_full\\uneven\\C_seed47_20261014_143357.csv",
+      "results\\benchmark_full\\uneven\\C_seed47_20261014_143630.csv"
+    ],
+    "uneven/C/48": [
+      "results\\benchmark_full\\uneven\\C_seed48_20261014_143358.csv",
+      "results\\benchmark_full\\uneven\\C_seed48_20261014_143631.csv"
+    ],
+    "uneven/C/49": [
+      "results\\benchmark_full\\uneven\\C_seed49_20261014_143359.csv",
+      "results\\benchmark_full\\uneven\\C_seed49_20261014_143632.csv"
+    ],
+    "uneven/C/50": [
+      "results\\benchmark_full\\uneven\\C_seed50_20261014_143400.csv",
+      "results\\benchmark_full\\uneven\\C_seed50_20261014_143633.csv"
+    ],
+    "uneven/C/51": [
+      "results\\benchmark_full\\uneven\\C_seed51_20261014_143401.csv",
+      "results\\benchmark_full\\uneven\\C_seed51_20261014_143634.csv"
+    ],
+    "uneven/D/42": [
+      "results\\benchmark_full\\uneven\\D_seed42_20261014_143402.csv",
+      "results\\benchmark_full\\uneven\\D_seed42_20261014_143635.csv"
+    ],
+    "uneven/D/43": [
+      "results\\benchmark_full\\uneven\\D_seed43_20261014_143403.csv",
+      "results\\benchmark_full\\uneven\\D_seed43_20261014_143636.csv"
+    ],
+    "uneven/D/44": [
+      "results\\benchmark_full\\uneven\\D_seed44_20261014_143404.csv",
+      "results\\benchmark_full\\uneven\\D_seed44_20261014_143637.csv"
+    ],
+    "uneven/D/45": [
+      "results\\benchmark_full\\uneven\\D_seed45_20261014_143406.csv",
+      "results\\benchmark_full\\uneven\\D_seed45_20261014_143638.csv"
+    ],
+    "uneven/D/46": [
+      "results\\benchmark_full\\uneven\\D_seed46_20261014_143407.csv",
+      "results\\benchmark_full\\uneven\\D_seed46_20261014_143639.csv"
+    ],
+    "uneven/D/47": [
+      "results\\benchmark_full\\uneven\\D_seed47_20261014_143408.csv",
+      "results\\benchmark_full\\uneven\\D_seed47_20261014_143640.csv"
+    ],
+    "uneven/D/48": [
+      "results\\benchmark_full\\uneven\\D_seed48_20261014_143409.csv",
+      "results\\benchmark_full\\uneven\\D_seed48_20261014_143641.csv"
+    ],
+    "uneven/D/49": [
+      "results\\benchmark_full\\uneven\\D_seed49_20261014_143410.csv",
+      "results\\benchmark_full\\uneven\\D_seed49_20261014_143642.csv"
+    ],
+    "uneven/D/50": [
+      "results\\benchmark_full\\uneven\\D_seed50_20261014_143411.csv",
+      "results\\benchmark_full\\uneven\\D_seed50_20261014_143643.csv"
+    ],
+    "uneven/D/51": [
+      "results\\benchmark_full\\uneven\\D_seed51_20261014_143412.csv",
+      "results\\benchmark_full\\uneven\\D_seed51_20261014_143645.csv"
+    ]
+  },
+  "runs": [
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed42_20261014_143251.csv",
+        "results\\benchmark_full\\balanced\\A_seed42_20261014_143522.csv"
+      ],
+      "file_count": 2,
+      "hash": "2108cf965658baba737cd207dfa11344",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed43_20261014_143252.csv",
+        "results\\benchmark_full\\balanced\\A_seed43_20261014_143523.csv"
+      ],
+      "file_count": 2,
+      "hash": "8b74ec75fa99ad818c66c5cfa236a2a6",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed44_20261014_143253.csv",
+        "results\\benchmark_full\\balanced\\A_seed44_20261014_143524.csv"
+      ],
+      "file_count": 2,
+      "hash": "08716bd19fbc353f7c03cb43af7c96b4",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 0,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed45_20261014_143254.csv",
+        "results\\benchmark_full\\balanced\\A_seed45_20261014_143525.csv"
+      ],
+      "file_count": 2,
+      "hash": "18db2fd0c70191a6cdae07d1c0a0cdae",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 29,
+      "queue_north_final": 0,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed46_20261014_143255.csv",
+        "results\\benchmark_full\\balanced\\A_seed46_20261014_143526.csv"
+      ],
+      "file_count": 2,
+      "hash": "ee81ee07ee5c920543d6338e05abb8d9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 2,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed47_20261014_143256.csv",
+        "results\\benchmark_full\\balanced\\A_seed47_20261014_143528.csv"
+      ],
+      "file_count": 2,
+      "hash": "7f1df87e6a726a78e08a9d229dd48e45",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 34,
+      "queue_north_final": 3,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed48_20261014_143257.csv",
+        "results\\benchmark_full\\balanced\\A_seed48_20261014_143529.csv"
+      ],
+      "file_count": 2,
+      "hash": "46e777a244a492e838a05a10f08926ce",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 36,
+      "queue_north_final": 1,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed49_20261014_143258.csv",
+        "results\\benchmark_full\\balanced\\A_seed49_20261014_143530.csv"
+      ],
+      "file_count": 2,
+      "hash": "d1328c97371771eb60a1b46f4d9acbab",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed50_20261014_143259.csv",
+        "results\\benchmark_full\\balanced\\A_seed50_20261014_143531.csv"
+      ],
+      "file_count": 2,
+      "hash": "810c3f6a1392a826de1c1612bbb58d01",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "A",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\balanced\\A_seed51_20261014_143300.csv",
+        "results\\benchmark_full\\balanced\\A_seed51_20261014_143532.csv"
+      ],
+      "file_count": 2,
+      "hash": "5d7f991088489416f2018f141079642a",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 29,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed42_20261014_143301.csv",
+        "results\\benchmark_full\\balanced\\B_seed42_20261014_143533.csv"
+      ],
+      "file_count": 2,
+      "hash": "c88123aa664e26144ffd4a1f5c5f1dde",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 9,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed43_20261014_143302.csv",
+        "results\\benchmark_full\\balanced\\B_seed43_20261014_143534.csv"
+      ],
+      "file_count": 2,
+      "hash": "55c4cf16a57b7b69e0c9e381fff1f6fc",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 6,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed44_20261014_143304.csv",
+        "results\\benchmark_full\\balanced\\B_seed44_20261014_143535.csv"
+      ],
+      "file_count": 2,
+      "hash": "fb4348866a40435055064fef646f2e14",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 36,
+      "queue_north_final": 2,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed45_20261014_143305.csv",
+        "results\\benchmark_full\\balanced\\B_seed45_20261014_143536.csv"
+      ],
+      "file_count": 2,
+      "hash": "88c15218f47a7012f3ada92257370197",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 0,
+      "queue_east_final": 9,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed46_20261014_143306.csv",
+        "results\\benchmark_full\\balanced\\B_seed46_20261014_143537.csv"
+      ],
+      "file_count": 2,
+      "hash": "a0f30e8bca6efc61b0890cdc86bc9d01",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed47_20261014_143307.csv",
+        "results\\benchmark_full\\balanced\\B_seed47_20261014_143538.csv"
+      ],
+      "file_count": 2,
+      "hash": "6ca2b8c731024ef7b49b27b81106e067",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 37,
+      "queue_north_final": 4,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed48_20261014_143308.csv",
+        "results\\benchmark_full\\balanced\\B_seed48_20261014_143539.csv"
+      ],
+      "file_count": 2,
+      "hash": "68c561700eb2026594c5638be47b2196",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed49_20261014_143309.csv",
+        "results\\benchmark_full\\balanced\\B_seed49_20261014_143540.csv"
+      ],
+      "file_count": 2,
+      "hash": "6468adf6399b986646283260f9b78871",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed50_20261014_143310.csv",
+        "results\\benchmark_full\\balanced\\B_seed50_20261014_143541.csv"
+      ],
+      "file_count": 2,
+      "hash": "6a969798b65bfc244974d484a608d0f4",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 6,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "B",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\balanced\\B_seed51_20261014_143311.csv",
+        "results\\benchmark_full\\balanced\\B_seed51_20261014_143542.csv"
+      ],
+      "file_count": 2,
+      "hash": "525ff628ad7137ac4b0993a34d5195a8",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 36,
+      "queue_north_final": 2,
+      "queue_east_final": 8,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed42_20261014_143312.csv",
+        "results\\benchmark_full\\balanced\\C_seed42_20261014_143544.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed43_20261014_143313.csv",
+        "results\\benchmark_full\\balanced\\C_seed43_20261014_143545.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed44_20261014_143314.csv",
+        "results\\benchmark_full\\balanced\\C_seed44_20261014_143546.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed45_20261014_143315.csv",
+        "results\\benchmark_full\\balanced\\C_seed45_20261014_143547.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed46_20261014_143316.csv",
+        "results\\benchmark_full\\balanced\\C_seed46_20261014_143548.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed47_20261014_143317.csv",
+        "results\\benchmark_full\\balanced\\C_seed47_20261014_143549.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed48_20261014_143318.csv",
+        "results\\benchmark_full\\balanced\\C_seed48_20261014_143550.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed49_20261014_143319.csv",
+        "results\\benchmark_full\\balanced\\C_seed49_20261014_143551.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed50_20261014_143320.csv",
+        "results\\benchmark_full\\balanced\\C_seed50_20261014_143552.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "C",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\balanced\\C_seed51_20261014_143321.csv",
+        "results\\benchmark_full\\balanced\\C_seed51_20261014_143553.csv"
+      ],
+      "file_count": 2,
+      "hash": "27cbbe3b314a72141956c8190744dcb0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed42_20261014_143322.csv",
+        "results\\benchmark_full\\balanced\\D_seed42_20261014_143554.csv"
+      ],
+      "file_count": 2,
+      "hash": "b6aad622ab0858ea513392e2f2768abb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed43_20261014_143323.csv",
+        "results\\benchmark_full\\balanced\\D_seed43_20261014_143555.csv"
+      ],
+      "file_count": 2,
+      "hash": "d017d0655582abbe888798b80c31cd2b",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed44_20261014_143324.csv",
+        "results\\benchmark_full\\balanced\\D_seed44_20261014_143556.csv"
+      ],
+      "file_count": 2,
+      "hash": "6fb0d99f16afb34cc20f9d29ee8fc456",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed45_20261014_143325.csv",
+        "results\\benchmark_full\\balanced\\D_seed45_20261014_143557.csv"
+      ],
+      "file_count": 2,
+      "hash": "5516ec0366625203c0733acfb5780b5f",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed46_20261014_143326.csv",
+        "results\\benchmark_full\\balanced\\D_seed46_20261014_143558.csv"
+      ],
+      "file_count": 2,
+      "hash": "aed6d5e2c001dcb06ae17cf99e1d43fd",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed47_20261014_143327.csv",
+        "results\\benchmark_full\\balanced\\D_seed47_20261014_143559.csv"
+      ],
+      "file_count": 2,
+      "hash": "b6aad622ab0858ea513392e2f2768abb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed48_20261014_143328.csv",
+        "results\\benchmark_full\\balanced\\D_seed48_20261014_143600.csv"
+      ],
+      "file_count": 2,
+      "hash": "d017d0655582abbe888798b80c31cd2b",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed49_20261014_143329.csv",
+        "results\\benchmark_full\\balanced\\D_seed49_20261014_143601.csv"
+      ],
+      "file_count": 2,
+      "hash": "6fb0d99f16afb34cc20f9d29ee8fc456",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed50_20261014_143330.csv",
+        "results\\benchmark_full\\balanced\\D_seed50_20261014_143601.csv"
+      ],
+      "file_count": 2,
+      "hash": "5516ec0366625203c0733acfb5780b5f",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "balanced",
+      "controller": "D",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\balanced\\D_seed51_20261014_143331.csv",
+        "results\\benchmark_full\\balanced\\D_seed51_20261014_143602.csv"
+      ],
+      "file_count": 2,
+      "hash": "aed6d5e2c001dcb06ae17cf99e1d43fd",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 26,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed42_20261014_143413.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed42_20261014_143646.csv"
+      ],
+      "file_count": 2,
+      "hash": "8da9addf03aad5d74ee610f531a98491",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 53,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed43_20261014_143414.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed43_20261014_143647.csv"
+      ],
+      "file_count": 2,
+      "hash": "b05b76eee7b8fa175a3caf59712a6a15",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 49,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed44_20261014_143415.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed44_20261014_143648.csv"
+      ],
+      "file_count": 2,
+      "hash": "6a8dd937e99a3f620ba71f1afb7d8fe2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 43,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed45_20261014_143416.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed45_20261014_143649.csv"
+      ],
+      "file_count": 2,
+      "hash": "a03165fb02d4c3678d2bc469ab906109",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 39,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed46_20261014_143418.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed46_20261014_143650.csv"
+      ],
+      "file_count": 2,
+      "hash": "a1836b8b81de067bd59dc7f15aec0154",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 45,
+      "queue_north_final": 1,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed47_20261014_143419.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed47_20261014_143652.csv"
+      ],
+      "file_count": 2,
+      "hash": "038e2bd2515c846589368930c2068230",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 50,
+      "queue_north_final": 1,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed48_20261014_143420.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed48_20261014_143653.csv"
+      ],
+      "file_count": 2,
+      "hash": "52238e920b8bf2fb6ff990e5065a013e",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 55,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed49_20261014_143421.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed49_20261014_143654.csv"
+      ],
+      "file_count": 2,
+      "hash": "180e0952b1493c7180dddb2ee8a12d4a",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 53,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed50_20261014_143422.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed50_20261014_143655.csv"
+      ],
+      "file_count": 2,
+      "hash": "51b95f8314646b1d6f23ae91729e157a",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 48,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "A",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\A_seed51_20261014_143423.csv",
+        "results\\benchmark_full\\bottleneck\\A_seed51_20261014_143656.csv"
+      ],
+      "file_count": 2,
+      "hash": "4563d01173c30336d83ae36dae4fea8f",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 41,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed42_20261014_143425.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed42_20261014_143658.csv"
+      ],
+      "file_count": 2,
+      "hash": "03f707c77391c0ae8f9f480a05f47b88",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 45,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed43_20261014_143426.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed43_20261014_143659.csv"
+      ],
+      "file_count": 2,
+      "hash": "9c937ee1a1a3d4568066070fe70aa536",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed44_20261014_143427.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed44_20261014_143700.csv"
+      ],
+      "file_count": 2,
+      "hash": "9c29e6bd2ae8298402917b8fe98dcfa8",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 54,
+      "queue_north_final": 3,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed45_20261014_143428.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed45_20261014_143701.csv"
+      ],
+      "file_count": 2,
+      "hash": "cc64a8549c9827e772bb092c61e84bd4",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed46_20261014_143429.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed46_20261014_143702.csv"
+      ],
+      "file_count": 2,
+      "hash": "6dd0d1f50efdcdb8dd2866fa6a45c750",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 40,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed47_20261014_143430.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed47_20261014_143703.csv"
+      ],
+      "file_count": 2,
+      "hash": "da1226cebee744a7582d023576bbc1c6",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 50,
+      "queue_north_final": 4,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed48_20261014_143431.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed48_20261014_143705.csv"
+      ],
+      "file_count": 2,
+      "hash": "f0a47eb3d3bdfc38e5a8ea8a45a4f48d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 57,
+      "queue_north_final": 1,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed49_20261014_143432.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed49_20261014_143706.csv"
+      ],
+      "file_count": 2,
+      "hash": "a0791848e30b1a3c53e82849bd12fffb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed50_20261014_143434.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed50_20261014_143707.csv"
+      ],
+      "file_count": 2,
+      "hash": "44703fd88c9d98ecae0b660df7b898d3",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 45,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "B",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\B_seed51_20261014_143435.csv",
+        "results\\benchmark_full\\bottleneck\\B_seed51_20261014_143708.csv"
+      ],
+      "file_count": 2,
+      "hash": "5cc14376a86d00a46703b75d2498535d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 57,
+      "queue_north_final": 3,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed42_20261014_143436.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed42_20261014_143709.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed43_20261014_143437.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed43_20261014_143710.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed44_20261014_143438.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed44_20261014_143712.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed45_20261014_143439.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed45_20261014_143713.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed46_20261014_143440.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed46_20261014_143714.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed47_20261014_143441.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed47_20261014_143715.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed48_20261014_143442.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed48_20261014_143716.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed49_20261014_143443.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed49_20261014_143717.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed50_20261014_143444.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed50_20261014_143718.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "C",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\C_seed51_20261014_143445.csv",
+        "results\\benchmark_full\\bottleneck\\C_seed51_20261014_143720.csv"
+      ],
+      "file_count": 2,
+      "hash": "ec7e1fcbce7b8dcd2d252e0cd6128ed2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 42,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed42_20261014_143446.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed42_20261014_143721.csv"
+      ],
+      "file_count": 2,
+      "hash": "e929c0de879cf9d2be1cb9bb591c4e40",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed43_20261014_143447.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed43_20261014_143722.csv"
+      ],
+      "file_count": 2,
+      "hash": "718acf67aa754eed71a08f17e722c0bb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed44_20261014_143449.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed44_20261014_143723.csv"
+      ],
+      "file_count": 2,
+      "hash": "45c7c623ec668d4c8cce865b11f415d2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed45_20261014_143450.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed45_20261014_143724.csv"
+      ],
+      "file_count": 2,
+      "hash": "6f328808c3282f3136c1c80dc5995bb2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed46_20261014_143451.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed46_20261014_143725.csv"
+      ],
+      "file_count": 2,
+      "hash": "1e43b65791832cb5488e6466ce6f9503",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed47_20261014_143453.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed47_20261014_143727.csv"
+      ],
+      "file_count": 2,
+      "hash": "e929c0de879cf9d2be1cb9bb591c4e40",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed48_20261014_143454.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed48_20261014_143728.csv"
+      ],
+      "file_count": 2,
+      "hash": "718acf67aa754eed71a08f17e722c0bb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed49_20261014_143455.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed49_20261014_143729.csv"
+      ],
+      "file_count": 2,
+      "hash": "45c7c623ec668d4c8cce865b11f415d2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed50_20261014_143456.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed50_20261014_143730.csv"
+      ],
+      "file_count": 2,
+      "hash": "6f328808c3282f3136c1c80dc5995bb2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "bottleneck",
+      "controller": "D",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\bottleneck\\D_seed51_20261014_143458.csv",
+        "results\\benchmark_full\\bottleneck\\D_seed51_20261014_143731.csv"
+      ],
+      "file_count": 2,
+      "hash": "1e43b65791832cb5488e6466ce6f9503",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 51,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed42_20261014_143212.csv",
+        "results\\benchmark_full\\light\\A_seed42_20261014_143445.csv"
+      ],
+      "file_count": 2,
+      "hash": "d776214cd332afe04908cc8745583964",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed43_20261014_143214.csv",
+        "results\\benchmark_full\\light\\A_seed43_20261014_143446.csv"
+      ],
+      "file_count": 2,
+      "hash": "c62745c3ecf16301438cc4e372acac3e",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 17,
+      "queue_north_final": 1,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed44_20261014_143215.csv",
+        "results\\benchmark_full\\light\\A_seed44_20261014_143447.csv"
+      ],
+      "file_count": 2,
+      "hash": "e02e91f99ae380096928c37246673052",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 19,
+      "queue_north_final": 1,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed45_20261014_143216.csv",
+        "results\\benchmark_full\\light\\A_seed45_20261014_143448.csv"
+      ],
+      "file_count": 2,
+      "hash": "cfef71c9a64b22e2f6ad80a1adc23499",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 17,
+      "queue_north_final": 0,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed46_20261014_143217.csv",
+        "results\\benchmark_full\\light\\A_seed46_20261014_143449.csv"
+      ],
+      "file_count": 2,
+      "hash": "e0d020973d2ae1acf50850944d8a7eaf",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed47_20261014_143218.csv",
+        "results\\benchmark_full\\light\\A_seed47_20261014_143450.csv"
+      ],
+      "file_count": 2,
+      "hash": "83f9cbdb0c7b6c7daaebc2f19b964c69",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed48_20261014_143219.csv",
+        "results\\benchmark_full\\light\\A_seed48_20261014_143451.csv"
+      ],
+      "file_count": 2,
+      "hash": "a0533500eeb8169f5bf60ae7d4e321b9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed49_20261014_143220.csv",
+        "results\\benchmark_full\\light\\A_seed49_20261014_143452.csv"
+      ],
+      "file_count": 2,
+      "hash": "8d4b9e8da84862128aba4328b642509e",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 17,
+      "queue_north_final": 0,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed50_20261014_143221.csv",
+        "results\\benchmark_full\\light\\A_seed50_20261014_143453.csv"
+      ],
+      "file_count": 2,
+      "hash": "017fb2ac7478b9cb5e37994a7d776d97",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 18,
+      "queue_north_final": 1,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "A",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\light\\A_seed51_20261014_143222.csv",
+        "results\\benchmark_full\\light\\A_seed51_20261014_143454.csv"
+      ],
+      "file_count": 2,
+      "hash": "5e5097e358bca0a70c08aa07bf411ec9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 19,
+      "queue_north_final": 1,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed42_20261014_143222.csv",
+        "results\\benchmark_full\\light\\B_seed42_20261014_143455.csv"
+      ],
+      "file_count": 2,
+      "hash": "df59b2f921d311d3dd692964c2454545",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed43_20261014_143223.csv",
+        "results\\benchmark_full\\light\\B_seed43_20261014_143456.csv"
+      ],
+      "file_count": 2,
+      "hash": "87ed4b0485956f0fe0972d232a181f73",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 2,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed44_20261014_143224.csv",
+        "results\\benchmark_full\\light\\B_seed44_20261014_143457.csv"
+      ],
+      "file_count": 2,
+      "hash": "3538cd6f0522ac4ccdf029ac87daaa6a",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 20,
+      "queue_north_final": 0,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed45_20261014_143225.csv",
+        "results\\benchmark_full\\light\\B_seed45_20261014_143458.csv"
+      ],
+      "file_count": 2,
+      "hash": "6ffd8cfd627d83975f16c5db921c34c9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 14,
+      "queue_north_final": 0,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed46_20261014_143226.csv",
+        "results\\benchmark_full\\light\\B_seed46_20261014_143459.csv"
+      ],
+      "file_count": 2,
+      "hash": "3422541f2cc37eb643dd71dc9063f6d3",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 17,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed47_20261014_143227.csv",
+        "results\\benchmark_full\\light\\B_seed47_20261014_143500.csv"
+      ],
+      "file_count": 2,
+      "hash": "268a17fab137e6adef425ca5b008665b",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 20,
+      "queue_north_final": 1,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed48_20261014_143228.csv",
+        "results\\benchmark_full\\light\\B_seed48_20261014_143501.csv"
+      ],
+      "file_count": 2,
+      "hash": "bdf52fc5a5edaa5409dd3e8e06be3aba",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 17,
+      "queue_north_final": 0,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed49_20261014_143229.csv",
+        "results\\benchmark_full\\light\\B_seed49_20261014_143501.csv"
+      ],
+      "file_count": 2,
+      "hash": "1492aa2098f1139147873f95c1c4e5f9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 14,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed50_20261014_143230.csv",
+        "results\\benchmark_full\\light\\B_seed50_20261014_143502.csv"
+      ],
+      "file_count": 2,
+      "hash": "cc5baa5ccf8470f1edac7722e59257ec",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 17,
+      "queue_north_final": 2,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "B",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\light\\B_seed51_20261014_143231.csv",
+        "results\\benchmark_full\\light\\B_seed51_20261014_143503.csv"
+      ],
+      "file_count": 2,
+      "hash": "9c4488ee67f794a3ce7de1cabc77d3c2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 18,
+      "queue_north_final": 0,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed42_20261014_143232.csv",
+        "results\\benchmark_full\\light\\C_seed42_20261014_143504.csv"
+      ],
+      "file_count": 2,
+      "hash": "df59b2f921d311d3dd692964c2454545",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed43_20261014_143233.csv",
+        "results\\benchmark_full\\light\\C_seed43_20261014_143505.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed44_20261014_143234.csv",
+        "results\\benchmark_full\\light\\C_seed44_20261014_143506.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed45_20261014_143235.csv",
+        "results\\benchmark_full\\light\\C_seed45_20261014_143507.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed46_20261014_143236.csv",
+        "results\\benchmark_full\\light\\C_seed46_20261014_143508.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed47_20261014_143237.csv",
+        "results\\benchmark_full\\light\\C_seed47_20261014_143509.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed48_20261014_143238.csv",
+        "results\\benchmark_full\\light\\C_seed48_20261014_143510.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed49_20261014_143239.csv",
+        "results\\benchmark_full\\light\\C_seed49_20261014_143511.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed50_20261014_143240.csv",
+        "results\\benchmark_full\\light\\C_seed50_20261014_143512.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "C",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\light\\C_seed51_20261014_143241.csv",
+        "results\\benchmark_full\\light\\C_seed51_20261014_143513.csv"
+      ],
+      "file_count": 2,
+      "hash": "4e15363fce9eb47b4532895851bcb7b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 15,
+      "queue_north_final": 0,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed42_20261014_143242.csv",
+        "results\\benchmark_full\\light\\D_seed42_20261014_143513.csv"
+      ],
+      "file_count": 2,
+      "hash": "779fe7d6fe26b783c23635ffd055e487",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed43_20261014_143243.csv",
+        "results\\benchmark_full\\light\\D_seed43_20261014_143514.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ffe6d309449cf0ae3b495025cef0a25",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed44_20261014_143243.csv",
+        "results\\benchmark_full\\light\\D_seed44_20261014_143515.csv"
+      ],
+      "file_count": 2,
+      "hash": "67be5346ea5845b81bd4e96b5b4fe771",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed45_20261014_143244.csv",
+        "results\\benchmark_full\\light\\D_seed45_20261014_143516.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ffe6d309449cf0ae3b495025cef0a25",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed46_20261014_143245.csv",
+        "results\\benchmark_full\\light\\D_seed46_20261014_143517.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ffe6d309449cf0ae3b495025cef0a25",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed47_20261014_143246.csv",
+        "results\\benchmark_full\\light\\D_seed47_20261014_143518.csv"
+      ],
+      "file_count": 2,
+      "hash": "4c3c819ab2cdc7a45d40ab90baf74c67",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed48_20261014_143247.csv",
+        "results\\benchmark_full\\light\\D_seed48_20261014_143519.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ffe6d309449cf0ae3b495025cef0a25",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed49_20261014_143248.csv",
+        "results\\benchmark_full\\light\\D_seed49_20261014_143520.csv"
+      ],
+      "file_count": 2,
+      "hash": "67be5346ea5845b81bd4e96b5b4fe771",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed50_20261014_143249.csv",
+        "results\\benchmark_full\\light\\D_seed50_20261014_143520.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ffe6d309449cf0ae3b495025cef0a25",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "light",
+      "controller": "D",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\light\\D_seed51_20261014_143250.csv",
+        "results\\benchmark_full\\light\\D_seed51_20261014_143521.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ffe6d309449cf0ae3b495025cef0a25",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 16,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed42_20261014_143459.csv",
+        "results\\benchmark_full\\surge\\A_seed42_20261014_143733.csv"
+      ],
+      "file_count": 2,
+      "hash": "5d132a36818eeaf68a586a23b8035f05",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 80,
+      "queue_north_final": 9,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed43_20261014_143501.csv",
+        "results\\benchmark_full\\surge\\A_seed43_20261014_143734.csv"
+      ],
+      "file_count": 2,
+      "hash": "f52dcdacd4391c21d9eab2e1a690e111",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 78,
+      "queue_north_final": 17,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed44_20261014_143502.csv",
+        "results\\benchmark_full\\surge\\A_seed44_20261014_143736.csv"
+      ],
+      "file_count": 2,
+      "hash": "7ae9d94d573818ea36002979693adc34",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 80,
+      "queue_north_final": 25,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed45_20261014_143504.csv",
+        "results\\benchmark_full\\surge\\A_seed45_20261014_143737.csv"
+      ],
+      "file_count": 2,
+      "hash": "006a941df01bb13219cb5903c44a2ffc",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 78,
+      "queue_north_final": 26,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed46_20261014_143505.csv",
+        "results\\benchmark_full\\surge\\A_seed46_20261014_143739.csv"
+      ],
+      "file_count": 2,
+      "hash": "8c408cc1f871014e7356106531db6817",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 76,
+      "queue_north_final": 18,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed47_20261014_143507.csv",
+        "results\\benchmark_full\\surge\\A_seed47_20261014_143740.csv"
+      ],
+      "file_count": 2,
+      "hash": "ae78645696c198f76fa8b7c75c067145",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 78,
+      "queue_north_final": 8,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed48_20261014_143508.csv",
+        "results\\benchmark_full\\surge\\A_seed48_20261014_143742.csv"
+      ],
+      "file_count": 2,
+      "hash": "3e9b573e7c3d2cbfb8942533674c8ebb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 78,
+      "queue_north_final": 3,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed49_20261014_143510.csv",
+        "results\\benchmark_full\\surge\\A_seed49_20261014_143744.csv"
+      ],
+      "file_count": 2,
+      "hash": "5cf5ef21b839e1dda0a6bede441fb922",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 79,
+      "queue_north_final": 11,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed50_20261014_143511.csv",
+        "results\\benchmark_full\\surge\\A_seed50_20261014_143745.csv"
+      ],
+      "file_count": 2,
+      "hash": "9bc6572d8d27f523233b9ed459f40837",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 79,
+      "queue_north_final": 19,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "A",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\surge\\A_seed51_20261014_143513.csv",
+        "results\\benchmark_full\\surge\\A_seed51_20261014_143747.csv"
+      ],
+      "file_count": 2,
+      "hash": "fd7480aa18c6c1005e1eb12df548bf17",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 80,
+      "queue_north_final": 29,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed42_20261014_143514.csv",
+        "results\\benchmark_full\\surge\\B_seed42_20261014_143748.csv"
+      ],
+      "file_count": 2,
+      "hash": "d5a58c10d1ee87e8364ddca8be98938d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 79,
+      "queue_north_final": 3,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed43_20261014_143516.csv",
+        "results\\benchmark_full\\surge\\B_seed43_20261014_143750.csv"
+      ],
+      "file_count": 2,
+      "hash": "49c35b312e9a0743d60c8255e6d9f2c9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 84,
+      "queue_north_final": 10,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed44_20261014_143517.csv",
+        "results\\benchmark_full\\surge\\B_seed44_20261014_143751.csv"
+      ],
+      "file_count": 2,
+      "hash": "0aa5fca67016df632d1acbe9a2ddcbdb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 76,
+      "queue_north_final": 35,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed45_20261014_143518.csv",
+        "results\\benchmark_full\\surge\\B_seed45_20261014_143753.csv"
+      ],
+      "file_count": 2,
+      "hash": "32533abd2f7d4d6b4d4145d7ffb66801",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 76,
+      "queue_north_final": 13,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed46_20261014_143520.csv",
+        "results\\benchmark_full\\surge\\B_seed46_20261014_143754.csv"
+      ],
+      "file_count": 2,
+      "hash": "9ca6afc6b8853b9ffdf5c8063db74f8e",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 81,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed47_20261014_143521.csv",
+        "results\\benchmark_full\\surge\\B_seed47_20261014_143755.csv"
+      ],
+      "file_count": 2,
+      "hash": "328dc2fbe81fbe2322c21f47538e0c02",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 79,
+      "queue_north_final": 29,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed48_20261014_143523.csv",
+        "results\\benchmark_full\\surge\\B_seed48_20261014_143757.csv"
+      ],
+      "file_count": 2,
+      "hash": "0932a14081a70eed87edbb969909969f",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 77,
+      "queue_north_final": 22,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed49_20261014_143524.csv",
+        "results\\benchmark_full\\surge\\B_seed49_20261014_143758.csv"
+      ],
+      "file_count": 2,
+      "hash": "877c91f2d9f386528abd64c5e20ed485",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 78,
+      "queue_north_final": 0,
+      "queue_east_final": 7,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed50_20261014_143526.csv",
+        "results\\benchmark_full\\surge\\B_seed50_20261014_143800.csv"
+      ],
+      "file_count": 2,
+      "hash": "140843b96e2b3ada1e73657191438aa6",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 84,
+      "queue_north_final": 15,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "B",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\surge\\B_seed51_20261014_143527.csv",
+        "results\\benchmark_full\\surge\\B_seed51_20261014_143801.csv"
+      ],
+      "file_count": 2,
+      "hash": "688dee0446df021a5ee0de89b168e0a8",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 76,
+      "queue_north_final": 33,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed42_20261014_143528.csv",
+        "results\\benchmark_full\\surge\\C_seed42_20261014_143803.csv"
+      ],
+      "file_count": 2,
+      "hash": "d862be2d8cb38044a81e3d9460e2b3cb",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 84,
+      "queue_north_final": 21,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed43_20261014_143530.csv",
+        "results\\benchmark_full\\surge\\C_seed43_20261014_143805.csv"
+      ],
+      "file_count": 2,
+      "hash": "ccdf5a1c13ae0d0af325a40a0dbc27b2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 82,
+      "queue_north_final": 20,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed44_20261014_143531.csv",
+        "results\\benchmark_full\\surge\\C_seed44_20261014_143806.csv"
+      ],
+      "file_count": 2,
+      "hash": "6f315c695637317ae4d8838e714d8336",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 82,
+      "queue_north_final": 21,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed45_20261014_143533.csv",
+        "results\\benchmark_full\\surge\\C_seed45_20261014_143808.csv"
+      ],
+      "file_count": 2,
+      "hash": "3a46623a52066f161acfa82144985097",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 81,
+      "queue_north_final": 30,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed46_20261014_143534.csv",
+        "results\\benchmark_full\\surge\\C_seed46_20261014_143809.csv"
+      ],
+      "file_count": 2,
+      "hash": "95ef2517115fd69a6af4d775e9e9079f",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 81,
+      "queue_north_final": 35,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed47_20261014_143536.csv",
+        "results\\benchmark_full\\surge\\C_seed47_20261014_143811.csv"
+      ],
+      "file_count": 2,
+      "hash": "a3b5d5e93734ec259189bf6dee1e9eb8",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 81,
+      "queue_north_final": 34,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed48_20261014_143538.csv",
+        "results\\benchmark_full\\surge\\C_seed48_20261014_143812.csv"
+      ],
+      "file_count": 2,
+      "hash": "0b95070ac804b4e3fe2f835623901ba2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 76,
+      "queue_north_final": 22,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed49_20261014_143539.csv",
+        "results\\benchmark_full\\surge\\C_seed49_20261014_143814.csv"
+      ],
+      "file_count": 2,
+      "hash": "c10aed4cb6d175541f561bed9b0ff65c",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 82,
+      "queue_north_final": 29,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed50_20261014_143540.csv",
+        "results\\benchmark_full\\surge\\C_seed50_20261014_143815.csv"
+      ],
+      "file_count": 2,
+      "hash": "85e01045ce1a5db09bebd9b1841fbddd",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 81,
+      "queue_north_final": 35,
+      "queue_east_final": 6,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "C",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\surge\\C_seed51_20261014_143542.csv",
+        "results\\benchmark_full\\surge\\C_seed51_20261014_143817.csv"
+      ],
+      "file_count": 2,
+      "hash": "887946e7f5a363c67fee46865799e37b",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 81,
+      "queue_north_final": 35,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed42_20261014_143543.csv",
+        "results\\benchmark_full\\surge\\D_seed42_20261014_143818.csv"
+      ],
+      "file_count": 2,
+      "hash": "fa0086160675f3c3ee5bc617546022c1",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed43_20261014_143545.csv",
+        "results\\benchmark_full\\surge\\D_seed43_20261014_143819.csv"
+      ],
+      "file_count": 2,
+      "hash": "46fdffd684220a2ac4547854411a80d3",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed44_20261014_143546.csv",
+        "results\\benchmark_full\\surge\\D_seed44_20261014_143820.csv"
+      ],
+      "file_count": 2,
+      "hash": "3e1b1c716d6b090b51087512fe94961b",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed45_20261014_143547.csv",
+        "results\\benchmark_full\\surge\\D_seed45_20261014_143822.csv"
+      ],
+      "file_count": 2,
+      "hash": "659b22886768e7f78e0e9865a9987efe",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed46_20261014_143548.csv",
+        "results\\benchmark_full\\surge\\D_seed46_20261014_143823.csv"
+      ],
+      "file_count": 2,
+      "hash": "c6bb1d10cb4718ef187c2289aa44a8c3",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed47_20261014_143550.csv",
+        "results\\benchmark_full\\surge\\D_seed47_20261014_143824.csv"
+      ],
+      "file_count": 2,
+      "hash": "fa0086160675f3c3ee5bc617546022c1",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed48_20261014_143551.csv",
+        "results\\benchmark_full\\surge\\D_seed48_20261014_143826.csv"
+      ],
+      "file_count": 2,
+      "hash": "46fdffd684220a2ac4547854411a80d3",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed49_20261014_143552.csv",
+        "results\\benchmark_full\\surge\\D_seed49_20261014_143827.csv"
+      ],
+      "file_count": 2,
+      "hash": "3e1b1c716d6b090b51087512fe94961b",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed50_20261014_143554.csv",
+        "results\\benchmark_full\\surge\\D_seed50_20261014_143828.csv"
+      ],
+      "file_count": 2,
+      "hash": "659b22886768e7f78e0e9865a9987efe",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "surge",
+      "controller": "D",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\surge\\D_seed51_20261014_143555.csv",
+        "results\\benchmark_full\\surge\\D_seed51_20261014_143830.csv"
+      ],
+      "file_count": 2,
+      "hash": "c6bb1d10cb4718ef187c2289aa44a8c3",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 69,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed42_20261014_143332.csv",
+        "results\\benchmark_full\\uneven\\A_seed42_20261014_143603.csv"
+      ],
+      "file_count": 2,
+      "hash": "5d4c977cde9b0531dd3a002b71141bb4",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 29,
+      "queue_north_final": 1,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed43_20261014_143333.csv",
+        "results\\benchmark_full\\uneven\\A_seed43_20261014_143604.csv"
+      ],
+      "file_count": 2,
+      "hash": "7f23a66bcb5acf934d6ae0db74f77055",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 2,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed44_20261014_143334.csv",
+        "results\\benchmark_full\\uneven\\A_seed44_20261014_143606.csv"
+      ],
+      "file_count": 2,
+      "hash": "54d8c63e041e00cf4faa231ee5f556dd",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 36,
+      "queue_north_final": 2,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed45_20261014_143335.csv",
+        "results\\benchmark_full\\uneven\\A_seed45_20261014_143607.csv"
+      ],
+      "file_count": 2,
+      "hash": "2b783ed3dad9d01c8f5b08883d516fab",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 36,
+      "queue_north_final": 0,
+      "queue_east_final": 3,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed46_20261014_143336.csv",
+        "results\\benchmark_full\\uneven\\A_seed46_20261014_143608.csv"
+      ],
+      "file_count": 2,
+      "hash": "f27127258a5e63e67f710de5242734e2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed47_20261014_143337.csv",
+        "results\\benchmark_full\\uneven\\A_seed47_20261014_143609.csv"
+      ],
+      "file_count": 2,
+      "hash": "6bf91af0f63f1765d36b0f280bd482d5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 29,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed48_20261014_143338.csv",
+        "results\\benchmark_full\\uneven\\A_seed48_20261014_143610.csv"
+      ],
+      "file_count": 2,
+      "hash": "d2195e3958ce42d7b7124f38755e34e9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 27,
+      "queue_north_final": 1,
+      "queue_east_final": 1,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed49_20261014_143339.csv",
+        "results\\benchmark_full\\uneven\\A_seed49_20261014_143611.csv"
+      ],
+      "file_count": 2,
+      "hash": "181549a153073fe0e281901addc756b5",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 1,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed50_20261014_143340.csv",
+        "results\\benchmark_full\\uneven\\A_seed50_20261014_143612.csv"
+      ],
+      "file_count": 2,
+      "hash": "bdbe02c51bf0515340aa87ec6d016598",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 2,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "A",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\uneven\\A_seed51_20261014_143341.csv",
+        "results\\benchmark_full\\uneven\\A_seed51_20261014_143613.csv"
+      ],
+      "file_count": 2,
+      "hash": "5ab8a9374d12df6c2bd62caca0cff62d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 36,
+      "queue_north_final": 3,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed42_20261014_143342.csv",
+        "results\\benchmark_full\\uneven\\B_seed42_20261014_143614.csv"
+      ],
+      "file_count": 2,
+      "hash": "57d8dde4d90f238ec7eb985aeab770b4",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 28,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed43_20261014_143343.csv",
+        "results\\benchmark_full\\uneven\\B_seed43_20261014_143615.csv"
+      ],
+      "file_count": 2,
+      "hash": "2547974c73e550c1f3bfb98e52183dde",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed44_20261014_143344.csv",
+        "results\\benchmark_full\\uneven\\B_seed44_20261014_143616.csv"
+      ],
+      "file_count": 2,
+      "hash": "dd1ef9e06dd81e1ce79b4fd0a3c7eac2",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 38,
+      "queue_north_final": 2,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed45_20261014_143345.csv",
+        "results\\benchmark_full\\uneven\\B_seed45_20261014_143617.csv"
+      ],
+      "file_count": 2,
+      "hash": "f060dec34d45fe6db6c51df527242ae9",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed46_20261014_143346.csv",
+        "results\\benchmark_full\\uneven\\B_seed46_20261014_143618.csv"
+      ],
+      "file_count": 2,
+      "hash": "167a2e0727a2f2f6996ce89802b6b8e0",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed47_20261014_143347.csv",
+        "results\\benchmark_full\\uneven\\B_seed47_20261014_143619.csv"
+      ],
+      "file_count": 2,
+      "hash": "b6d58925aebf300f48ce6fbe58f7ad56",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 34,
+      "queue_north_final": 3,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed48_20261014_143348.csv",
+        "results\\benchmark_full\\uneven\\B_seed48_20261014_143620.csv"
+      ],
+      "file_count": 2,
+      "hash": "5406d0f0ae163859a74f4beb05773366",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 35,
+      "queue_north_final": 1,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed49_20261014_143349.csv",
+        "results\\benchmark_full\\uneven\\B_seed49_20261014_143621.csv"
+      ],
+      "file_count": 2,
+      "hash": "8e3ea5b74f8a493611a862dcf288cd7d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 28,
+      "queue_north_final": 0,
+      "queue_east_final": 5,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed50_20261014_143350.csv",
+        "results\\benchmark_full\\uneven\\B_seed50_20261014_143622.csv"
+      ],
+      "file_count": 2,
+      "hash": "5a8cfd6e20336d6f5303b86091a0b933",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 30,
+      "queue_north_final": 2,
+      "queue_east_final": 2,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "B",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\uneven\\B_seed51_20261014_143352.csv",
+        "results\\benchmark_full\\uneven\\B_seed51_20261014_143623.csv"
+      ],
+      "file_count": 2,
+      "hash": "79b86008f9c8e882c17f87606266b4db",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 39,
+      "queue_north_final": 2,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed42_20261014_143353.csv",
+        "results\\benchmark_full\\uneven\\C_seed42_20261014_143624.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed43_20261014_143354.csv",
+        "results\\benchmark_full\\uneven\\C_seed43_20261014_143626.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed44_20261014_143355.csv",
+        "results\\benchmark_full\\uneven\\C_seed44_20261014_143627.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed45_20261014_143355.csv",
+        "results\\benchmark_full\\uneven\\C_seed45_20261014_143628.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed46_20261014_143356.csv",
+        "results\\benchmark_full\\uneven\\C_seed46_20261014_143629.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed47_20261014_143357.csv",
+        "results\\benchmark_full\\uneven\\C_seed47_20261014_143630.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed48_20261014_143358.csv",
+        "results\\benchmark_full\\uneven\\C_seed48_20261014_143631.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed49_20261014_143359.csv",
+        "results\\benchmark_full\\uneven\\C_seed49_20261014_143632.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed50_20261014_143400.csv",
+        "results\\benchmark_full\\uneven\\C_seed50_20261014_143633.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "C",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\uneven\\C_seed51_20261014_143401.csv",
+        "results\\benchmark_full\\uneven\\C_seed51_20261014_143634.csv"
+      ],
+      "file_count": 2,
+      "hash": "26d7fe8a4b60dc7c52ca1d142906b707",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 31,
+      "queue_north_final": 0,
+      "queue_east_final": 4,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 42,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed42_20261014_143402.csv",
+        "results\\benchmark_full\\uneven\\D_seed42_20261014_143635.csv"
+      ],
+      "file_count": 2,
+      "hash": "0761f795d8461a9e3528acda190044d1",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 43,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed43_20261014_143403.csv",
+        "results\\benchmark_full\\uneven\\D_seed43_20261014_143636.csv"
+      ],
+      "file_count": 2,
+      "hash": "278b7d3fa730837d4c8634bf547c769d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 44,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed44_20261014_143404.csv",
+        "results\\benchmark_full\\uneven\\D_seed44_20261014_143637.csv"
+      ],
+      "file_count": 2,
+      "hash": "f81021cf2780c88efcfc1247d5541f58",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 45,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed45_20261014_143406.csv",
+        "results\\benchmark_full\\uneven\\D_seed45_20261014_143638.csv"
+      ],
+      "file_count": 2,
+      "hash": "60e7d1731f6e7fb725410a675ba5bfde",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 46,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed46_20261014_143407.csv",
+        "results\\benchmark_full\\uneven\\D_seed46_20261014_143639.csv"
+      ],
+      "file_count": 2,
+      "hash": "009d4d34192cc81ccfcc83683121caab",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 47,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed47_20261014_143408.csv",
+        "results\\benchmark_full\\uneven\\D_seed47_20261014_143640.csv"
+      ],
+      "file_count": 2,
+      "hash": "0761f795d8461a9e3528acda190044d1",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 48,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed48_20261014_143409.csv",
+        "results\\benchmark_full\\uneven\\D_seed48_20261014_143641.csv"
+      ],
+      "file_count": 2,
+      "hash": "278b7d3fa730837d4c8634bf547c769d",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 49,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed49_20261014_143410.csv",
+        "results\\benchmark_full\\uneven\\D_seed49_20261014_143642.csv"
+      ],
+      "file_count": 2,
+      "hash": "f81021cf2780c88efcfc1247d5541f58",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 50,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed50_20261014_143411.csv",
+        "results\\benchmark_full\\uneven\\D_seed50_20261014_143643.csv"
+      ],
+      "file_count": 2,
+      "hash": "60e7d1731f6e7fb725410a675ba5bfde",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 33,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    },
+    {
+      "scenario": "uneven",
+      "controller": "D",
+      "seed": 51,
+      "files": [
+        "results\\benchmark_full\\uneven\\D_seed51_20261014_143412.csv",
+        "results\\benchmark_full\\uneven\\D_seed51_20261014_143645.csv"
+      ],
+      "file_count": 2,
+      "hash": "009d4d34192cc81ccfcc83683121caab",
+      "time_steps": 92,
+      "final_time": 121.0,
+      "arrived_cumulative_final": 0,
+      "remaining_expected_final": 0,
+      "completed_final": 32,
+      "queue_north_final": 0,
+      "queue_east_final": 0,
+      "spillback_ns_final": 0,
+      "spillback_ew_final": 0
+    }
+  ]
+}

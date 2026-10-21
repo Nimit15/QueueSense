@@ -1,0 +1,27 @@
+{
+  "experiment": "matched_d1_d2_bottleneck_seed42",
+  "seed": 42,
+  "scenario": "bottleneck",
+  "duration_s": 300,
+  "warmup_s": 60,
+  "threshold": 0.30,
+  "interventions_d2": 37,
+  "interventions_d1": 0,
+  "details": [
+    {
+      "time_s": 233.0,
+      "junction": "J1",
+      "approach": "west",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3072696381448144,
+      "threshold": 0.30,
+      "eligible": false,
+      "gate_suppresses": true,
+      "gate_enabled": true,
+      "ungated_phase_guess": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    }
+    /* 36 more similar entries ... */
+  ],
+  "notes": "All interventions occur on J1 west approach due to congestion on receiving edge art_east_1. Gate suppresses EAST_WEST green and holds NORTH_SOUTH green. No invalid/missing observations."
+}

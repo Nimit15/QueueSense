@@ -1,0 +1,22 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "D:/QueueSense/src/queuesense/dashboard/static/index.html"
+        ],
+        "createdAt": "2026-10-20T21:08:17.157Z",
+        "reason": "Intentional ICCC dashboard aesthetic: neon glow accents for signal heads and decision receipts per QueueSense ICCC spec"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-21T13:37:48.638Z"
+      }
+    ]
+  }
+}

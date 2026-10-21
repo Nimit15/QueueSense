@@ -1,0 +1,1490 @@
+{
+  "total_runs": 200,
+  "successful_runs": 200,
+  "failed_runs": 0,
+  "scenarios": [
+    "balanced",
+    "bottleneck",
+    "light",
+    "surge",
+    "uneven"
+  ],
+  "controllers": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51
+  ],
+  "metrics": {
+    "arrived_cumulative": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 866.2,
+        "std": 2.440400695696416,
+        "min": 861,
+        "max": 869
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 859.1,
+        "std": 5.404730438339278,
+        "min": 848,
+        "max": 867
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 657.5,
+        "std": 193.02345856282741,
+        "min": 507,
+        "max": 888
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 1039.6,
+        "std": 11.692352676476654,
+        "min": 1024,
+        "max": 1062
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 952.5,
+        "std": 7.121953539740494,
+        "min": 942,
+        "max": 963
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 961.8,
+        "std": 2.3475755815545356,
+        "min": 958,
+        "max": 965
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 769.4,
+        "std": 453.66634827321667,
+        "min": 415,
+        "max": 1302
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 1363.9,
+        "std": 4.433458644845545,
+        "min": 1356,
+        "max": 1371
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 468.3,
+        "std": 3.2676869155073276,
+        "min": 462,
+        "max": 472
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 502.6,
+        "std": 5.581716183715858,
+        "min": 491,
+        "max": 509
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 364.7,
+        "std": 2.626785107312739,
+        "min": 362,
+        "max": 371
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 190.8,
+        "std": 83.70424123065688,
+        "min": 161,
+        "max": 429
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 1002.4,
+        "std": 4.402019738458436,
+        "min": 995,
+        "max": 1009
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 1012.0,
+        "std": 7.468452167469364,
+        "min": 999,
+        "max": 1023
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 835.4,
+        "std": 121.94734747240531,
+        "min": 744,
+        "max": 1045
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 1091.4,
+        "std": 90.32312365428174,
+        "min": 959,
+        "max": 1165
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 952.1,
+        "std": 8.504247304860225,
+        "min": 932,
+        "max": 963
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 957.7,
+        "std": 4.522781838156201,
+        "min": 951,
+        "max": 967
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 1070.9,
+        "std": 4.306326095924952,
+        "min": 1062,
+        "max": 1077
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 1066.5,
+        "std": 7.720823214600359,
+        "min": 1056,
+        "max": 1079
+      }
+    ],
+    "remaining_expected": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 273.3,
+        "std": 2.830390628713835,
+        "min": 269,
+        "max": 279
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 280.1,
+        "std": 4.954235000930462,
+        "min": 273,
+        "max": 289
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 482.0,
+        "std": 193.0158312447741,
+        "min": 253,
+        "max": 633
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 99.3,
+        "std": 11.402241495035575,
+        "min": 77,
+        "max": 113
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 876.5,
+        "std": 7.633988327065893,
+        "min": 863,
+        "max": 887
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 867.5,
+        "std": 2.3213980461973547,
+        "min": 864,
+        "max": 871
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 1059.7,
+        "std": 453.9789642703724,
+        "min": 524,
+        "max": 1417
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 465.6,
+        "std": 4.247875285886397,
+        "min": 459,
+        "max": 472
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 96.8,
+        "std": 2.2997584414213774,
+        "min": 93,
+        "max": 102
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 62.7,
+        "std": 4.110960958218892,
+        "min": 59,
+        "max": 73
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 199.4,
+        "std": 3.47051068928543,
+        "min": 194,
+        "max": 205
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 375.2,
+        "std": 84.40879364405374,
+        "min": 135,
+        "max": 404
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 875.0,
+        "std": 3.055050463303893,
+        "min": 870,
+        "max": 881
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 865.0,
+        "std": 7.241853660800152,
+        "min": 855,
+        "max": 877
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 1041.0,
+        "std": 120.92513753925972,
+        "min": 833,
+        "max": 1131
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 786.5,
+        "std": 89.14937527044769,
+        "min": 713,
+        "max": 917
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 279.6,
+        "std": 8.78382351573365,
+        "min": 269,
+        "max": 299
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 274.2,
+        "std": 4.917090377222871,
+        "min": 264,
+        "max": 281
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 161.3,
+        "std": 4.056544780420343,
+        "min": 156,
+        "max": 168
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 165.2,
+        "std": 7.435649863252629,
+        "min": 155,
+        "max": 177
+      }
+    ],
+    "queue_north": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 0.8,
+        "std": 1.1352924243950933,
+        "min": 0,
+        "max": 3
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 2.1,
+        "std": 2.4244128727957572,
+        "min": 0,
+        "max": 7
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 8.3,
+        "std": 12.000462954032695,
+        "min": 0,
+        "max": 30
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 4.0,
+        "std": 3.39934634239519,
+        "min": 0,
+        "max": 9
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.7,
+        "std": 0.8232726023485646,
+        "min": 0,
+        "max": 2
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 1.4,
+        "std": 1.577621275493231,
+        "min": 0,
+        "max": 4
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 5.7,
+        "std": 7.3794007585681065,
+        "min": 0,
+        "max": 18
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 25.9,
+        "std": 7.078135347674555,
+        "min": 15,
+        "max": 35
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 0.3,
+        "std": 0.48304589153964794,
+        "min": 0,
+        "max": 1
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 0.6,
+        "std": 0.8432740427115678,
+        "min": 0,
+        "max": 2
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 3.5,
+        "std": 11.067971810589327,
+        "min": 0,
+        "max": 35
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 16.1,
+        "std": 7.936553968120477,
+        "min": 5,
+        "max": 26
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 15.9,
+        "std": 13.510900948657882,
+        "min": 1,
+        "max": 35
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 22.1,
+        "std": 11.308305698811727,
+        "min": 0,
+        "max": 35
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 15.7,
+        "std": 6.896859188548558,
+        "min": 6,
+        "max": 27
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 0.5,
+        "std": 0.8498365855987975,
+        "min": 0,
+        "max": 2
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 1.2,
+        "std": 1.3165611772087666,
+        "min": 0,
+        "max": 3
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 3.4,
+        "std": 3.777124126457412,
+        "min": 0,
+        "max": 10
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 2.9,
+        "std": 1.7919573407620817,
+        "min": 0,
+        "max": 5
+      }
+    ],
+    "queue_south": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "queue_east": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 18.7,
+        "std": 2.5407785333546005,
+        "min": 16,
+        "max": 24
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 20.3,
+        "std": 3.945461527713414,
+        "min": 15,
+        "max": 24
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 17.3,
+        "std": 5.396500923952688,
+        "min": 10,
+        "max": 24
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 6.5,
+        "std": 5.421151989096864,
+        "min": 0,
+        "max": 19
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 18.5,
+        "std": 2.549509756796392,
+        "min": 15,
+        "max": 23
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 21.1,
+        "std": 3.446415206816755,
+        "min": 16,
+        "max": 24
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 16.0,
+        "std": 4.521553322083512,
+        "min": 10,
+        "max": 24
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 23.1,
+        "std": 2.8460498941515415,
+        "min": 15,
+        "max": 24
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 18.4,
+        "std": 1.9550504398153574,
+        "min": 15,
+        "max": 21
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 18.4,
+        "std": 5.501514942874069,
+        "min": 8,
+        "max": 24
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 17.7,
+        "std": 6.03784361801095,
+        "min": 7,
+        "max": 24
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 21.6,
+        "std": 7.589466384404111,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 18.7,
+        "std": 2.3118054512532926,
+        "min": 16,
+        "max": 24
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 19.5,
+        "std": 5.759050847723665,
+        "min": 9,
+        "max": 24
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 18.5,
+        "std": 4.503085362035432,
+        "min": 12,
+        "max": 24
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 13.4,
+        "std": 6.703233050799691,
+        "min": 7,
+        "max": 24
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 18.4,
+        "std": 2.3190036174568114,
+        "min": 16,
+        "max": 23
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 22.5,
+        "std": 2.9533408577782247,
+        "min": 16,
+        "max": 24
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 14.8,
+        "std": 4.211096452627668,
+        "min": 9,
+        "max": 24
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 7.5,
+        "std": 2.068278940998476,
+        "min": 4,
+        "max": 11
+      }
+    ],
+    "queue_west": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 2.4,
+        "std": 2.503331114069145,
+        "min": 0,
+        "max": 7
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 3.8,
+        "std": 3.9944405810520647,
+        "min": 0,
+        "max": 9
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 11.9,
+        "std": 9.456919865015953,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 0.1,
+        "std": 0.31622776601683794,
+        "min": 0,
+        "max": 1
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 11.4,
+        "std": 8.113089560840693,
+        "min": 0,
+        "max": 23
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 10.7,
+        "std": 9.809858986414296,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 10.3,
+        "std": 7.674633541739958,
+        "min": 1,
+        "max": 24
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 0.7,
+        "std": 0.9486832980505138,
+        "min": 0,
+        "max": 2
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 1.8,
+        "std": 2.043961295567452,
+        "min": 0,
+        "max": 5
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 17.6,
+        "std": 6.363087999461338,
+        "min": 9,
+        "max": 24
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 21.6,
+        "std": 7.589466384404111,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 2.1,
+        "std": 2.282785822435191,
+        "min": 0,
+        "max": 6
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 4.6,
+        "std": 5.18973345494095,
+        "min": 0,
+        "max": 13
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 4.4,
+        "std": 8.669230390037836,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 1.4,
+        "std": 2.1186998109427604,
+        "min": 0,
+        "max": 6
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 12.1,
+        "std": 8.11651266109884,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 11.0,
+        "std": 11.64283279771532,
+        "min": 0,
+        "max": 24
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 3.4,
+        "std": 3.6575644598253874,
+        "min": 0,
+        "max": 8
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 5.0,
+        "std": 4.216370213557839,
+        "min": 0,
+        "max": 10
+      }
+    ],
+    "spillback_ns": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "spillback_ew": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.2,
+        "std": 0.4216370213557839,
+        "min": 0,
+        "max": 1
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.1,
+        "std": 0.31622776601683794,
+        "min": 0,
+        "max": 1
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "completed": [
+      {
+        "scenario": "balanced",
+        "controller": "A",
+        "mean": 866.2,
+        "std": 2.440400695696416,
+        "min": 861,
+        "max": 869
+      },
+      {
+        "scenario": "balanced",
+        "controller": "B",
+        "mean": 859.1,
+        "std": 5.404730438339278,
+        "min": 848,
+        "max": 867
+      },
+      {
+        "scenario": "balanced",
+        "controller": "C",
+        "mean": 657.5,
+        "std": 193.02345856282741,
+        "min": 507,
+        "max": 888
+      },
+      {
+        "scenario": "balanced",
+        "controller": "D",
+        "mean": 1039.6,
+        "std": 11.692352676476654,
+        "min": 1024,
+        "max": 1062
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 952.5,
+        "std": 7.121953539740494,
+        "min": 942,
+        "max": 963
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 961.8,
+        "std": 2.3475755815545356,
+        "min": 958,
+        "max": 965
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 769.4,
+        "std": 453.66634827321667,
+        "min": 415,
+        "max": 1302
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 1363.9,
+        "std": 4.433458644845545,
+        "min": 1356,
+        "max": 1371
+      },
+      {
+        "scenario": "light",
+        "controller": "A",
+        "mean": 468.3,
+        "std": 3.2676869155073276,
+        "min": 462,
+        "max": 472
+      },
+      {
+        "scenario": "light",
+        "controller": "B",
+        "mean": 502.6,
+        "std": 5.581716183715858,
+        "min": 491,
+        "max": 509
+      },
+      {
+        "scenario": "light",
+        "controller": "C",
+        "mean": 364.7,
+        "std": 2.626785107312739,
+        "min": 362,
+        "max": 371
+      },
+      {
+        "scenario": "light",
+        "controller": "D",
+        "mean": 190.8,
+        "std": 83.70424123065688,
+        "min": 161,
+        "max": 429
+      },
+      {
+        "scenario": "surge",
+        "controller": "A",
+        "mean": 1002.4,
+        "std": 4.402019738458436,
+        "min": 995,
+        "max": 1009
+      },
+      {
+        "scenario": "surge",
+        "controller": "B",
+        "mean": 1012.0,
+        "std": 7.468452167469364,
+        "min": 999,
+        "max": 1023
+      },
+      {
+        "scenario": "surge",
+        "controller": "C",
+        "mean": 835.4,
+        "std": 121.94734747240531,
+        "min": 744,
+        "max": 1045
+      },
+      {
+        "scenario": "surge",
+        "controller": "D",
+        "mean": 1091.4,
+        "std": 90.32312365428174,
+        "min": 959,
+        "max": 1165
+      },
+      {
+        "scenario": "uneven",
+        "controller": "A",
+        "mean": 952.1,
+        "std": 8.504247304860225,
+        "min": 932,
+        "max": 963
+      },
+      {
+        "scenario": "uneven",
+        "controller": "B",
+        "mean": 957.7,
+        "std": 4.522781838156201,
+        "min": 951,
+        "max": 967
+      },
+      {
+        "scenario": "uneven",
+        "controller": "C",
+        "mean": 1070.9,
+        "std": 4.306326095924952,
+        "min": 1062,
+        "max": 1077
+      },
+      {
+        "scenario": "uneven",
+        "controller": "D",
+        "mean": 1066.5,
+        "std": 7.720823214600359,
+        "min": 1056,
+        "max": 1079
+      }
+    ]
+  }
+}

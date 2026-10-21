@@ -1,0 +1,325 @@
+{
+  "total_runs": 4,
+  "successful_runs": 4,
+  "failed_runs": 0,
+  "scenarios": [
+    "bottleneck"
+  ],
+  "controllers": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "seeds": [
+    42
+  ],
+  "metrics": {
+    "arrived_cumulative": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 1045.0,
+        "std": NaN,
+        "min": 1045,
+        "max": 1045
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 1051.0,
+        "std": NaN,
+        "min": 1051,
+        "max": 1051
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 515.0,
+        "std": NaN,
+        "min": 515,
+        "max": 515
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 311.0,
+        "std": NaN,
+        "min": 311,
+        "max": 311
+      }
+    ],
+    "remaining_expected": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 680.0,
+        "std": NaN,
+        "min": 680,
+        "max": 680
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 674.0,
+        "std": NaN,
+        "min": 674,
+        "max": 674
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 1210.0,
+        "std": NaN,
+        "min": 1210,
+        "max": 1210
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 1414.0,
+        "std": NaN,
+        "min": 1414,
+        "max": 1414
+      }
+    ],
+    "queue_north": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 2.0,
+        "std": NaN,
+        "min": 2,
+        "max": 2
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 5.0,
+        "std": NaN,
+        "min": 5,
+        "max": 5
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "queue_south": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "queue_east": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 18.0,
+        "std": NaN,
+        "min": 18,
+        "max": 18
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 24.0,
+        "std": NaN,
+        "min": 24,
+        "max": 24
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 11.0,
+        "std": NaN,
+        "min": 11,
+        "max": 11
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 24.0,
+        "std": NaN,
+        "min": 24,
+        "max": 24
+      }
+    ],
+    "queue_west": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 5.0,
+        "std": NaN,
+        "min": 5,
+        "max": 5
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 10.0,
+        "std": NaN,
+        "min": 10,
+        "max": 10
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 24.0,
+        "std": NaN,
+        "min": 24,
+        "max": 24
+      }
+    ],
+    "spillback_ns": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "spillback_ew": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 0.0,
+        "std": NaN,
+        "min": 0,
+        "max": 0
+      }
+    ],
+    "completed": [
+      {
+        "scenario": "bottleneck",
+        "controller": "A",
+        "mean": 1045.0,
+        "std": NaN,
+        "min": 1045,
+        "max": 1045
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "B",
+        "mean": 1051.0,
+        "std": NaN,
+        "min": 1051,
+        "max": 1051
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "C",
+        "mean": 515.0,
+        "std": NaN,
+        "min": 515,
+        "max": 515
+      },
+      {
+        "scenario": "bottleneck",
+        "controller": "D",
+        "mean": 311.0,
+        "std": NaN,
+        "min": 311,
+        "max": 311
+      }
+    ]
+  }
+}

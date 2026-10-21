@@ -1,0 +1,203 @@
+{
+  "csv": "results\\stage5_selector_closed_loop\\bottleneck\\S_seed42_bottleneck_seed42.csv",
+  "seed": 42,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 68,
+  "remaining_expected": 82,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 28,
+  "phase_switches": 96,
+  "gate_interventions": 18,
+  "gate_intervention_details": [
+    {
+      "time": 233.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "NORTH_SOUTH",
+      "applied_phase": "EAST_WEST"
+    },
+    {
+      "time": 234.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "hold",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "EAST_WEST"
+    },
+    {
+      "time": 240.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3434,
+      "gate_event": "hold",
+      "ungated_phase": "NORTH_SOUTH",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 241.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3423,
+      "gate_event": "hold",
+      "ungated_phase": "NORTH_SOUTH",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 242.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3301,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 243.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3253,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 244.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3253,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 245.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 246.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 278.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "hold",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "EAST_WEST"
+    },
+    {
+      "time": 279.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "hold",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "EAST_WEST"
+    },
+    {
+      "time": 285.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3434,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 286.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3385,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 287.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3253,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 288.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3253,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 289.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.314,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 290.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.3073,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    },
+    {
+      "time": 291.0,
+      "junction": "J1",
+      "approach": "art_east_1",
+      "receiving_edge": "art_east_1",
+      "edge_occupancy_fraction": 0.305,
+      "gate_event": "phase_change",
+      "ungated_phase": "EAST_WEST",
+      "applied_phase": "NORTH_SOUTH"
+    }
+  ],
+  "physical_congestion_observations": 28,
+  "gate_restrictions": 28,
+  "gate_phase_change_interventions": 13,
+  "gate_caused_holds": 5,
+  "spillback_gate": true,
+  "total_wait_seconds": 21260.0,
+  "mean_wait_seconds": 88.21576763485477,
+  "teleports": 0,
+  "decision_trace": "results\\stage5_selector_closed_loop\\bottleneck\\S_seed42_bottleneck_seed42_decision_trace.csv"
+}

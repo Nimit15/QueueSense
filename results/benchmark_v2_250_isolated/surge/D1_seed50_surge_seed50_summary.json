@@ -1,0 +1,22 @@
+{
+  "csv": "results\\benchmark_v2_250_isolated\\surge\\D1_seed50_surge_seed50.csv",
+  "seed": 50,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 42,
+  "remaining_expected": 111,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 107,
+  "phase_switches": 96,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "physical_congestion_observations": 107,
+  "gate_restrictions": 0,
+  "gate_phase_change_interventions": 0,
+  "gate_caused_holds": 0,
+  "spillback_gate": false,
+  "total_wait_seconds": 17520.0,
+  "mean_wait_seconds": 72.69709543568464,
+  "teleports": 0,
+  "decision_trace": "results\\benchmark_v2_250_isolated\\surge\\D1_seed50_surge_seed50_decision_trace.csv"
+}

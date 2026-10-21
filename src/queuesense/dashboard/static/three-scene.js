@@ -1,1245 +1,1472 @@
 // QueueSense Dashboard — Three.js 3D Scene Engine
-// High-craft architectural traffic diorama for J1 + J2 corridor
-// Built from scratch: flat geometry, glowing signals, multi-part vehicles, smooth physics
+// High-craft architectural traffic diorama: J1 + J2 corridor
+// Flat geometry, glowing signals, multi-part vehicles, smooth physics
 
-(function () {
-  'use strict';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/OrbitControls';
 
-  // ─── Scene State ──────────────────────────────────────────────
-  const SceneState = {
-    currentMode: 'queuesense',
-    currentScenario: 'auto',
-    currentCamera: 'isometric',
-    autoRunning: true,
-    simTime: 0,
-    vehicles: [],
-    signals: {},
-    densityLevel: 50,
-    exitBlock: 0,
-    emergencyActive: false,
-    kpi: { queue: 0, wait: 0, exit: 0 },
-  };
+// ─── Scene State ──────────────────────────────────────────────
+const state = {
+  currentMode: 'queuesense',
+  currentScenario: 'auto',
+  currentCamera: 'isometric',
+  autoRunning: true,
+  simTime: 0,
+  vehicles: [],
+  signals: {},
+  densityLevel: 50,
+  exitBlock: 0,
+  emergencyActive: false,
+  kpi: { queue: 0, wait: 0, exit: 0 },
+  scenarioTimer: 0,
+  scenarioStep: 0,
+};
 
-  // ─── Three.js Core ────────────────────────────────────────────
-  let scene, camera, renderer, controls, clock, animationId;
-  const state = SceneState;
+// ─── Three.js Core ────────────────────────────────────────────
+let scene, camera, renderer, controls, clock, animationId;
 
-  // Color palette — high-contrast stone/neutral dark with vibrant signals
-  const COLORS = {
-    ground: 0x0a0c10,
-    asphalt: 0x1c1f26,
-    asphaltDark: 0x15181d,
-    curb: 0x2a2e36,
-    sidewalk: 0x242830,
-    crosswalk: 0xf8f8fa,
-    laneMark: 0xd1d5db,
-    stopLine: 0xfff5e6,
-    signalRed: 0xff2e4c,
-    signalAmber: 0xffb800,
-    signalGreen: 0x00e676,
-    vehicleA: 0x4f96ff,   // blue-white
-    vehicleB: 0x22c55e,
-    vehicleC: 0xffb800,
-    vehicleD: 0xff2e4c,
-    vehicleEmergency: 0xff4444,
-    poleMetal: 0x2a2e3a,
-    poleGlow: 0x4a505e,
-  };
+// Color palette — high-contrast stone/neutral dark with vibrant signals
+const COLORS = {
+  ground: 0x0a0c10,
+  groundWarm: 0x0d0f14,
+  asphalt: 0x1c1f26,
+  asphaltDark: 0x15181d,
+  asphaltHighlight: 0x22262e,
+  curb: 0x2a2e36,
+  sidewalk: 0x242830,
+  crosswalk: 0xf8f8fa,
+  stopLine: 0xfff5e6,
+  laneMark: 0xd1d5db,
+  signalRed: 0xff2e4c,
+  signalAmber: 0xffb800,
+  signalGreen: 0x00e676,
+  poleMetal: 0x2a2e3a,
+  poleGlow: 0x4a505e,
+  building: 0x1a1c23,
+  buildingDim: 0x14161c,
+  treeTrunk: 0x4a3a2a,
+  treeFoliage: 0x1a3a2a,
+  lampPost: 0x2a2e36,
+  lampGlow: 0x4a505e,
+};
 
-  // ─── Vehicle Definitions (multi-part 3D) ─────────────────────
-  // Each vehicle is a group of meshes parented together for articulated movement.
+// ─── Vehicle Definitions (multi-part 3D) ──────────────────────
+function createVehicle(type, color, x, z, length, width, height) {
+  const group = new THREE.Group();
+  const paintColor = color !== undefined ? color : (0x4f96ff + Math.random() * 0x808080);
 
-  function createVehicle(type, color, x, z, length, width, height) {
-    const group = new THREE.Group();
+  // Body (chassis / main passenger cell)
+  const bodyGeom = new THREE.BoxGeometry(length, height * 0.6, width);
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: paintColor,
+    metalness: 0.8,
+    roughness: 0.2,
+  });
+  const body = new THREE.Mesh(bodyGeom, bodyMat);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
 
-    const paintColor = color !== undefined ? color : (0x4f96ff + Math.random() * 0x808080);
+  // Roof / cabin
+  const roofHeight = height * 0.4;
+  let cabinLength, cabinWidth;
+  if (type === 'truck') {
+    cabinLength = length * 0.25;
+    cabinWidth = width * 0.9;
+  } else if (type === 'bus') {
+    cabinLength = length * 0.8;
+    cabinWidth = width * 0.9;
+  } else if (type === 'auto') {
+    cabinLength = length * 0.3;
+    cabinWidth = width * 0.7;
+  } else {
+    cabinLength = length * 0.5;
+    cabinWidth = width * 0.85;
+  }
 
-    // Body (chassis / main passenger cell)
-    const bodyGeom = new THREE.BoxGeometry(length, height * 0.6, width);
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: paintColor,
-      metalness: 0.8,
-      roughness: 0.2,
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    body.castShadow = true;
-    body.receiveShadow = true;
-    group.add(body);
+  const cabinGeom = new THREE.BoxGeometry(cabinLength, roofHeight, cabinWidth);
+  const cabinMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a2e,
+    metalness: 0.9,
+    roughness: 0.1,
+    transparent: true,
+    opacity: 0.7,
+  });
+  const cabin = new THREE.Mesh(cabinGeom, cabinMat);
+  cabin.position.y = height * 0.3;
+  cabin.castShadow = true;
+  cabin.receiveShadow = true;
+  group.add(cabin);
 
-    // Roof / cabin
-    const roofHeight = height * 0.4;
-    const cabinGeom = type === 'truck'
-      ? new THREE.BoxGeometry(length * 0.4, roofHeight, width * 0.9)
-      : new THREE.BoxGeometry(length * 0.5, roofHeight, width * 0.85);
-    const cabinMat = new THREE.MeshStandardMaterial({
-      color: 0x1a1a2e,  // dark glass
-      metalness: 0.9,
-      roughness: 0.1,
-      transparent: true,
-      opacity: 0.7,
-    });
-    const cabin = new THREE.Mesh(cabinGeom, cabinMat);
-    cabin.position.y = height * 0.3;
-    cabin.castShadow = true;
-    cabin.receiveShadow = true;
-    group.add(cabin);
+  // Wheels
+  const wheelMat = new THREE.MeshStandardMaterial({
+    color: 0x111419,
+    metalness: 0.9,
+    roughness: 0.4,
+  });
+  const wheelRadius = Math.min(width * 0.12, 0.18);
+  const wheelGeom = new THREE.CylinderGeometry(wheelRadius, wheelRadius, width * 0.2, 16);
 
-    // Wheels — 4 cylinders
-    const wheelMat = new THREE.MeshStandardMaterial({
-      color: 0x111419,
-      metalness: 0.9,
-      roughness: 0.4,
-    });
-    const wheelGeom = new THREE.CylinderGeometry(width * 0.12, width * 0.12, width * 0.2, 16);
-    const wheelPositions = [
+  let wheelPositions;
+  if (type === 'bus') {
+    wheelPositions = [
+      [-length * 0.4, -height * 0.2, width * 0.35],
+      [-length * 0.4, -height * 0.2, -width * 0.35],
+      [length * 0.4, -height * 0.2, width * 0.35],
+      [length * 0.4, -height * 0.2, -width * 0.35],
+      [-length * 0.42, -height * 0.2, width * 0.35],
+      [length * 0.42, -height * 0.2, -width * 0.35],
+    ];
+  } else if (type === 'truck') {
+    wheelPositions = [
+      [-length * 0.35, -height * 0.2, width * 0.35],
+      [-length * 0.35, -height * 0.2, -width * 0.35],
+      [length * 0.38, -height * 0.2, width * 0.35],
+      [length * 0.38, -height * 0.2, -width * 0.35],
+      [length * 0.42, -height * 0.2, width * 0.35],
+      [length * 0.42, -height * 0.2, -width * 0.35],
+      [-length * 0.38, -height * 0.2, width * 0.35],
+      [-length * 0.38, -height * 0.2, -width * 0.35],
+    ];
+  } else {
+    wheelPositions = [
       [-length * 0.35, -height * 0.2, width * 0.35],
       [-length * 0.35, -height * 0.2, -width * 0.35],
       [length * 0.35, -height * 0.2, width * 0.35],
       [length * 0.35, -height * 0.2, -width * 0.35],
     ];
-    // For trucks, rear wheels are dual
-    if (type === 'truck') {
-      wheelPositions.push(
-        [length * 0.42, -height * 0.2, width * 0.35],
-        [length * 0.42, -height * 0.2, -width * 0.35]
-      );
-    }
+  }
 
-    wheelPositions.forEach(pos => {
-      const wheel = new THREE.Mesh(wheelGeom, wheelMat);
-      wheel.position.set(pos[0], pos[1], pos[2]);
-      wheel.rotation.z = Math.PI / 2;
-      wheel.castShadow = true;
-      wheel.receiveShadow = true;
-      group.add(wheel);
-    });
+  wheelPositions.forEach(pos => {
+    const wheel = new THREE.Mesh(wheelGeom, wheelMat);
+    wheel.position.set(pos[0], pos[1], pos[2]);
+    wheel.rotation.z = Math.PI / 2;
+    wheel.castShadow = true;
+    wheel.receiveShadow = true;
+    group.add(wheel);
+  });
 
-    // Front/rear lights
-    const lightMat = new THREE.MeshStandardMaterial({
-      color: type === 'emergency' ? COLORS.vehicleEmergency : paintColor,
-      emissive: type === 'emergency' ? COLORS.vehicleEmergency : paintColor,
-      emissiveIntensity: type === 'emergency' ? 0.8 : 0.3,
+  // Headlights (glowing white)
+  const headlightMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    toneMapped: false,
+  });
+  const headlightGeom = new THREE.BoxGeometry(width * 0.18, height * 0.12, 0.03);
+  const hlL = new THREE.Mesh(headlightGeom, headlightMat);
+  hlL.position.set(length * 0.48, height * 0.25, width * 0.25);
+  hlL.castShadow = true;
+  group.add(hlL);
+  const hlR = hlL.clone();
+  hlR.position.z = -width * 0.25;
+  group.add(hlR);
+
+  // Taillights (glowing red)
+  const taillightMat = new THREE.MeshBasicMaterial({
+    color: 0xef4444,
+    toneMapped: false,
+  });
+  const taillightGeom = new THREE.BoxGeometry(width * 0.2, height * 0.1, 0.03);
+  const tlL = new THREE.Mesh(taillightGeom, taillightMat);
+  tlL.position.set(-length * 0.48, height * 0.25, width * 0.28);
+  tlL.castShadow = true;
+  group.add(tlL);
+  const tlR = tlL.clone();
+  tlR.position.x = -length * 0.48;
+  tlR.position.z = -width * 0.28;
+  group.add(tlR);
+
+  // Emergency beacon for ambulances
+  if (type === 'emergency') {
+    const beaconRedGeom = new THREE.SphereGeometry(width * 0.18, 16, 12);
+    const beaconRedMat = new THREE.MeshStandardMaterial({
+      color: 0xff2e4c,
+      emissive: 0xff2e4c,
+      emissiveIntensity: 0.8,
       toneMapped: false,
     });
-    const lightGeom = new THREE.BoxGeometry(width * 0.15, height * 0.12, 0.02);
-    const frontLightL = new THREE.Mesh(lightGeom, lightMat);
-    frontLightL.position.set(length * 0.48, height * 0.25, width * 0.25);
-    group.add(frontLightL);
-    const frontLightR = frontLightL.clone();
-    frontLightR.position.x = frontLightL.position.x;
-    frontLightR.position.z = -width * 0.25;
-    group.add(frontLightR);
-    const rearLightL = frontLightL.clone();
-    rearLightL.position.set(-length * 0.48, height * 0.25, width * 0.25);
-    rearLightL.material.color.setHex(type === 'emergency' ? COLORS.vehicleEmergency : 0xef4444);
-    rearLightL.material.emissive.setHex(type === 'emergency' ? COLORS.vehicleEmergency : 0xef4444);
-    rearLightL.material.emissiveIntensity = type === 'emergency' ? 0.8 : 0.4;
-    group.add(rearLightL);
-    const rearLightR = rearLightL.clone();
-    rearLightR.position.z = -width * 0.25;
-    group.add(rearLightR);
+    const beaconR = new THREE.Mesh(beaconRedGeom, beaconRedMat);
+    beaconR.position.y = height * 0.85;
+    group.add(beaconR);
 
-    // Emergency beacon for ambulances
-    if (type === 'emergency') {
-      const beaconGeom = new THREE.SphereGeometry(width * 0.25, 16, 12);
-      const beaconMat = new THREE.MeshStandardMaterial({
-        color: COLORS.vehicleEmergency,
-        emissive: COLORS.vehicleEmergency,
-        emissiveIntensity: 1.0,
-        toneMapped: false,
-      });
-      const beacon = new THREE.Mesh(beaconGeom, beaconMat);
-      beacon.position.y = height * 0.8;
-      group.add(beacon);
-      group.userData.beacon = beacon;
-    }
+    const beaconBlueGeom = new THREE.SphereGeometry(width * 0.14, 16, 12);
+    const beaconBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x00a8ff,
+      emissive: 0x00a8ff,
+      emissiveIntensity: 0.8,
+      toneMapped: false,
+    });
+    const beaconB = new THREE.Mesh(beaconBlueGeom, beaconBlueMat);
+    beaconB.position.y = height * 0.95;
+    group.add(beaconB);
 
-    // For auto-rickshaw: add a distinct canopy
-    if (type === 'auto') {
-      const canopyGeom = new THREE.ConeGeometry(width * 0.7, height * 0.6, 6);
-      const canopyMat = new THREE.MeshStandardMaterial({
-        color: 0xe53935,  // auto-rickshaw red
-        metalness: 0.2,
-        roughness: 0.6,
-      });
-      const canopy = new THREE.Mesh(canopyGeom, canopyMat);
-      canopy.position.y = height * 0.65;
-      canopy.rotation.y = Math.PI / 6;
-      canopy.castShadow = true;
-      canopy.receiveShadow = true;
-      group.add(canopy);
-    }
-
-    // For bus: add distinct side windows strip
-    if (type === 'bus') {
-      const windowMat = new THREE.MeshStandardMaterial({
-        color: 0x87ceeb,
-        transparent: true,
-        opacity: 0.6,
-        metalness: 0.8,
-        roughness: 0.1,
-      });
-      // Just adjust the cabin opacity for buses
-      cabin.material.opacity = 0.5;
-    }
-
-    group.position.set(x, 0, z);
-    group.userData = {
-      type: type,
-      color: paintColor,
-      speed: 0,
-      maxSpeed: 0,
-      accel: 0,
-      deceleration: 0,
-      targetSpeed: 0,
-      pathIndex: 0,
-      pathPoints: [],
-      stopAt: Infinity,
-      stopped: false,
-    };
-
-    return group;
+    group.userData.beaconRed = beaconR;
+    group.userData.beaconBlue = beaconB;
   }
 
-  // ─── Signal Group (glowing traffic lights) ────────────────────
-
-  function createSignalGroup(name, x, z, axis) {
-    const group = new THREE.Group();
-
-    // Pole
-    const poleMat = new THREE.MeshStandardMaterial({
-      color: COLORS.poleMetal,
-      metalness: 0.6,
-      roughness: 0.7,
-    });
-
-    const poleGeom = new THREE.CylinderGeometry(0.12, 0.15, 4.0, 12);
-    const pole = new THREE.Mesh(poleGeom, poleMat);
-    pole.castShadow = true;
-    pole.receiveShadow = true;
-    group.add(pole);
-
-    // Cantilever arm (horizontal)
-    const armGeom = new THREE.BoxGeometry(axis === 'ns' ? 2.0 : 2.0, 0.1, 0.15);
-    const arm = new THREE.Mesh(armGeom, poleMat);
-    arm.position.y = 2.5;
-    if (axis === 'ns') {
-      arm.position.z = -1.2;  // point east/west
-    } else {
-      arm.position.x = 1.2;  // point north/south
-    }
-    arm.castShadow = true;
-    arm.receiveShadow = true;
-    group.add(arm);
-
-    // Signal housing (box)
-    const housingGeom = new THREE.BoxGeometry(0.35, 0.85, 0.25);
-    const housingMat = new THREE.MeshStandardMaterial({
-      color: 0x0e1013,
+  // Auto-rickshaw canopy
+  if (type === 'auto') {
+    const canopyGeom = new THREE.ConeGeometry(width * 0.7, height * 0.6, 6);
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0xe53935,
       metalness: 0.2,
-      roughness: 0.4,
+      roughness: 0.6,
     });
-    const housing = new THREE.Mesh(housingGeom, housingMat);
-    housing.position.y = 2.5;
-    if (axis === 'ns') {
-      housing.position.z = -1.8;
-    } else {
-      housing.position.x = 1.8;
-    }
-    housing.castShadow = true;
-    housing.receiveShadow = true;
-    group.add(housing);
-
-    // Three signal bulbs
-    const bulbPositions = [
-      { y: 2.85, color: COLORS.signalRed, key: 'red' },
-      { y: 2.55, color: COLORS.signalAmber, key: 'amber' },
-      { y: 2.25, color: COLORS.signalGreen, key: 'green' },
-    ];
-
-    bulbPositions.forEach(bp => {
-      const bulbGeom = new THREE.SphereGeometry(0.09, 16, 12);
-      const emissiveColor = bp.color;
-      const bulbMat = new THREE.MeshBasicMaterial({
-        color: bp.color,
-        emissive: emissiveColor,
-        emissiveIntensity: 0,  // off by default, lit when active
-        toneMapped: false,
-      });
-      const bulb = new THREE.Mesh(bulbGeom, bulbMat);
-      bulb.position.y = bp.y;
-      if (axis === 'ns') {
-        bulb.position.z = housing.position.z;
-      } else {
-        bulb.position.x = housing.position.x;
-      }
-      group.add(bulb);
-
-      group.userData[bp.key] = bulb;
-      group.userData[bp.key + 'Color'] = bp.color;
-    });
-
-    group.position.set(x, 0, z);
-    group.userData.activeLight = 'red';
-    group.userData.name = name;
-
-    return group;
+    const canopy = new THREE.Mesh(canopyGeom, canopyMat);
+    canopy.position.y = height * 0.65;
+    canopy.rotation.y = Math.PI / 6;
+    canopy.castShadow = true;
+    canopy.receiveShadow = true;
+    group.add(canopy);
   }
 
-  // ─── Ground Stop-Line Bars (glowing ground indicators) ─────────
+  // Motorcycle: simpler, two wheels
+  if (type === 'bike') {
+    const bikeWheelGeom = new THREE.CylinderGeometry(width * 0.15, width * 0.15, width * 0.15, 16);
+    const wheelFront = new THREE.Mesh(bikeWheelGeom, wheelMat);
+    wheelFront.position.set(length * 0.35, 0, 0);
+    wheelFront.rotation.z = Math.PI / 2;
+    group.add(wheelFront);
+    const wheelRear = wheelFront.clone();
+    wheelRear.position.x = -length * 0.35;
+    group.add(wheelRear);
+  }
 
-  function createGroundStopBars(axis, distance, color, count, spacing) {
-    const group = new THREE.Group();
-    const barMat = new THREE.MeshBasicMaterial({
-      color: color,
-      emissive: color,
+  group.position.set(x, 0, z);
+  group.userData = {
+    type: type,
+    color: paintColor,
+    speed: 0,
+    maxSpeed: 0,
+    accel: 0,
+    deceleration: 0,
+    targetSpeed: 0,
+    pathIndex: 0,
+    pathPoints: [],
+    stopAt: Infinity,
+    stopped: false,
+  };
+
+  return group;
+}
+
+// ─── Signal Group (glowing traffic lights on cantilever gantry) ──
+function createSignalGroup(name, x, z, axis) {
+  const group = new THREE.Group();
+
+  // Pole — thicker, more substantial
+  const poleMat = new THREE.MeshStandardMaterial({
+    color: COLORS.poleMetal,
+    metalness: 0.6,
+    roughness: 0.7,
+  });
+
+  const poleGeom = new THREE.CylinderGeometry(0.2, 0.25, 6.0, 16);
+  const pole = new THREE.Mesh(poleGeom, poleMat);
+  pole.castShadow = true;
+  pole.receiveShadow = true;
+  group.add(pole);
+
+  // Cantilever arm (horizontal gantry)
+  const armLength = 3.0;
+  const armGeom = new THREE.BoxGeometry(axis === 'ns' ? armLength : armLength, 0.2, 0.25);
+  const arm = new THREE.Mesh(armGeom, poleMat);
+  arm.position.y = 5.0;
+  arm.castShadow = true;
+  arm.receiveShadow = true;
+  if (axis === 'ns') {
+    arm.position.z = -armLength / 2;
+  } else {
+    arm.position.x = armLength / 2;
+  }
+  group.add(arm);
+
+  // Signal housing box (vertical, facing traffic)
+  const housingGeom = new THREE.BoxGeometry(0.5, 1.4, 0.35);
+  const housingMat = new THREE.MeshStandardMaterial({
+    color: 0x0e1013,
+    metalness: 0.2,
+    roughness: 0.4,
+  });
+  const housing = new THREE.Mesh(housingGeom, housingMat);
+  housing.position.y = 5.0;
+  housing.castShadow = true;
+  housing.receiveShadow = true;
+  if (axis === 'ns') {
+    housing.position.z = -armLength;
+  } else {
+    housing.position.x = armLength;
+  }
+  group.add(housing);
+
+  // Three signal bulbs on the housing
+  const bulbPositions = [
+    { y: 5.35, color: COLORS.signalRed, key: 'red' },
+    { y: 5.0, color: COLORS.signalAmber, key: 'amber' },
+    { y: 4.65, color: COLORS.signalGreen, key: 'green' },
+  ];
+
+  bulbPositions.forEach(bp => {
+    const bulbGeom = new THREE.SphereGeometry(0.14, 20, 14);
+    const bulbMat = new THREE.MeshStandardMaterial({
+      color: bp.color,
+      emissive: bp.color,
       emissiveIntensity: 0,
       toneMapped: false,
     });
-    const barGeom = new THREE.BoxGeometry(0.3, 0.08, axis === 'ns' ? 8.0 : 6.0);
-
-    for (let i = 0; i < count; i++) {
-      const bar = new THREE.Mesh(barGeom, barMat.clone());
-      bar.position.y = 0.05;
-      if (axis === 'ns') {
-        bar.position.z = distance;
-        bar.position.x = (i - (count - 1) / 2) * spacing;
-      } else {
-        bar.position.x = distance;
-        bar.position.z = (i - (count - 1) / 2) * spacing;
-      }
-      group.add(bar);
+    const bulb = new THREE.Mesh(bulbGeom, bulbMat);
+    bulb.position.y = bp.y;
+    if (axis === 'ns') {
+      bulb.position.z = housing.position.z;
+    } else {
+      bulb.position.x = housing.position.x;
     }
+    group.add(bulb);
 
-    group.userData.bars = group.children;
-    group.userData.color = color;
-    group.userData.intensity = 0;
-    return group;
+    group.userData[bp.key] = bulb;
+    group.userData[bp.key + 'Color'] = bp.color;
+  });
+
+  group.position.set(x, 0, z);
+  group.userData.activeLight = 'red';
+  group.userData.name = name;
+
+  return group;
+}
+
+// ─── Ground Stop-Line Bars (glowing ground indicators) ─────────
+function createGroundStopBars(axis, distance, color, count, spacing) {
+  const group = new THREE.Group();
+  const barMat = new THREE.MeshStandardMaterial({
+    color: color,
+    emissive: color,
+    emissiveIntensity: 0,
+    toneMapped: false,
+  });
+  const barWidth = 0.3;
+  const barThickness = 0.08;
+  const barLength = axis === 'ns' ? 8.0 : 6.0;
+  const barGeom = new THREE.BoxGeometry(barWidth, barThickness, barLength);
+
+  for (let i = 0; i < count; i++) {
+    const bar = new THREE.Mesh(barGeom, barMat.clone());
+    bar.position.y = 0.05;
+    if (axis === 'ns') {
+      bar.position.z = distance;
+      bar.position.x = (i - (count - 1) / 2) * spacing;
+    } else {
+      bar.position.x = distance;
+      bar.position.z = (i - (count - 1) / 2) * spacing;
+    }
+    group.add(bar);
   }
 
-  // ─── Build the Intersection ───────────────────────────────────
+  group.userData.bars = group.children;
+  group.userData.color = color;
+  group.userData.intensity = 0;
+  return group;
+}
 
-  function buildIntersection() {
-    // Ground plane
-    const groundGeom = new THREE.PlaneGeometry(80, 80);
-    const groundMat = new THREE.MeshStandardMaterial({
-      color: COLORS.ground,
-      metalness: 0.0,
+// ─── Street Lamp ──────────────────────────────────────────────
+function createStreetLamp(x, z) {
+  const group = new THREE.Group();
+
+  const poleMat = new THREE.MeshStandardMaterial({
+    color: COLORS.lampPost,
+    metalness: 0.7,
+    roughness: 0.8,
+  });
+
+  // Thin pole
+  const poleGeom = new THREE.CylinderGeometry(0.06, 0.06, 8.0, 8);
+  const pole = new THREE.Mesh(poleGeom, poleMat);
+  pole.castShadow = true;
+  pole.receiveShadow = true;
+  group.add(pole);
+
+  // Arm extending horizontally
+  const armGeom = new THREE.BoxGeometry(2.0, 0.1, 0.1);
+  const arm = new THREE.Mesh(armGeom, poleMat);
+  arm.position.y = 7.5;
+  arm.position.z = -1.0;
+  arm.castShadow = true;
+  arm.receiveShadow = true;
+  group.add(arm);
+
+  // Glowing lamp
+  const lampGeom = new THREE.SphereGeometry(0.3, 16, 12);
+  const lampMat = new THREE.MeshBasicMaterial({
+    color: 0xffeb3b,
+    toneMapped: false,
+  });
+  const lamp = new THREE.Mesh(lampGeom, lampMat);
+  lamp.position.y = 7.5;
+  lamp.position.z = -1.5;
+  group.add(lamp);
+
+  // Point light
+  const plight = new THREE.PointLight(0xffeb3b, 0.5, 15);
+  plight.position.y = 7.5;
+  plight.position.z = -1.5;
+  group.add(plight);
+
+  group.position.set(x, 0, z);
+  scene.add(group);
+  return group;
+}
+
+// ─── Building Massing ─────────────────────────────────────────
+function createBuilding(x, z, width, depth, height, color) {
+  const geom = new THREE.BoxGeometry(width, height, depth);
+  const mat = new THREE.MeshStandardMaterial({
+    color: color || COLORS.building,
+    metalness: 0.0,
+    roughness: 0.95,
+  });
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set(x, height / 2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  return mesh;
+}
+
+// ─── Tree ─────────────────────────────────────────────────────
+function createTree(x, z, scaleFactor) {
+  const group = new THREE.Group();
+  const s = scaleFactor || 1.0;
+
+  // Trunk
+  const trunkGeom = new THREE.CylinderGeometry(0.15 * s, 0.25 * s, 1.2 * s, 8);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: COLORS.treeTrunk });
+  const trunk = new THREE.Mesh(trunkGeom, trunkMat);
+  trunk.position.y = 0.6 * s;
+  trunk.castShadow = true;
+  trunk.receiveShadow = true;
+  group.add(trunk);
+
+  // Foliage layers
+  const foliageMat = new THREE.MeshStandardMaterial({ color: COLORS.treeFoliage });
+  for (let i = 0; i < 3; i++) {
+    const fy = 1.0 * s + i * 0.6 * s;
+    const fr = 1.0 * s - i * 0.2 * s;
+    const fgeom = new THREE.ConeGeometry(fr, 1.2 * s, 8);
+    const fmesh = new THREE.Mesh(fgeom, foliageMat);
+    fmesh.position.y = fy;
+    fmesh.castShadow = true;
+    fmesh.receiveShadow = true;
+    group.add(fmesh);
+  }
+
+  group.position.set(x, 0, z);
+  scene.add(group);
+  return group;
+}
+
+// ─── Build the Intersection ───────────────────────────────────
+function buildIntersection() {
+  const roadWidthNS = 8.0;
+  const roadWidthEW = 8.0;
+  const roadLength = 64;
+  const sidewalkWidth = 5.0;
+
+  // ─── Ground Plane (architectural studio base) ──────────────
+  const groundGeom = new THREE.PlaneGeometry(140, 140);
+  const groundMat = new THREE.MeshStandardMaterial({
+    color: COLORS.ground,
+    metalness: 0.0,
+    roughness: 0.9,
+  });
+  const ground = new THREE.Mesh(groundGeom, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // ─── Road Surfaces (all flat, deep charcoal asphalt) ─────────
+  const roadMatNS = new THREE.MeshStandardMaterial({
+    color: COLORS.asphalt,
+    metalness: 0.0,
+    roughness: 0.95,
+  });
+
+  // North-South road (J1 to J2 corridor)
+  const roadGeomNS = new THREE.PlaneGeometry(roadWidthNS, roadLength * 2);
+  const roadNS = new THREE.Mesh(roadGeomNS, roadMatNS);
+  roadNS.rotation.x = -Math.PI / 2;
+  roadNS.position.y = 0.01;
+  roadNS.position.set(0, 0.01, 0);
+  roadNS.receiveShadow = true;
+  scene.add(roadNS);
+
+  // East-West road
+  const roadGeomEW = new THREE.PlaneGeometry(roadWidthEW, roadLength);
+  const roadEW = new THREE.Mesh(roadGeomEW, roadMatNS);
+  roadEW.rotation.x = -Math.PI / 2;
+  roadEW.position.y = 0.01;
+  roadEW.receiveShadow = true;
+  scene.add(roadEW);
+
+  // ─── Sidewalks (high-contrast, raised curbs) ────────────────
+  function createSidewalkSlab(x, z, width, length, color) {
+    const geom = new THREE.PlaneGeometry(width, length);
+    const mat = new THREE.MeshStandardMaterial({
+      color: color || COLORS.sidewalk,
+      metalness: 0.05,
       roughness: 0.9,
     });
-    const ground = new THREE.Mesh(groundGeom, groundMat);
-    ground.rotation.x = -Math.PI / 2;  // FLAT — no vertical walls
-    ground.receiveShadow = true;
-    scene.add(ground);
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(x, 0.02, z);
+    mesh.receiveShadow = true;
+    scene.add(mesh);
 
-    // ─── Road surfaces (all flat) ──────────────────────────────
-    const roadWidthNS = 7.0;
-    const roadWidthEW = 7.0;
-    const roadLength = 60;
-
-    // North-South road
-    const roadGeomNS = new THREE.PlaneGeometry(roadWidthNS, roadLength);
-    const roadMatNS = new THREE.MeshStandardMaterial({
-      color: COLORS.asphalt,
-      metalness: 0.0,
-      roughness: 0.95,
-    });
-    const roadNS = new THREE.Mesh(roadGeomNS, roadMatNS);
-    roadNS.rotation.x = -Math.PI / 2;  // FLAT
-    roadNS.position.y = 0.01;
-    roadNS.position.set(0, 0.01, 0);
-    roadNS.receiveShadow = true;
-    scene.add(roadNS);
-
-    // East-West road
-    const roadGeomEW = new THREE.PlaneGeometry(roadWidthEW, roadLength);
-    const roadMatEW = new THREE.MeshStandardMaterial({
-      color: COLORS.asphalt,
-      metalness: 0.0,
-      roughness: 0.95,
-    });
-    const roadEW = new THREE.Mesh(roadGeomEW, roadMatEW);
-    roadEW.rotation.x = -Math.PI / 2;  // FLAT
-    roadEW.position.y = 0.01;
-    roadEW.receiveShadow = true;
-    scene.add(roadEW);
-
-    // ─── Sidewalks (high-contrast) ─────────────────────────────
-    const sidewalkWidth = 4.0;
-
-    function createSidewalk(x, z, rotX, width, length, color) {
-      const geom = new THREE.PlaneGeometry(width, length);
-      const mat = new THREE.MeshStandardMaterial({
-        color: color === undefined ? COLORS.sidewalk : color,
-        metalness: 0.05,
-        roughness: 0.9,
-      });
-      const mesh = new THREE.Mesh(geom, mat);
-      mesh.rotation.x = -Math.PI / 2 + rotX;  // FLAT or slightly tilted curb
-      mesh.position.set(x, 0.02, z);
-      mesh.receiveShadow = true;
-      scene.add(mesh);
-      return mesh;
-    }
-
-    // 8 sidewalk slabs (4 per road, one on each side)
-    // NS road sides
-    createSidewalk(roadWidthNS / 2 + sidewalkWidth / 2, 0, 0, sidewalkWidth, roadLength);
-    createSidewalk(-roadWidthNS / 2 - sidewalkWidth / 2, 0, 0, sidewalkWidth, roadLength);
-    // EW road sides
-    createSidewalk(0, roadWidthEW / 2 + sidewalkWidth / 2, 0, roadLength, sidewalkWidth);
-    createSidewalk(0, -roadWidthEW / 2 - sidewalkWidth / 2, 0, roadLength, sidewalkWidth);
-
-    // ─── Curb strips (chamfered transition) ───────────────────
+    // Curb strip
+    const curbGeom = new THREE.BoxGeometry(width, 0.15, 0.3);
     const curbMat = new THREE.MeshStandardMaterial({
       color: COLORS.curb,
       metalness: 0.1,
       roughness: 0.8,
     });
+    const curb = new THREE.Mesh(curbGeom, curbMat);
+    curb.position.set(x, 0.15 / 2, z);
+    curb.castShadow = true;
+    curb.receiveShadow = true;
+    scene.add(curb);
+    return mesh;
+  }
 
-    function createCurb(x, z, w, l) {
-      const geom = new THREE.BoxGeometry(w, 0.15, l);
-      const mesh = new THREE.Mesh(geom, curbMat);
-      mesh.position.set(x, 0.15 / 2, z);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      scene.add(mesh);
-      return mesh;
+  // 8 sidewalk slabs
+  createSidewalkSlab(roadWidthNS / 2 + sidewalkWidth / 2, 0, sidewalkWidth, roadLength * 2);
+  createSidewalkSlab(-roadWidthNS / 2 - sidewalkWidth / 2, 0, sidewalkWidth, roadLength * 2);
+  createSidewalkSlab(0, roadWidthEW / 2 + sidewalkWidth / 2, roadLength, sidewalkWidth);
+  createSidewalkSlab(0, -roadWidthEW / 2 - sidewalkWidth / 2, roadLength, sidewalkWidth);
+
+  // ─── Lane Markings (white dashed) ────────────────────────────
+  const laneMarkMat = new THREE.MeshStandardMaterial({
+    color: COLORS.laneMark,
+    metalness: 0.0,
+    roughness: 0.5,
+    side: THREE.DoubleSide,
+  });
+
+  function createDashedLineNS(startZ, length, segments, gap) {
+    const group = new THREE.Group();
+    const segLen = (length - (segments - 1) * gap) / segments;
+    const geom = new THREE.PlaneGeometry(0.12, segLen);
+    for (let i = 0; i < segments; i++) {
+      const mesh = new THREE.Mesh(geom, laneMarkMat);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(0, 0.03, startZ + i * (segLen + gap));
+      group.add(mesh);
     }
+    scene.add(group);
+    return group;
+  }
 
-    // Curbs along road edges
-    createCurb(roadWidthNS / 2 + 0.05, 0, 0.1, roadLength);
-    createCurb(-roadWidthNS / 2 - 0.05, 0, 0.1, roadLength);
-    createCurb(0, roadWidthEW / 2 + 0.05, roadLength, 0.1);
-    createCurb(0, -roadWidthEW / 2 - 0.05, roadLength, 0.1);
+  function createDashedLineEW(startX, length, segments, gap) {
+    const group = new THREE.Group();
+    const segLen = (length - (segments - 1) * gap) / segments;
+    const geom = new THREE.PlaneGeometry(segLen, 0.12);
+    for (let i = 0; i < segments; i++) {
+      const mesh = new THREE.Mesh(geom, laneMarkMat);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(startX + i * (segLen + gap), 0.03, 0);
+      group.add(mesh);
+    }
+    scene.add(group);
+    return group;
+  }
 
-    // ─── Lane markings ──────────────────────────────────────
-    const laneMarkMat = new THREE.MeshStandardMaterial({
-      color: COLORS.laneMark,
+  // Center lines
+  createDashedLineNS(-roadLength, roadLength * 4, 40, 0.4);
+  createDashedLineEW(-roadLength, roadLength * 2, 30, 0.4);
+
+  // ─── Zebra Crosswalks (flat, crisp white stripes) ────────────
+  function createZebraCrosswalk(centerX, centerZ, rotationY, stripes, length, width) {
+    const group = new THREE.Group();
+    const stripeMat = new THREE.MeshStandardMaterial({
+      color: COLORS.crosswalk,
       metalness: 0.0,
-      roughness: 0.5,
+      roughness: 0.6,
+      side: THREE.DoubleSide,
     });
+    const stripeWidth = length / stripes;
 
-    function createDashedLine(axis, start, length, segments, gap, color) {
-      const group = new THREE.Group();
-      const segLen = (length - (segments - 1) * gap) / segments;
-      const geom = new THREE.PlaneGeometry(0.1, segLen);
-      const mat = new THREE.MeshStandardMaterial({
-        color: color || COLORS.laneMark,
-        metalness: 0.0,
-        roughness: 0.5,
-        side: THREE.DoubleSide,
-      });
-
-      for (let i = 0; i < segments; i++) {
-        const mesh = new THREE.Mesh(geom, mat);
-        mesh.rotation.x = -Math.PI / 2;  // FLAT
-        if (axis === 'ns') {
-          mesh.position.set(start + i * (segLen + gap), 0.02, 0);
-        } else {
-          mesh.position.set(0, 0.02, start + i * (segLen + gap));
-        }
-        group.add(mesh);
+    for (let i = 0; i < stripes; i++) {
+      const geom = new THREE.PlaneGeometry(stripeWidth, width);
+      const stripe = new THREE.Mesh(geom, stripeMat);
+      stripe.rotation.x = -Math.PI / 2;
+      stripe.rotation.y = rotationY;
+      stripe.position.y = 0.04;
+      const offset = -length / 2 + stripeWidth / 2 + i * stripeWidth;
+      if (rotationY === 0) {
+        stripe.position.set(centerX + offset, 0.04, centerZ);
+      } else {
+        stripe.position.set(centerX, 0.04, centerZ + offset);
       }
-      scene.add(group);
-      return group;
+      group.add(stripe);
     }
-
-    // Center dashed lines for each road
-    createDashedLine('ns', -roadWidthNS / 2 + 0.15, roadLength, 20, 0.3, COLORS.laneMark);
-    createDashedLine('ew', -roadWidthEW / 2 + 0.15, roadLength, 15, 0.3, COLORS.laneMark);
-
-    // ─── Zebra Crosswalks (all flat, high-contrast) ──────────
-    function createZebraCrosswalk(x, z, rotationY, length, widthBetween) {
-      const group = new THREE.Group();
-      const stripes = 12;
-      const stripeWidth = (roadWidthNS - widthBetween) / stripes;
-      const stripeLength = 2.5;
-
-      const stripeMat = new THREE.MeshStandardMaterial({
-        color: COLORS.crosswalk,
-        metalness: 0.0,
-        roughness: 0.6,
-        side: THREE.DoubleSide,
-      });
-
-      for (let i = 0; i < stripes; i++) {
-        const geom = new THREE.PlaneGeometry(stripeLength, stripeWidth);
-        const stripe = new THREE.Mesh(geom, stripeMat);
-        stripe.rotation.x = -Math.PI / 2;  // FLAT — no walls
-        stripe.rotation.y = rotationY;
-        stripe.position.y = 0.03;
-        const offset = -length / 2 + widthBetween / 2 + stripeWidth / 2 + i * stripeWidth;
-        if (rotationY === 0) {
-          // NS road, EW crosswalk
-          stripe.position.set(offset, 0.03, z);
-        } else {
-          // EW road, NS crosswalk
-          stripe.position.set(x, 0.03, offset);
-        }
-        group.add(stripe);
-      }
-      scene.add(group);
-      return group;
-    }
-
-    // 4 zebra crosswalks at the intersection
-    const crossLength = roadWidthNS;
-    createZebraCrosswalk(0, roadWidthEW / 2 + 0.3, 0, crossLength, 0.3);
-    createZebraCrosswalk(0, -roadWidthEW / 2 - 0.3, Math.PI, crossLength, 0.3);
-    createZebraCrosswalk(roadWidthNS / 2 + 0.3, 0, Math.PI / 2, crossLength, 0.3);
-    createZebraCrosswalk(-roadWidthNS / 2 - 0.3, 0, -Math.PI / 2, crossLength, 0.3);
-
-    // ─── Stop lines (glowing, on ground) ────────────────────
-    state.signals.stopBars = {};
-
-    const stopBarNS_N = createGroundStopBars('ns', roadWidthEW / 2 + 0.1, COLORS.signalGreen, 1, 0);
-    stop_bar_set_position(stopBarNS_N, 0, roadWidthEW / 2 - 0.3);
-    scene.add(stopBarNS_N);
-    state.signals.stopBars.north = stopBarNS_N;
-
-    const stopBarNS_S = createGroundStopBars('ns', -roadWidthEW / 2 - 0.1, COLORS.signalGreen, 1, 0);
-    stop_bar_set_position(stopBarNS_S, 0, -roadWidthEW / 2 + 0.3);
-    scene.add(stopBarNS_S);
-    state.signals.stopBars.south = stopBarNS_S;
-
-    const stopBarEW_E = createGroundStopBars('ew', roadWidthNS / 2 + 0.1, COLORS.signalGreen, 1, 0);
-    stop_bar_set_position(stopBarEW_E, roadWidthNS / 2 - 0.3, 0);
-    scene.add(stopBarEW_E);
-    state.signals.stopBars.east = stopBarEW_E;
-
-    const stopBarEW_W = createGroundStopBars('ew', -roadWidthNS / 2 - 0.1, COLORS.signalGreen, 1, 0);
-    stop_bar_set_position(stopBarEW_W, -roadWidthNS / 2 + 0.3, 0);
-    scene.add(stopBarEW_W);
-    state.signals.stopBars.west = stopBarEW_W;
-
-    // ─── Traffic Signal Poles ─────────────────────────────────
-    state.signals.groups = {};
-
-    // North approach: NS direction signals
-    const sigN = createSignalGroup('north', 0, -roadWidthEW / 2 - 1.5, 'ns');
-    scene.add(sigN);
-    state.signals.groups.north = sigN;
-
-    // South approach
-    const sigS = createSignalGroup('south', 0, roadWidthEW / 2 + 1.5, 'ns');
-    scene.add(sigS);
-    state.signals.groups.south = sigS;
-
-    // East approach: EW direction signals
-    const sigE = createSignalGroup('east', roadWidthNS / 2 + 1.5, 0, 'ew');
-    scene.add(sigE);
-    state.signals.groups.east = sigE;
-
-    // West approach
-    const sigW = createSignalGroup('west', -roadWidthNS / 2 - 1.5, 0, 'ew');
-    scene.add(sigW);
-    state.signals.groups.west = sigW;
-
-    // ─── Junction 2 (downstream) ──────────────────────────────
-    // A smaller downstream junction 30 units away along NS axis
-    const j2Distance = 30;
-
-    const roadJ2 = new THREE.Mesh(roadGeomNS.clone(), roadMatNS.clone());
-    roadJ2.rotation.x = -Math.PI / 2;  // FLAT
-    roadJ2.position.set(0, 0.01, j2Distance);
-    roadJ2.receiveShadow = true;
-    scene.add(roadJ2);
-
-    // J2 signal
-    const sigJ2 = createSignalGroup('j2_downstream', 0, j2Distance + roadWidthEW / 2 + 1.5, 'ns');
-    scene.add(sigJ2);
-    state.signals.groups.j2 = sigJ2;
-
-    // ─── Ambient & Lighting ───────────────────────────────────
-    const ambient = new THREE.AmbientLight(0x404060, 1.8);
-    scene.add(ambient);
-
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
-    dirLight.position.set(20, 40, 15);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
-    dirLight.shadow.camera.near = 0.5;
-    dirLight.shadow.camera.far = 100;
-    dirLight.shadow.camera.left = -40;
-    dirLight.shadow.camera.right = 40;
-    dirLight.shadow.camera.top = 40;
-    dirLight.shadow.camera.bottom = -40;
-    scene.add(dirLight);
-
-    // ─── Fog for depth ───────────────────────────────────────
-    scene.fog = new THREE.FogExp2(0x0a0c10, 0.003);
+    scene.add(group);
+    return group;
   }
 
-  // Helper: adjust stop bar group position without moving individual mesh z
-  function stop_bar_set_position(group, x, z) {
-    group.position.x = x;
-    group.position.z = z;
-  }
+  // 4 zebra crosswalks
+  const cwLength = roadWidthNS;
+  const cwWidth = 2.5;
+  createZebraCrosswalk(0, roadWidthEW / 2 + 0.8, 0, 16, cwLength, cwWidth);
+  createZebraCrosswalk(0, -roadWidthEW / 2 - 0.8, Math.PI, cwLength, cwWidth);
+  createZebraCrosswalk(roadWidthNS / 2 + 0.8, 0, Math.PI / 2, cwLength, cwWidth);
+  createZebraCrosswalk(-roadWidthNS / 2 - 0.8, 0, -Math.PI / 2, cwLength, cwWidth);
 
-  // ─── Vehicle Spawning & Physics ─────────────────────────────
+  // ─── Stop Lines with Glowing Ground Bars ─────────────────────
+  state.signals.stopBars = {};
+  const stopBarDist = roadWidthEW / 2 - 0.2;
 
-  function spawnVehicle(axis, direction, type) {
-    const roadWidth = 7.0;
-    const laneOffset = direction === 'N' || direction === 'E' ? -roadWidth / 2 + 0.8 : roadWidth / 2 - 0.8;
+  // North stop bar
+  const stopBarNS_N = createGroundStopBars('ns', roadWidthEW / 2 - 0.4, COLORS.signalGreen, 3, 2.0);
+  state.signals.stopBars.north = stopBarNS_N;
+  scene.add(stopBarNS_N);
 
-    let x, z, rotY;
-    if (axis === 'ns') {
-      x = laneOffset;
-      z = direction === 'N' ? 35 : -35;
-      rotY = direction === 'N' ? Math.PI : 0;
+  // South stop bar
+  const stopBarNS_S = createGroundStopBars('ns', -roadWidthEW / 2 + 0.4, COLORS.signalGreen, 3, 2.0);
+  state.signals.stopBars.south = stopBarNS_S;
+  scene.add(stopBarNS_S);
+
+  // East stop bar
+  const stopBarEW_E = createGroundStopBars('ew', roadWidthNS / 2 - 0.4, COLORS.signalGreen, 3, 2.0);
+  state.signals.stopBars.east = stopBarEW_E;
+  scene.add(stopBarEW_E);
+
+  // West stop bar
+  const stopBarEW_W = createGroundStopBars('ew', -roadWidthNS / 2 + 0.4, COLORS.signalGreen, 3, 2.0);
+  state.signals.stopBars.west = stopBarEW_W;
+  scene.add(stopBarEW_W);
+
+  // ─── Cantilever Traffic Signal Gantries ──────────────────────
+  state.signals.groups = {};
+
+  const gap = 2.0;
+  const sigN = createSignalGroup('north', 0, -roadWidthEW / 2 - gap, 'ns');
+  scene.add(sigN);
+  state.signals.groups.north = sigN;
+
+  const sigS = createSignalGroup('south', 0, roadWidthEW / 2 + gap, 'ns');
+  scene.add(sigS);
+  state.signals.groups.south = sigS;
+
+  const sigE = createSignalGroup('east', roadWidthNS / 2 + gap, 0, 'ew');
+  scene.add(sigE);
+  state.signals.groups.east = sigE;
+
+  const sigW = createSignalGroup('west', -roadWidthNS / 2 - gap, 0, 'ew');
+  scene.add(sigW);
+  state.signals.groups.west = sigW;
+
+  // ─── Junction 2 (downstream) ─────────────────────────────────
+  const j2Distance = 30;
+
+  const roadJ2 = new THREE.Mesh(roadGeomNS.clone(), roadMatNS.clone());
+  roadJ2.rotation.x = -Math.PI / 2;
+  roadJ2.position.set(0, 0.01, j2Distance);
+  roadJ2.receiveShadow = true;
+  scene.add(roadJ2);
+
+  // J2 sidewalks
+  createSidewalkSlab(roadWidthNS / 2 + sidewalkWidth / 2, j2Distance, sidewalkWidth, roadLength);
+  createSidewalkSlab(-roadWidthNS / 2 - sidewalkWidth / 2, j2Distance, sidewalkWidth, roadLength);
+
+  // J2 signals
+  const sigJ2_N = createSignalGroup('j2_north', 0, j2Distance - roadWidthEW / 2 - gap, 'ns');
+  scene.add(sigJ2_N);
+  state.signals.groups.j2_north = sigJ2_N;
+
+  const sigJ2_S = createSignalGroup('j2_south', 0, j2Distance + roadWidthEW / 2 + gap, 'ns');
+  scene.add(sigJ2_S);
+  state.signals.groups.j2_south = sigJ2_S;
+
+  // J2 stop bars — track with upstream NS phase
+  const j2StopBars = {};
+  const j2StopBarNear = createGroundStopBars('ns', j2Distance - roadWidthEW / 2 + 0.4, COLORS.signalGreen, 2, 2.0);
+  const j2StopBarFar = createGroundStopBars('ns', j2Distance + roadWidthEW / 2 - 0.4, COLORS.signalGreen, 2, 2.0);
+  scene.add(j2StopBarNear);
+  scene.add(j2StopBarFar);
+  j2StopBars.north = j2StopBarNear;
+  j2StopBars.south = j2StopBarFar;
+  state.signals.stopBars.j2 = j2StopBars;
+
+  // Downstream sensor zone at J2 (visualized as a glowing ring)
+  const sensorGeom = new THREE.RingGeometry(4.0, 4.5, 32);
+  const sensorMat = new THREE.MeshStandardMaterial({
+    color: 0x00e676,
+    emissive: 0x00e676,
+    emissiveIntensity: 0.3,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.7,
+    toneMapped: false,
+  });
+  const sensorRing = new THREE.Mesh(sensorGeom, sensorMat);
+  sensorRing.rotation.x = -Math.PI / 2;
+  sensorRing.position.y = 0.1;
+  sensorRing.position.z = j2Distance;
+  scene.add(sensorRing);
+  state.signals.downstreamSensor = sensorRing;
+
+  // ─── Surrounding Buildings & Trees ──────────────────────────
+  const buildings = [
+    { x: -20, z: -25, w: 8, d: 12, h: 12, c: COLORS.buildingDim },
+    { x: 20, z: -25, w: 6, d: 10, h: 10, c: COLORS.buildingDim },
+    { x: -22, z: 25, w: 8, d: 8, h: 8, c: COLORS.building },
+    { x: 18, z: 25, w: 10, d: 6, h: 11, c: COLORS.buildingDim },
+    { x: -25, z: 40, w: 6, d: 14, h: 9, c: COLORS.building },
+    { x: 25, z: 40, w: 7, d: 10, h: 7, c: COLORS.buildingDim },
+    { x: -15, z: 45, w: 10, d: 8, h: 14, c: COLORS.building },
+  ];
+  buildings.forEach(b => createBuilding(b.x, b.z, b.w, b.d, b.h, b.c));
+
+  const treePositions = [
+    [-10, -12], [10, -12], [-8, -35], [8, -35],
+    [-12, -28], [12, -28], [-10, 12], [10, 12],
+    [-12, 35], [12, 35], [-8, 45], [8, 45],
+    [0, -45], [0, 45], [-15, 0], [15, 0],
+  ];
+  treePositions.forEach(p => createTree(p[0], p[1], 1.0 + Math.random() * 0.5));
+
+  // Street lamps
+  const lampPositions = [
+    [roadWidthNS / 2 + 1, 0], [-roadWidthNS / 2 - 1, 0],
+    [0, roadWidthEW / 2 + 1], [0, -roadWidthEW / 2 - 1],
+    [roadWidthNS / 2 + 1, j2Distance], [-roadWidthNS / 2 - 1, j2Distance],
+  ];
+  lampPositions.forEach(p => createStreetLamp(p[0], p[1]));
+
+  // ─── Ambient & Lighting ──────────────────────────────────────
+  const ambient = new THREE.AmbientLight(0x404060, 1.8);
+  scene.add(ambient);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 2.2);
+  dirLight.position.set(30, 50, 25);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 4096;
+  dirLight.shadow.mapSize.height = 4096;
+  dirLight.shadow.camera.near = 0.5;
+  dirLight.shadow.camera.far = 120;
+  dirLight.shadow.camera.left = -50;
+  dirLight.shadow.camera.right = 50;
+  dirLight.shadow.camera.top = 50;
+  dirLight.shadow.camera.bottom = -50;
+  scene.add(dirLight);
+}
+
+// ─── Vehicle Spawning & Physics ─────────────────────────────
+const VEHICLE_LENGTHS = {
+  sedan: { l: 4.2, w: 1.8, h: 1.5 },
+  suv: { l: 4.8, w: 2.0, h: 1.7 },
+  truck: { l: 7.5, w: 2.4, h: 2.2 },
+  bus: { l: 10.0, w: 2.6, h: 3.0 },
+  auto: { l: 2.8, w: 1.0, h: 1.5 },
+  bike: { l: 1.9, w: 0.8, h: 1.3 },
+  emergency: { l: 6.5, w: 2.2, h: 2.4 },
+};
+
+function spawnVehicle(axis, direction, forceType) {
+  const roadW = 8.0;
+  const laneWidth = roadW / 2;
+
+  let x, z, rotY;
+  // Position vehicles in proper lanes
+  if (axis === 'ns') {
+    if (direction === 'N') {
+      x = -roadW / 2 + laneWidth / 2; // Right lane (from N perspective)
+      z = -32;
+      rotY = 0;
     } else {
-      z = laneOffset;
-      x = direction === 'E' ? 35 : -35;
-      rotY = direction === 'E' ? -Math.PI / 2 : Math.PI / 2;
+      x = roadW / 2 - laneWidth / 2; // Right lane (from S perspective)
+      z = 32;
+      rotY = Math.PI;
     }
+  } else {
+    if (direction === 'E') {
+      z = -roadW / 2 + laneWidth / 2;
+      x = -32;
+      rotY = -Math.PI / 2;
+    } else {
+      z = roadW / 2 - laneWidth / 2;
+      x = 32;
+      rotY = Math.PI / 2;
+    }
+  }
 
+  let t;
+  if (forceType) {
+    t = forceType;
+  } else {
     const types = ['sedan', 'sedan', 'sedan', 'suv', 'truck', 'bus', 'auto', 'bike'];
-    const colors = [COLORS.vehicleA, 0xff6b6b, 0x4ecdc4, 0xff9f43, 0x54a0ff, 0x22c55e];
-    const t = type || types[Math.floor(Math.random() * types.length)];
-    const c = colors[Math.floor(Math.random() * colors.length)];
-
-    const lengths = {
-      sedan: [4.0, 1.7, 1.5],
-      suv: [4.5, 1.9, 1.7],
-      truck: [7.0, 2.2, 2.2],
-      bus: [9.0, 2.5, 3.0],
-      auto: [2.8, 1.0, 1.5],
-      bike: [1.8, 0.7, 1.2],
-    };
-    const dims = lengths[t];
-
-    const vehicle = createVehicle(t, c, x, z, dims[0], dims[1], dims[2]);
-    vehicle.rotation.y = rotY;
-    vehicle.userData.speed = 0;
-    vehicle.userData.maxSpeed = (t === 'truck' || t === 'bus') ? 8 + Math.random() * 4 : 12 + Math.random() * 6;
-    vehicle.userData.accel = (t === 'truck' || t === 'bus') ? 1.5 : 2.5;
-    vehicle.userData.deceleration = (t === 'bike') ? 4.0 : 5.5;
-    vehicle.userData.targetSpeed = vehicle.userData.maxSpeed;
-    vehicle.userData.axis = axis;
-    vehicle.userData.direction = direction;
-
-    // Build path points for the vehicle to follow
-    const pathPoints = buildPath(axis, direction, rotY);
-    vehicle.userData.pathPoints = pathPoints;
-    vehicle.userData.pathIndex = 0;
-
-    scene.add(vehicle);
-    state.vehicles.push(vehicle);
-    vehicle.name = `vehicle_${state.vehicles.length}`;
-
-    return vehicle;
+    t = types[Math.floor(Math.random() * types.length)];
   }
 
-  function buildPath(axis, direction, rotY) {
-    // Build a simple curved path through the intersection
-    const points = [];
-    const roadW = 3.5;
+  const colors = [0x4f96ff, 0xff6b6b, 0x4ecdc4, 0xff9f43, 0x54a0ff, 0x22c55e, 0xb197ff];
+  const paintColor = colors[Math.floor(Math.random() * colors.length)];
 
-    if (axis === 'ns' && direction === 'N') {
-      // Coming from south, going north
-      for (let i = 0; i <= 10; i++) {
-        const t = i / 10;
-        const z = -30 + t * 60;
-        // Slight curve as they approach intersection center
-        const x = -roadW + (Math.sin(t * Math.PI) * 0.3);
-        points.push(new THREE.Vector3(x, 0, z));
-      }
-    } else if (axis === 'ns' && direction === 'S') {
-      for (let i = 0; i <= 10; i++) {
-        const t = i / 10;
-        const z = 30 - t * 60;
-        const x = roadW + (Math.sin(t * Math.PI) * 0.3);
-        points.push(new THREE.Vector3(x, 0, z));
-      }
-    } else if (axis === 'ew' && direction === 'E') {
-      for (let i = 0; i <= 10; i++) {
-        const t = i / 10;
-        const x = -30 + t * 60;
-        const z = -roadW + (Math.sin(t * Math.PI) * 0.3);
-        points.push(new THREE.Vector3(x, 0, z));
-      }
+  const dims = VEHICLE_LENGTHS[t];
+  const vehicle = createVehicle(t, paintColor, x, z, dims.l, dims.w, dims.h);
+  vehicle.rotation.y = rotY;
+  vehicle.userData.speed = 0;
+  const isHeavy = t === 'truck' || t === 'bus' || t === 'emergency';
+  vehicle.userData.maxSpeed = isHeavy ? 8 + Math.random() * 4 : 12 + Math.random() * 6;
+  vehicle.userData.accel = isHeavy ? 1.5 : 2.5;
+  vehicle.userData.deceleration = t === 'bike' ? 4.0 : 5.5;
+  vehicle.userData.targetSpeed = vehicle.userData.maxSpeed;
+  vehicle.userData.axis = axis;
+  vehicle.userData.direction = direction;
+  vehicle.userData.vehicleType = t;
+
+  // Build smooth curved path
+  const pathPoints = buildVehiclePath(axis, direction);
+  vehicle.userData.pathPoints = pathPoints;
+  vehicle.userData.pathIndex = 0;
+
+  scene.add(vehicle);
+  state.vehicles.push(vehicle);
+  vehicle.name = `vehicle_${state.vehicles.length}`;
+
+  return vehicle;
+}
+
+function buildVehiclePath(axis, direction) {
+  const points = [];
+  const roadW = 4.0;
+  const curveRadius = 3.0;
+  const pathLength = 40;
+
+  if (axis === 'ns' && direction === 'N') {
+    // From south, going north, slight right lane bias
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30;
+      const z = -30 + t * 60;
+      let x = -roadW + Math.sin(t * Math.PI) * 0.3;
+      points.push(new THREE.Vector3(x, 0, z));
+    }
+  } else if (axis === 'ns' && direction === 'S') {
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30;
+      const z = 30 - t * 60;
+      let x = roadW - Math.sin(t * Math.PI) * 0.3;
+      points.push(new THREE.Vector3(x, 0, z));
+    }
+  } else if (axis === 'ew' && direction === 'E') {
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30;
+      const x = -30 + t * 60;
+      let z = -roadW + Math.sin(t * Math.PI) * 0.3;
+      points.push(new THREE.Vector3(x, 0, z));
+    }
+  } else {
+    // EW, direction W
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30;
+      const x = 30 - t * 60;
+      let z = roadW - Math.sin(t * Math.PI) * 0.3;
+      points.push(new THREE.Vector3(x, 0, z));
+    }
+  }
+
+  return points;
+}
+
+// ─── Physics Update Loop ────────────────────────────────────
+function updateVehicles(delta) {
+  const stopThreshold = 0.5;
+
+  state.vehicles.forEach((vehicle, idx) => {
+    const signalKey = getSignalKeyForVehicle(vehicle);
+    const stopPos = getStopPosition(vehicle, signalKey);
+    const distToStop = distanceToPosition(vehicle.position, stopPos, vehicle.userData.axis);
+
+    // Check downstream blockage at J2
+    const downstreamBlock = state.exitBlock > 60 && vehicle.userData.direction === 'N';
+
+    const signalGreen = isSignalGreen(signalKey) && !downstreamBlock;
+
+    if (distToStop < stopThreshold && !signalGreen) {
+      vehicle.userData.targetSpeed = 0;
+      vehicle.userData.stopped = true;
+    } else if (distToStop < 5 && !signalGreen) {
+      vehicle.userData.targetSpeed = Math.max(vehicle.userData.targetSpeed * 0.6, 0);
+      vehicle.userData.stopped = vehicle.userData.targetSpeed < 0.2;
     } else {
-      // EW, direction W
-      for (let i = 0; i <= 10; i++) {
-        const t = i / 10;
-        const x = 30 - t * 60;
-        const z = roadW + (Math.sin(t * Math.PI) * 0.3);
-        points.push(new THREE.Vector3(x, 0, z));
-      }
+      vehicle.userData.stopped = false;
+      vehicle.userData.targetSpeed = vehicle.userData.maxSpeed;
     }
 
-    return points;
-  }
+    // Smooth acceleration/deceleration (car-following)
+    const speedDiff = vehicle.userData.targetSpeed - vehicle.userData.speed;
+    const accelRate = vehicle.userData.accel;
+    const decelRate = vehicle.userData.deceleration;
 
-  // ─── Physics Update Loop ────────────────────────────────────
+    let accel = 0;
+    if (speedDiff > 0) {
+      accel = Math.min(speedDiff * 0.1, accelRate);
+    } else if (speedDiff < 0) {
+      accel = Math.max(speedDiff * 0.1, -decelRate);
+    }
 
-  function updateVehicles(delta) {
-    const stopThreshold = 0.05;
+    vehicle.userData.speed += accel * delta;
+    if (vehicle.userData.speed < 0) vehicle.userData.speed = 0;
 
-    state.vehicles.forEach((vehicle, idx) => {
-      // Check if vehicle should stop at the stop line
-      const stopLine = getStopLineForVehicle(vehicle);
-      const distToStop = distanceToStopLine(vehicle, stopLine);
+    // Move vehicle along path
+    if (vehicle.userData.speed > 0.001 || !vehicle.userData.stopped) {
+      const moveDist = vehicle.userData.speed * delta;
+      vehicle.userData.pathIndex += moveDist / 2.5;
 
-      // Check signal state
-      const signalKey = getSignalKeyForVehicle(vehicle);
-
-      if (distToStop < 5 && !isSignalGreen(signalKey)) {
-        vehicle.userData.targetSpeed = 0;
-        vehicle.userData.stopped = true;
-      } else if (distToStop < 8 && !isSignalGreen(signalKey)) {
-        // Begin deceleration
-        vehicle.userData.targetSpeed = Math.max(vehicle.userData.targetSpeed * 0.7, 0);
-      } else if (distToStop > 10) {
-        vehicle.userData.stopped = false;
-        vehicle.userData.targetSpeed = vehicle.userData.maxSpeed;
-      }
-
-      // Smooth acceleration/deceleration
-      const speedDiff = vehicle.userData.targetSpeed - vehicle.userData.speed;
-      const accelRate = vehicle.userData.accel;
-      const decelRate = vehicle.userData.deceleration;
-
-      let accel = 0;
-      if (speedDiff > 0) {
-        accel = Math.min(speedDiff * 0.1, accelRate);
-      } else if (speedDiff < 0) {
-        accel = Math.max(speedDiff * 0.1, -decelRate);
-      }
-
-      vehicle.userData.speed += accel * delta;
-      if (vehicle.userData.speed < 0) vehicle.userData.speed = 0;
-
-      // Move vehicle along its path
-      if (vehicle.userData.speed > 0.001 || !vehicle.userData.stopped) {
-        const moveDist = vehicle.userData.speed * delta;
-        const currentPoint = vehicle.userData.pathPoints[
-          Math.min(vehicle.userData.pathIndex, vehicle.userData.pathPoints.length - 1)
-        ];
-
-        // Move along path
-        vehicle.userData.pathIndex += moveDist / 2.0; // path segment length heuristic
-        if (vehicle.userData.pathIndex >= vehicle.userData.pathPoints.length - 1) {
-          // Vehicle has left the visible area
-          vehicle.userData.pathIndex = 0;
-          // Respawn at origin
-          const roadW = 3.5;
-          if (vehicle.userData.direction === 'N') {
-            vehicle.position.set(-roadW, 0, -35);
-          } else if (vehicle.userData.direction === 'S') {
-            vehicle.position.set(roadW, 0, 35);
-          } else if (vehicle.userData.direction === 'E') {
-            vehicle.position.set(-35, 0, -roadW);
-          } else {
-            vehicle.position.set(35, 0, roadW);
-          }
-          return;
+      if (vehicle.userData.pathIndex >= vehicle.userData.pathPoints.length - 1) {
+        // Respawn at start
+        vehicle.userData.pathIndex = 0;
+        const roadW = 4.0;
+        if (vehicle.userData.direction === 'N') {
+          vehicle.position.set(-roadW, 0, -32);
+        } else if (vehicle.userData.direction === 'S') {
+          vehicle.position.set(roadW, 0, 32);
+        } else if (vehicle.userData.direction === 'E') {
+          vehicle.position.set(-32, 0, -roadW);
+        } else {
+          vehicle.position.set(32, 0, roadW);
         }
-
-        const targetPoint = vehicle.userData.pathPoints[
-          Math.min(Math.floor(vehicle.userData.pathIndex), vehicle.userData.pathPoints.length - 1)
-        ];
-        vehicle.position.lerp(targetPoint, 0.02);
+        return;
       }
 
-      // Update emergency beacon flash
-      if (vehicle.userData.type === 'emergency' && vehicle.userData.beacon) {
-        const intensity = Math.sin(state.simTime * 10) * 0.5 + 0.5;
-        vehicle.userData.beacon.material.emissiveIntensity = 0.5 + intensity * 0.5;
+      const targetPoint = vehicle.userData.pathPoints[
+        Math.min(Math.floor(vehicle.userData.pathIndex), vehicle.userData.pathPoints.length - 1)
+      ];
+      vehicle.position.lerp(targetPoint, 0.05);
+    }
+
+    // Emergency beacon flash
+    if (vehicle.userData.type === 'emergency') {
+      const sin = Math.sin(state.simTime * 12);
+      if (vehicle.userData.beaconRed) {
+        vehicle.userData.beaconRed.material.emissiveIntensity = sin > 0 ? 0.9 : 0.1;
       }
+      if (vehicle.userData.beaconBlue) {
+        vehicle.userData.beaconBlue.material.emissiveIntensity = sin < 0 ? 0.9 : 0.1;
+      }
+    }
+  });
+
+  // Remove old vehicles
+  if (state.vehicles.length > 40) {
+    const excess = state.vehicles.splice(0, state.vehicles.length - 40);
+    excess.forEach(v => scene.remove(v));
+  }
+}
+
+function getSignalKeyForVehicle(vehicle) {
+  const d = vehicle.userData.direction;
+  if (d === 'N') return 'north';
+  if (d === 'S') return 'south';
+  if (d === 'E') return 'east';
+  return 'west';
+}
+
+function getStopPosition(vehicle, signalKey) {
+  const roadW = 8.0;
+  const stopDist = roadW / 2 - 0.4;
+  switch (signalKey) {
+    case 'north': return { z: stopDist, x: vehicle.position.x };
+    case 'south': return { z: -stopDist, x: vehicle.position.x };
+    case 'east': return { x: stopDist, z: vehicle.position.z };
+    case 'west': return { x: -stopDist, z: vehicle.position.z };
+    default: return { x: 0, z: 0 };
+  }
+}
+
+function distanceToPosition(pos, stop, axis) {
+  if (axis === 'ns') {
+    return Math.abs(pos.z - stop.z);
+  } else {
+    return Math.abs(pos.x - stop.x);
+  }
+}
+
+function isSignalGreen(signalKey) {
+  const group = state.signals.groups[signalKey];
+  if (!group) return true;
+  return group.userData.activeLight === 'green';
+}
+
+// ─── Signal Control ─────────────────────────────────────────
+let signalPhase = 0;
+let signalTimer = 0;
+const SIGNAL_CYCLE = {
+  ns_green: 25,
+  ns_yellow: 4,
+  all_red: 2,
+  ew_green: 25,
+  ew_yellow: 4,
+};
+
+function updateSignals(delta) {
+  signalTimer += delta;
+
+  if (state.currentMode === 'queuesense') {
+    // QueueSense: adaptive timing based on density + spillback
+    const densityFactor = state.densityLevel / 50;
+    const downstreamBlocked = state.exitBlock > 70;
+
+    let nsGreen = SIGNAL_CYCLE.ns_green * (0.8 + densityFactor * 0.5);
+    let ewGreen = SIGNAL_CYCLE.ew_green * (0.8 + densityFactor * 0.4);
+
+    if (downstreamBlocked) {
+      nsGreen = 30;  // Extend NS green to clear upstream
+      ewGreen = 5;   // Hold EW red longer to prevent spillback
+    }
+
+    if (signalPhase === 0 && signalTimer > nsGreen) setSignalPhase(1);
+    else if (signalPhase === 1 && signalTimer > SIGNAL_CYCLE.ns_yellow) setSignalPhase(2);
+    else if (signalPhase === 2 && signalTimer > SIGNAL_CYCLE.all_red) setSignalPhase(3);
+    else if (signalPhase === 3 && signalTimer > ewGreen) setSignalPhase(4);
+    else if (signalPhase === 4 && signalTimer > SIGNAL_CYCLE.ew_yellow) { setSignalPhase(0); signalTimer = 0; }
+  } else {
+    // Traditional fixed-time
+    const cycle = SIGNAL_CYCLE;
+    if (signalPhase === 0 && signalTimer > cycle.ns_green) setSignalPhase(1);
+    else if (signalPhase === 1 && signalTimer > cycle.ns_yellow) setSignalPhase(2);
+    else if (signalPhase === 2 && signalTimer > cycle.all_red) setSignalPhase(3);
+    else if (signalPhase === 3 && signalTimer > cycle.ew_green) setSignalPhase(4);
+    else if (signalPhase === 4 && signalTimer > cycle.ew_yellow) { setSignalPhase(0); signalTimer = 0; }
+  }
+}
+
+function setSignalPhase(phase) {
+  if (phase === signalPhase) return;
+  signalPhase = phase;
+  signalTimer = 0;
+
+  // NS = north/south/j2, EW = east/west
+  const nsKeys = ['north', 'south', 'j2_north', 'j2_south'];
+  const ewKeys = ['east', 'west'];
+
+  nsKeys.forEach(key => {
+    const group = state.signals.groups[key];
+    if (!group) return;
+    if (key.includes('j2')) {
+      // J2 signals follow main NS
+    }
+    if (phase === 0) setBulb(group, 'green');
+    else if (phase === 1) setBulb(group, 'amber');
+    else if (phase === 2 || phase === 4) setBulb(group, 'red');
+    else if (phase === 3) setBulb(group, 'green');
+  });
+
+  ewKeys.forEach(key => {
+    const group = state.signals.groups[key];
+    if (!group) return;
+    if (phase === 0 || phase === 1 || phase === 2) setBulb(group, 'red');
+    else if (phase === 3) setBulb(group, 'green');
+    else if (phase === 4) setBulb(group, 'amber');
+  });
+
+  updateGroundStopBars(phase);
+  updateAISpeech(phase);
+}
+
+function setBulb(group, colorKey) {
+  group.userData.activeLight = colorKey;
+
+  const r = group.userData.red;
+  const a = group.userData.amber;
+  const g = group.userData.green;
+
+  if (r) r.material.emissiveIntensity = colorKey === 'red' ? 1.0 : 0;
+  if (a) a.material.emissiveIntensity = colorKey === 'amber' ? 1.0 : 0;
+  if (g) g.material.emissiveIntensity = colorKey === 'green' ? 1.0 : 0;
+}
+
+function updateGroundStopBars(phase) {
+  const nsGreen = phase === 0;
+  const ewGreen = phase === 3;
+
+  // J1 stop bars
+  if (state.signals.stopBars.north) setStopBarEmissive(state.signals.stopBars.north, nsGreen ? 0 : 1);
+  if (state.signals.stopBars.south) setStopBarEmissive(state.signals.stopBars.south, nsGreen ? 0 : 1);
+  if (state.signals.stopBars.east) setStopBarEmissive(state.signals.stopBars.east, ewGreen ? 0 : 1);
+  if (state.signals.stopBars.west) setStopBarEmissive(state.signals.stopBars.west, ewGreen ? 0 : 1);
+
+  // J2 stop bars — track with upstream NS phase
+  if (state.signals.stopBars.j2) {
+    const j2 = state.signals.stopBars.j2;
+    if (j2.north) setStopBarEmissive(j2.north, nsGreen ? 0 : 1);
+    if (j2.south) setStopBarEmissive(j2.south, nsGreen ? 0 : 1);
+  }
+}
+
+function setStopBarEmissive(group, intensity) {
+  if (group.userData.bars) {
+    group.userData.bars.forEach(bar => {
+      bar.material.emissiveIntensity = intensity;
     });
-
-    // Remove vehicles that are too far
-    if (state.vehicles.length > 50) {
-      const excess = state.vehicles.splice(0, state.vehicles.length - 50);
-      excess.forEach(v => scene.remove(v));
-    }
   }
+}
 
-  function getStopLineForVehicle(vehicle) {
-    const d = vehicle.userData.direction;
-    if (d === 'N' || d === 'S') return { axis: 'ns', dir: d };
-    return { axis: 'ew', dir: d };
-  }
-
-  function distanceToStopLine(vehicle, stopLine) {
-    const pos = vehicle.position;
-    let stopZ = 0, stopX = 0;
-
-    if (stopLine.axis === 'ns') {
-      stopZ = stopLine.dir === 'N' ? 3.5 : -3.5;
-      return Math.abs(pos.z - stopZ);
-    } else {
-      stopX = stopLine.dir === 'E' ? 3.5 : -3.5;
-      return Math.abs(pos.x - stopX);
-    }
-  }
-
-  function getSignalKeyForVehicle(vehicle) {
-    const d = vehicle.userData.direction;
-    if (d === 'N') return 'north';
-    if (d === 'S') return 'south';
-    if (d === 'E') return 'east';
-    return 'west';
-  }
-
-  function isSignalGreen(signalKey) {
-    const group = state.signals.groups[signalKey];
-    if (!group) return true;
-    return group.userData.activeLight === 'green';
-  }
-
-  // ─── Signal Control ─────────────────────────────────────────
-
-  let signalPhase = 0;
-  let signalTimer = 0;
-  const SIGNAL_CYCLE = {
-    ns_green: 25,
-    ns_yellow: 3,
-    all_red: 2,
-    ew_green: 25,
-    ew_yellow: 3,
+// ─── AI Reasoning Speech Synthesis ───────────────────────────
+function updateAISpeech(phase) {
+  let text = '';
+  const phaseNames = {
+    0: 'NORTH-SOUTH GREEN — Vehicles approaching from North/South have right of way.',
+    1: 'NORTH-SOUTH YELLOW CLEARANCE — Preparing to switch phases.',
+    2: 'ALL-RED CLEARANCE — Intersection clearing for safety.',
+    3: 'EAST-WEST GREEN — Vehicles approaching from East/West have right of way.',
+    4: 'EAST-WEST YELLOW CLEARANCE — Preparing to switch phases.',
   };
 
-  function updateSignals(delta) {
-    signalTimer += delta;
-
-    if (state.currentMode === 'queuesense') {
-      // QueueSense: adaptive timing based on density
-      const densityFactor = state.densityLevel / 50;
-      const cycle = SIGNAL_CYCLE;
-
-      if (signalPhase === 0 && signalTimer > cycle.ns_green * (0.8 + densityFactor * 0.4)) {
-        setSignalPhase(1);
-      } else if (signalPhase === 1 && signalTimer > cycle.ns_yellow) {
-        setSignalPhase(2);
-      } else if (signalPhase === 2 && signalTimer > cycle.all_red) {
-        setSignalPhase(3);
-      } else if (signalPhase === 3 && signalTimer > cycle.ew_green * (0.8 + densityFactor * 0.4)) {
-        setSignalPhase(4);
-      } else if (signalPhase === 4 && signalTimer > cycle.ew_yellow) {
-        setSignalPhase(0);
-        signalTimer = 0;
-      }
+  if (state.currentMode === 'queuesense') {
+    const exitPct = Math.round(state.exitBlock);
+    if (exitPct > 70) {
+      text = `QUEUESENSE AI: ${phaseNames[phase]} DOWNSTREAM SPILLBACK DETECTED (${exitPct}% exit congestion). Suppressing conflicting approach green to prevent gridlock.`;
+    } else if (state.densityLevel > 75) {
+      text = `QUEUESENSE AI: ${phaseNames[phase]} High density detected (${state.densityLevel}%). Extending green for platoon clearance.`;
     } else {
-      // Traditional fixed-time
-      const cycle = SIGNAL_CYCLE;
-      if (signalPhase === 0 && signalTimer > cycle.ns_green) {
-        setSignalPhase(1);
-      } else if (signalPhase === 1 && signalTimer > cycle.ns_yellow) {
-        setSignalPhase(2);
-      } else if (signalPhase === 2 && signalTimer > cycle.all_red) {
-        setSignalPhase(3);
-      } else if (signalPhase === 3 && signalTimer > cycle.ew_green) {
-        setSignalPhase(4);
-      } else if (signalPhase === 4 && signalTimer > cycle.ew_yellow) {
-        setSignalPhase(0);
-        signalTimer = 0;
-      }
+      text = `QUEUESENSE AI: ${phaseNames[phase]} Adaptive green allocation in progress.`;
     }
+  } else {
+    text = `TRADITIONAL MODE: ${phaseNames[phase]} Fixed-time signal cycle.`;
   }
 
-  function setSignalPhase(phase) {
-    if (phase === signalPhase) return;
-    signalPhase = phase;
-    signalTimer = 0;
+  const reasonText = document.getElementById('reasonText');
+  if (reasonText) reasonText.textContent = text;
+}
 
-    // NS signals: groups north, south, j2
-    // EW signals: groups east, west
-    const nsSignals = ['north', 'south', 'j2'];
-    const ewSignals = ['east', 'west'];
+// ─── Spawn Logic ────────────────────────────────────────────
+let spawnTimer = 0;
 
-    nsSignals.forEach(key => {
-      const group = state.signals.groups[key];
-      if (!group) return;
-      if (phase === 0) {
-        setBulb(group, 'green');
-      } else if (phase === 1) {
-        setBulb(group, 'amber');
-      } else if (phase === 2 || phase === 4) {
-        setBulb(group, 'red');
-      } else if (phase === 3) {
-        setBulb(group, 'green');
-      }
-    });
+function updateSpawning(delta) {
+  if (!state.autoRunning) return;
 
-    ewSignals.forEach(key => {
-      const group = state.signals.groups[key];
-      if (!group) return;
-      if (phase === 0 || phase === 1 || phase === 2) {
-        setBulb(group, 'red');
-      } else if (phase === 3) {
-        setBulb(group, 'green');
-      } else if (phase === 4) {
-        setBulb(group, 'amber');
-      }
-    });
+  spawnTimer += delta;
+  const baseRate = 0.8;
+  const rate = baseRate * (state.densityLevel / 50);
+  const spawnInterval = Math.max(0.3, 1.5 / rate);
 
-    // Update ground stop bars
-    updateGroundStopBars(phase);
-  }
+  if (spawnTimer > spawnInterval) {
+    spawnTimer = 0;
 
-  function setBulb(group, colorKey) {
-    group.userData.activeLight = colorKey;
-
-    const r = group.userData.red;
-    const a = group.userData.amber;
-    const g = group.userData.green;
-
-    if (r) r.material.emissiveIntensity = colorKey === 'red' ? 1.0 : 0;
-    if (a) a.material.emissiveIntensity = colorKey === 'amber' ? 1.0 : 0;
-    if (g) g.material.emissiveIntensity = colorKey === 'green' ? 1.0 : 0;
-  }
-
-  function updateGroundStopBars(phase) {
-    const nsGreen = phase === 0;
-    const ewGreen = phase === 3;
-
-    // NS stop bars
-    if (state.signals.stopBars.north) {
-      const intensity = nsGreen ? 0 : 1;
-      setStopBarEmissive(state.signals.stopBars.north, intensity);
-    }
-    if (state.signals.stopBars.south) {
-      const intensity = nsGreen ? 0 : 1;
-      setStopBarEmissive(state.signals.stopBars.south, intensity);
-    }
-
-    // EW stop bars
-    if (state.signals.stopBars.east) {
-      const intensity = ewGreen ? 0 : 1;
-      setStopBarEmissive(state.signals.stopBars.east, intensity);
-    }
-    if (state.signals.stopBars.west) {
-      const intensity = ewGreen ? 0 : 1;
-      setStopBarEmissive(state.signals.stopBars.west, intensity);
-    }
-  }
-
-  function setStopBarEmissive(group, intensity) {
-    if (group.userData.bars) {
-      group.userData.bars.forEach(bar => {
-        bar.material.emissiveIntensity = intensity;
-      });
-    }
-  }
-
-  // ─── Spawn Logic ────────────────────────────────────────────
-
-  let spawnTimer = 0;
-
-  function updateSpawning(delta) {
-    if (!state.autoRunning) return;
-
-    spawnTimer += delta;
-    const baseRate = 0.5; // vehicles per second at density 50
-    const rate = baseRate * (state.densityLevel / 50);
-
-    if (spawnTimer > 1 / rate) {
-      spawnTimer = 0;
-
-      // Spawn from all 4 approaches
-      if (Math.random() < 0.5) {
-        if (Math.random() < 0.5) {
-          spawnVehicle('ns', 'N', null);
-        } else {
-          spawnVehicle('ns', 'S', null);
-        }
-      } else {
-        if (Math.random() < 0.5) {
-          spawnVehicle('ew', 'E', null);
-        } else {
-          spawnVehicle('ew', 'W', null);
-        }
-      }
-    }
-
-    // Emergency vehicle spawn (rare)
-    if (state.emergencyActive && Math.random() < 0.02) {
+    if (state.emergencyActive && Math.random() < 0.15) {
       spawnVehicle('ns', 'S', 'emergency');
-    }
-  }
-
-  // ─── KPI Updates ────────────────────────────────────────────
-
-  function updateKPIs(delta) {
-    const stopped = state.vehicles.filter(v => v.userData.stopped).length;
-    const active = state.vehicles.length;
-    const totalStops = stopped;
-    const waitTime = totalStops > 0 ? totalStops * (1 - Math.cos(state.simTime * 0.5)) * 0.1 : 0;
-
-    state.kpi.queue = Math.round(totalStops * 1.5);
-    state.kpi.wait = waitTime > 0.1 ? Math.round(waitTime * 10) / 10 : 0;
-
-    if (state.exitBlock > 0) {
-      state.kpi.exit = state.exitBlock;
     } else {
-      state.kpi.exit = Math.round(Math.sin(state.simTime * 0.3) * 10 + 20);
+      const directions = ['N', 'S', 'E', 'W'];
+      const dir = directions[Math.floor(Math.random() * 4)];
+      const axis = (dir === 'N' || dir === 'S') ? 'ns' : 'ew';
+      spawnVehicle(axis, dir);
     }
+  }
+}
 
-    // Emit KPI updates to app.js
-    if (window.QueueSense && window.QueueSense.onKPIUpdate) {
-      window.QueueSense.onKPIUpdate(state.kpi);
+// ─── Auto Scenario Cycling ─────────────────────────────────
+let scenarioChangeTimer = 0;
+const SCENARIO_DURATION = 25; // seconds per scenario
+
+function updateScenarioCycle(delta) {
+  if (!state.autoRunning) return;
+
+  scenarioChangeTimer += delta;
+  if (scenarioChangeTimer > SCENARIO_DURATION) {
+    scenarioChangeTimer = 0;
+    cycleScenario();
+  }
+}
+
+const SCENARIOS = ['auto', 'surge', 'spillback', 'emergency'];
+
+function cycleScenario() {
+  const idx = SCENARIOS.indexOf(state.currentScenario);
+  const next = (idx + 1) % SCENARIOS.length;
+  applyScenario(SCENARIOS[next]);
+}
+
+// ─── KPI Updates ────────────────────────────────────────────
+function updateKPIs(delta) {
+  const stopped = state.vehicles.filter(v => v.userData.stopped).length;
+  const total = state.vehicles.length;
+
+  state.kpi.queue = Math.round(stopped * 1.5);
+  state.kpi.wait = Math.round(stopped * 2.5 + Math.sin(state.simTime * 0.3) * 5);
+  state.kpi.exit = Math.round(state.exitBlock + Math.sin(state.simTime * 0.2) * 5);
+
+  if (window.QueueSense && window.QueueSense.onKPIUpdate) {
+    window.QueueSense.onKPIUpdate(state.kpi);
+  }
+}
+
+// ─── Animation Loop ────────────────────────────────────────
+function animate() {
+  if (!renderer) return;
+
+  animationId = requestAnimationFrame(animate);
+  const delta = Math.min(clock.getDelta(), 0.05);
+  state.simTime += delta;
+
+  const timeScale = state.autoRunning ? 1 : 0;
+
+  updateSignals(delta * timeScale);
+  updateVehicles(delta * timeScale);
+  updateSpawning(delta * timeScale);
+  updateScenarioCycle(delta * timeScale);
+  updateKPIs(delta * timeScale);
+
+  // Pulse downstream sensor ring
+  if (state.signals.downstreamSensor) {
+    const intensity = 0.15 + Math.sin(state.simTime * 3) * 0.1;
+    const blocked = state.exitBlock > 70;
+    const color = blocked ? COLORS.signalRed : COLORS.signalGreen;
+    if (state.signals.downstreamSensor.material) {
+      state.signals.downstreamSensor.material.color.setHex(color);
+      state.signals.downstreamSensor.material.emissive.setHex(color);
+      state.signals.downstreamSensor.material.emissiveIntensity = intensity + (blocked ? 0.3 : 0);
     }
   }
 
-  // ─── Animation Loop ────────────────────────────────────────
-
-  function animate() {
-    if (!renderer) return;
-
-    animationId = requestAnimationFrame(animate);
-
-    const delta = Math.min(clock.getDelta(), 0.05);
-    state.simTime += delta;
-
-    const timeScale = state.autoRunning ? 1 : 0;
-
-    updateSignals(delta * timeScale);
-    updateVehicles(delta * timeScale);
-    updateSpawning(delta * timeScale);
-    updateKPIs(delta * timeScale);
-
-    if (controls && controls.update) {
-      controls.update();
-    }
-
-    renderer.render(scene, camera);
+  // Update timeline bar
+  const timelineBar = document.getElementById('timelineProgress');
+  if (timelineBar) {
+    const progress = ((scenarioChangeTimer / SCENARIO_DURATION) * 100);
+    timelineBar.style.transform = `scaleX(${Math.min(100, progress) / 100})`;
   }
 
-  // ─── Camera Setup ─────────────────────────────────────────
-
-  function setupCamera() {
-    const fov = 45;
-    const aspect = window.innerWidth / window.innerHeight;
-    const near = 0.1;
-    const far = 200;
-
-    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-
-    if (state.currentCamera === 'isometric') {
-      camera.position.set(30, 28, 30);
-      camera.lookAt(0, 2, 0);
-    } else if (state.currentCamera === 'top') {
-      camera.position.set(0, 45, 0.01);
-      camera.lookAt(0, 0, 0);
-      camera.rotation.order = 'YXZ';
-      camera.rotation.y = 0;
-      camera.rotation.x = -Math.PI / 2;
-    } else if (state.currentCamera === 'follow') {
-      camera.position.set(0, 12, 22);
-      camera.lookAt(0, 2, 0);
-    }
-  }
-
-  function switchCamera(preset) {
-    state.currentCamera = preset;
-
-    const targets = {
-      isometric: { pos: { x: 30, y: 28, z: 30 }, look: { x: 0, y: 2, z: 0 } },
-      top: { pos: { x: 0, y: 45, z: 0.01 }, look: { x: 0, y: 0, z: 0 } },
-      follow: { pos: { x: 0, y: 12, z: 22 }, look: { x: 0, y: 2, z: 0 } },
+  // Update scenario label
+  const scenarioLabel = document.getElementById('scenarioLabel');
+  if (scenarioLabel) {
+    const labels = {
+      auto: 'Normal Flow',
+      surge: 'Density Surge',
+      spillback: 'Exit Jam',
+      emergency: 'Ambulance',
     };
+    scenarioLabel.textContent = labels[state.currentScenario] || 'Normal Flow';
+  }
 
-    const target = targets[preset] || targets.isometric;
+  if (controls && controls.update) controls.update();
+  renderer.render(scene, camera);
+}
 
-    if (typeof gsap !== 'undefined') {
-      gsap.to(camera.position, {
-        duration: 1.2,
-        ...target.pos,
-        ease: 'power2.inOut',
-        onUpdate: () => camera.lookAt(target.look.x, target.look.y, target.look.z),
-      });
-    } else {
-      camera.position.set(target.pos.x, target.pos.y, target.pos.z);
-      camera.lookAt(target.look.x, target.look.y, target.look.z);
-    }
+// ─── Camera Setup ─────────────────────────────────────────
+function setupCamera() {
+  const fov = 45;
+  const aspect = window.innerWidth / window.innerHeight;
+  const near = 0.1;
+  const far = 300;
 
+  camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+
+  if (state.currentCamera === 'isometric') {
+    camera.position.set(35, 30, 35);
+    camera.lookAt(0, 2, 0);
+  } else if (state.currentCamera === 'top') {
+    camera.position.set(0, 50, 0.01);
+    camera.lookAt(0, 0, 0);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = 0;
+    camera.rotation.x = -Math.PI / 2;
+  } else if (state.currentCamera === 'corridor') {
+    camera.position.set(0, 12, 22);
+    camera.lookAt(0, 2, 30);
+  }
+}
+
+function switchCamera(preset) {
+  state.currentCamera = preset;
+
+  const targets = {
+    isometric: { pos: { x: 35, y: 30, z: 35 }, look: { x: 0, y: 2, z: 0 } },
+    top: { pos: { x: 0, y: 50, z: 0.01 }, look: { x: 0, y: 0, z: 0 } },
+    corridor: { pos: { x: 0, y: 12, z: 22 }, look: { x: 0, y: 2, z: 30 } },
+  };
+
+  const target = targets[preset] || targets.isometric;
+
+  if (typeof gsap !== 'undefined') {
+    gsap.to(camera.position, {
+      duration: 1.2,
+      ...target.pos,
+      ease: 'power2.inOut',
+      onUpdate: () => camera.lookAt(target.look.x, target.look.y, target.look.z),
+    });
+  } else {
+    camera.position.set(target.pos.x, target.pos.y, target.pos.z);
+    camera.lookAt(target.look.x, target.look.y, target.look.z);
+  }
+
+  if (controls) {
     controls.target.set(target.look.x, target.look.y, target.look.z);
     controls.update();
   }
+}
 
-  // ─── Scenario Handling ─────────────────────────────────────
+// ─── Scenario Handling ─────────────────────────────────────
+function applyScenario(scenario) {
+  state.currentScenario = scenario;
 
-  function applyScenario(scenario) {
-    state.currentScenario = scenario;
-    state.vehicles.forEach(v => {
-      scene.remove(v);
-    });
-    state.vehicles = [];
-    state.simTime = 0;
-    signalTimer = 0;
-    signalPhase = 0;
+  // Clear vehicles
+  state.vehicles.forEach(v => scene.remove(v));
+  state.vehicles = [];
+  state.simTime = 0;
+  signalTimer = 0;
+  signalPhase = 0;
+  scenarioChangeTimer = 0;
 
-    switch (scenario) {
-      case 'auto':
-        state.densityLevel = 50;
-        state.exitBlock = 0;
-        setSignalPhase(0);
-        break;
-      case 'surge':
-        state.densityLevel = 85;
-        setSignalPhase(0);
-        setTimeout(() => {
-          state.densityLevel = 100;
-        }, 15000);
-        break;
-      case 'spillback':
-        state.densityLevel = 70;
-        state.exitBlock = 40;
-        setSignalPhase(0);
-        break;
-      case 'emergency':
-        state.densityLevel = 50;
-        state.emergencyActive = true;
-        setTimeout(() => {
-          state.emergencyActive = false;
-          state.densityLevel = 50;
-        }, 20000);
-        break;
-    }
-
-    // Update AI reasoning text
-    const reasonText = document.getElementById('reasonText');
-    if (reasonText) {
-      const reasons = {
-        auto: 'Monitoring balanced traffic across all approaches. NS phase active.',
-        surge: 'Density surge detected. QueueSense AI extending NS green by 4.7s.',
-        spillback: 'Exit congestion detected (40%). Suppressing EW arrivals, clearing NS queue.',
-        emergency: 'AMBULANCE DETECTED — activating emergency corridor on NS approach.',
-      };
-      reasonText.textContent = reasons[scenario] || reasons.auto;
-    }
-  }
-
-  // ─── Initialization ─────────────────────────────────────────
-
-  function init() {
-    const container = document.getElementById('scene-container');
-    if (!container) {
-      console.error('Scene container not found');
-      return;
-    }
-
-    clock = new THREE.Clock();
-
-    // Scene
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(COLORS.ground);
-
-    // Renderer
-    renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    container.appendChild(renderer.domElement);
-
-    // Camera
-    setupCamera();
-
-    // Controls
-    if (typeof THREE.OrbitControls !== 'undefined') {
-      controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.minDistance = 15;
-      controls.maxDistance = 80;
-      controls.maxPolarAngle = Math.PI / 2;
-      controls.target.set(0, 2, 0);
-      controls.update();
-    }
-
-    // Build intersection
-    buildIntersection();
-
-    // Initialize signals
-    setSignalPhase(0);
-
-    // Spawn initial vehicles
-    for (let i = 0; i < 6; i++) {
+  switch (scenario) {
+    case 'auto':
+      state.densityLevel = 50;
+      state.exitBlock = 0;
+      setSignalPhase(0);
+      spawnInitialVehicles(6);
+      break;
+    case 'surge':
+      state.densityLevel = 55;
+      setSignalPhase(0);
+      spawnInitialVehicles(4);
+      setTimeout(() => { state.densityLevel = 90; }, 15000);
+      break;
+    case 'spillback':
+      state.densityLevel = 75;
+      state.exitBlock = 80;
+      setSignalPhase(0);
+      spawnInitialVehicles(8);
+      break;
+    case 'emergency':
+      state.densityLevel = 50;
+      state.exitBlock = 0;
+      state.emergencyActive = true;
+      setSignalPhase(0);
+      spawnInitialVehicles(5);
       setTimeout(() => {
-        const axes = ['ns', 'ew'];
-        const dirs = ['N', 'S', 'E', 'W'];
-        const axis = axes[Math.floor(Math.random() * 2)];
-        const dir = dirs[Math.floor(Math.random() * 4)];
-        spawnVehicle(axis, dir);
-      }, i * 800);
-    }
+        state.emergencyActive = false;
+        state.densityLevel = 50;
+      }, 20000);
+      break;
+  }
+}
 
-    // Window resize
-    window.addEventListener('resize', onWindowResize);
+function spawnInitialVehicles(count) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const dirs = ['N', 'S', 'E', 'W'];
+      const dir = dirs[Math.floor(Math.random() * 4)];
+      const axis = (dir === 'N' || dir === 'S') ? 'ns' : 'ew';
+      spawnVehicle(axis, dir);
+    }, i * 500);
+  }
+}
 
-    // Start animation
-    animate();
-
-    // Expose to global scope
-    window.QueueSense = {
-      scene: scene,
-      camera: camera,
-      renderer: renderer,
-      state: state,
-      switchCamera: switchCamera,
-      applyScenario: applyScenario,
-      setMode: function (mode) {
-        state.currentMode = mode;
-      },
-      setDensity: function (level) {
-        state.densityLevel = level;
-      },
-      setExitBlock: function (level) {
-        state.exitBlock = level;
-      },
-      triggerEmergency: function () {
-        state.emergencyActive = true;
-        setTimeout(() => {
-          state.emergencyActive = false;
-        }, 15000);
-      },
-      setAutoRunning: function (running) {
-        state.autoRunning = running;
-      },
-      setScenario: function (scenario) {
-        applyScenario(scenario);
-      },
-      resetView: function () {
-        switchCamera(state.currentCamera);
-      },
-      onKPIUpdate: null,
-    };
+// ─── Initialization ─────────────────────────────────────────
+function init() {
+  const container = document.getElementById('scene-container');
+  if (!container) {
+    console.error('Scene container not found');
+    return;
   }
 
-  function onWindowResize() {
-    if (!camera || !renderer) return;
-    const container = document.getElementById('scene-container');
-    if (!container) return;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-  }
+  clock = new THREE.Clock();
 
-  // ─── Auto-init when DOM is ready ──────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  // Scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(COLORS.ground);
+  scene.fog = new THREE.FogExp2(COLORS.ground, 0.0025);
 
-  // Expose for debugging
-  window._QueueSenseDebug = {
+  // Renderer
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+    powerPreference: 'high-performance',
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  container.appendChild(renderer.domElement);
+
+  // Camera
+  setupCamera();
+
+  // Controls
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.minDistance = 15;
+  controls.maxDistance = 120;
+  controls.maxPolarAngle = Math.PI / 2 - 0.05;
+  controls.target.set(0, 2, 0);
+  controls.update();
+
+  // Build intersection
+  buildIntersection();
+  setSignalPhase(0);
+  spawnInitialVehicles(10);
+
+  // Window resize
+  window.addEventListener('resize', onWindowResize);
+
+  // Start animation
+  animate();
+
+  // Expose to global scope for app.js
+  window.QueueSense = {
+    scene: scene,
+    camera: camera,
+    renderer: renderer,
     state: state,
-    signals: state.signals,
-    COLORS: COLORS,
+    switchCamera: switchCamera,
+    applyScenario: applyScenario,
+    setMode: function (mode) {
+      state.currentMode = mode;
+      applyScenario(state.currentScenario);
+    },
+    setDensity: function (level) {
+      state.densityLevel = level;
+    },
+    setExitBlock: function (level) {
+      state.exitBlock = level;
+    },
+    triggerEmergency: function () {
+      state.emergencyActive = true;
+      spawnVehicle('ns', 'S', 'emergency');
+      setTimeout(() => { state.emergencyActive = false; }, 15000);
+    },
+    setAutoRunning: function (running) {
+      state.autoRunning = running;
+    },
+    setScenario: function (scenario) {
+      applyScenario(scenario);
+    },
+    resetView: function () {
+      switchCamera(state.currentCamera);
+    },
+    onKPIUpdate: null,
   };
-})();
+}
+
+function onWindowResize() {
+  if (!camera || !renderer) return;
+  const container = document.getElementById('scene-container');
+  if (!container) return;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+// ─── Auto-init when DOM is ready ──────────────────────────
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+// Expose for debugging
+window._QueueSenseDebug = {
+  state: state,
+  signals: state.signals,
+  COLORS: COLORS,
+};

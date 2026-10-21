@@ -1,0 +1,21 @@
+{
+  "csv": "results\\benchmark_v2_250_gateverified\\D1_seed49_balanced_seed49.csv",
+  "seed": 49,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 75,
+  "remaining_expected": 54,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 84,
+  "phase_switches": 288,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "physical_congestion_observations": 84,
+  "gate_restrictions": 0,
+  "gate_phase_change_interventions": 0,
+  "gate_caused_holds": 0,
+  "spillback_gate": false,
+  "total_wait_seconds": 3399.0,
+  "mean_wait_seconds": 14.103734439834025,
+  "teleports": 0
+}

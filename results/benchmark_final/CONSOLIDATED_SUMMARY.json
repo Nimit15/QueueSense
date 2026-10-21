@@ -1,0 +1,199 @@
+{
+  "generated": "2026-10-15 01:35:12",
+  "total_expected": 200,
+  "total_consolidated": 170,
+  "scenarios": {
+    "light": {
+      "total_runs": 40,
+      "successful_runs": 40,
+      "failed_runs": 0,
+      "controller_counts": {
+        "A": 10,
+        "B": 10,
+        "C": 10,
+        "D": 10
+      },
+      "metrics": {
+        "controller_A": {
+          "mean_arrived": 467.5,
+          "std_arrived": 3.2058973436118907,
+          "min_arrived": 462,
+          "max_arrived": 471,
+          "runs": 10
+        },
+        "controller_B": {
+          "mean_arrived": 502.9,
+          "std_arrived": 6.314885412877875,
+          "min_arrived": 492,
+          "max_arrived": 514,
+          "runs": 10
+        },
+        "controller_C": {
+          "mean_arrived": 365.3,
+          "std_arrived": 2.6267851073127395,
+          "min_arrived": 362,
+          "max_arrived": 371,
+          "runs": 10
+        },
+        "controller_D": {
+          "mean_arrived": 423.2,
+          "std_arrived": 3.011090610836324,
+          "min_arrived": 417,
+          "max_arrived": 427,
+          "runs": 10
+        }
+      }
+    },
+    "balanced": {
+      "total_runs": 40,
+      "successful_runs": 40,
+      "failed_runs": 0,
+      "controller_counts": {
+        "A": 10,
+        "B": 10,
+        "C": 10,
+        "D": 10
+      },
+      "metrics": {
+        "controller_A": {
+          "mean_arrived": 866.3,
+          "std_arrived": 2.0575065816014617,
+          "min_arrived": 863,
+          "max_arrived": 870,
+          "runs": 10
+        },
+        "controller_B": {
+          "mean_arrived": 862.1,
+          "std_arrived": 3.3813212407775355,
+          "min_arrived": 857,
+          "max_arrived": 869,
+          "runs": 10
+        },
+        "controller_C": {
+          "mean_arrived": 507.3,
+          "std_arrived": 2.263232692902394,
+          "min_arrived": 503,
+          "max_arrived": 511,
+          "runs": 10
+        },
+        "controller_D": {
+          "mean_arrived": 1039.6,
+          "std_arrived": 11.692352676476668,
+          "min_arrived": 1024,
+          "max_arrived": 1062,
+          "runs": 10
+        }
+      }
+    },
+    "bottleneck": {
+      "total_runs": 40,
+      "successful_runs": 40,
+      "failed_runs": 0,
+      "controller_counts": {
+        "A": 10,
+        "B": 10,
+        "C": 10,
+        "D": 10
+      },
+      "metrics": {
+        "controller_A": {
+          "mean_arrived": 952.4,
+          "std_arrived": 5.420127099780759,
+          "min_arrived": 939,
+          "max_arrived": 959,
+          "runs": 10
+        },
+        "controller_B": {
+          "mean_arrived": 962.1,
+          "std_arrived": 5.1305187088853135,
+          "min_arrived": 955,
+          "max_arrived": 969,
+          "runs": 10
+        },
+        "controller_C": {
+          "mean_arrived": 418.1,
+          "std_arrived": 5.087020520675908,
+          "min_arrived": 409,
+          "max_arrived": 427,
+          "runs": 10
+        },
+        "controller_D": {
+          "mean_arrived": 1361.5,
+          "std_arrived": 2.8771127502720115,
+          "min_arrived": 1358,
+          "max_arrived": 1367,
+          "runs": 10
+        }
+      }
+    },
+    "surge": {
+      "total_runs": 37,
+      "successful_runs": 37,
+      "failed_runs": 0,
+      "controller_counts": {
+        "A": 10,
+        "B": 10,
+        "C": 10,
+        "D": 7
+      },
+      "metrics": {
+        "controller_A": {
+          "mean_arrived": 1002.4,
+          "std_arrived": 4.402019738458447,
+          "min_arrived": 995,
+          "max_arrived": 1009,
+          "runs": 10
+        },
+        "controller_B": {
+          "mean_arrived": 1012,
+          "std_arrived": 7.468452167469359,
+          "min_arrived": 999,
+          "max_arrived": 1023,
+          "runs": 10
+        },
+        "controller_C": {
+          "mean_arrived": 835.4,
+          "std_arrived": 121.9473474724053,
+          "min_arrived": 744,
+          "max_arrived": 1045,
+          "runs": 10
+        },
+        "controller_D": {
+          "mean_arrived": 1146.857142857143,
+          "std_arrived": 16.516946564347897,
+          "min_arrived": 1120,
+          "max_arrived": 1165,
+          "runs": 7
+        }
+      }
+    },
+    "uneven": {
+      "total_runs": 13,
+      "successful_runs": 13,
+      "failed_runs": 0,
+      "controller_counts": {
+        "A": 10,
+        "B": 3,
+        "C": 0,
+        "D": 0
+      },
+      "metrics": {
+        "controller_A": {
+          "mean_arrived": 955.9,
+          "std_arrived": 4.840798832148815,
+          "min_arrived": 950,
+          "max_arrived": 965,
+          "runs": 10
+        },
+        "controller_B": {
+          "mean_arrived": 957,
+          "std_arrived": 5.291502622129181,
+          "min_arrived": 951,
+          "max_arrived": 961,
+          "runs": 3
+        }
+      }
+    }
+  },
+  "consolidated_files": {}
+}

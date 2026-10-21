@@ -1,0 +1,17 @@
+{
+  "csv": "results\\benchmark_v2_250\\B_seed44_balanced_seed44.csv",
+  "seed": 44,
+  "duration": 300,
+  "steps": 241,
+  "arrived_cumulative": 81,
+  "remaining_expected": 47,
+  "spillback_ns_seconds": 0,
+  "spillback_ew_seconds": 0,
+  "phase_switches": 66,
+  "gate_interventions": 0,
+  "gate_intervention_details": [],
+  "spillback_gate": false,
+  "total_wait_seconds": 10963.0,
+  "mean_wait_seconds": 45.489626556016596,
+  "teleports": 0
+}

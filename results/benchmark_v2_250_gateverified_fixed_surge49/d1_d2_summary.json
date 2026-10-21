@@ -1,0 +1,28 @@
+{
+  "experiment": "matched_d1_d2_surge49_fixed",
+  "seed": 49,
+  "scenario": "surge",
+  "duration_s": 300,
+  "warmup_s": 60,
+  "network": "sumo/network_v2/corridor.net.xml",
+  "route": "sumo/routes_v2/benchmark/surge.rou.xml",
+  "threshold": 0.3,
+  "junctions": [
+    "J1",
+    "J2",
+    "J3"
+  ],
+  "controller_instances_per_junction": true,
+  "d1": {
+    "gate_enabled": false,
+    "csv": "results\\benchmark_v2_250_gateverified_fixed_surge49\\D1_seed49_surge_seed49.csv",
+    "detailed": "results\\benchmark_v2_250_gateverified_fixed_surge49\\D1_seed49_surge_seed49_detailed.csv",
+    "steps": 241
+  },
+  "d2": {
+    "gate_enabled": true,
+    "csv": "results\\benchmark_v2_250_gateverified_fixed_surge49\\D2_seed49_surge_seed49.csv",
+    "detailed": "results\\benchmark_v2_250_gateverified_fixed_surge49\\D2_seed49_surge_seed49_detailed.csv",
+    "steps": 241
+  }
+}
