@@ -29,7 +29,7 @@ def test_index_page_serves_html(client):
     assert response.status_code == 200
     assert "QueueSense" in response.text
     assert "Edge-AI Adaptive Traffic Signal Controller" in response.text
-    assert "three-canvas-container" in response.text, (
+    assert "scene-container" in response.text, (
         "Index page should include the Three.js canvas container"
     )
     assert "styles.css" in response.text, (
@@ -44,17 +44,17 @@ def test_index_page_serves_html(client):
     assert "chart.umd.min.js" in response.text, (
         "Index page should load Chart.js via UMD CDN"
     )
-    assert "hero__stage" in response.text, (
-        "Index page should include the studio split-stage hero"
+    assert "hero__canvas" in response.text, (
+        "Index page should include the hero canvas section"
     )
-    assert "hero__control-dock" in response.text, (
-        "Index page should include the bento control dock"
+    assert "control-dock" in response.text, (
+        "Index page should include the control dock"
     )
-    assert "hud-pill--phase" in response.text, (
-        "Index page should include Live Decision Receipt HUD (phase pill)"
+    assert "pill-btn" in response.text, (
+        "Index page should include mode toggle pills"
     )
-    assert "hud-pill--scoreboard" in response.text, (
-        "Index page should include real-time scoreboard"
+    assert "scenario-btn" in response.text, (
+        "Index page should include scenario buttons"
     )
 
 

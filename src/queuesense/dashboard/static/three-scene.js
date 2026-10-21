@@ -1,1307 +1,1118 @@
-/* =============================================================================
-   QUEUESENSE ICCC — 3D LIVING DIGITAL TWIN
-   Three.js WebGL corridor scene: J1 -> J1_to_J2 -> J2
-   Uses GLOBAL THREE (loaded via UMD script tag). NO ES modules.
-
-   Emil Kowalski Design Engineering Principles Applied
-   =============================================================================
-
-   Architecture:
-   - Scene: J1 Intersection, J1_to_J2 Link (60m), J2 Intersection
-   - Camera Presets: Isometric (orbit), Top-Down (ortho), Driver Follow (perspective)
-   - Vehicles: InstancedMesh for 60 FPS with 50+ vehicles
-   - Signal Heads: 3-bulb LED with bloom glow, smooth phase transitions
-   - AI Detection Zones: Cyan scan volumes, PCU counters, green extension badges
-   - Scenario Engine: autonomous cycling with manual trigger override
-   ============================================================================= */
+// QueueSense 3D Scene — Multi-part vehicle models with lighting
+// No flat BoxGeometry: every vehicle is a rich THREE.Group with real proportions
 
 (function() {
   'use strict';
 
-  var CORRIDOR_LENGTH = 60;
-  var ROAD_WIDTH = 16;
-  var LANE_WIDTH = 4;
-  var NUM_LANES = 4;
-  var JUNCTION_SIZE = 8;
-  var LANE_MARKING_WIDTH = 0.15;
-  var CROSSWALK_WIDTH = 3;
-  var MAX_VEHICLES = 80;
+  // --- Scene setup ---
+  const container = document.getElementById('scene-container');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0a0e);
 
-  var PCU_WEIGHTS = {
-    car: 1.0,
-    bus: 2.2,
-    auto: 1.0,
-    bike: 0.5,
-    truck: 2.0,
+  const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 2000);
+  camera.position.set(40, 30, 45);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  container.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.enablePan = false;
+  controls.minDistance = 20;
+  controls.maxDistance = 120;
+  controls.maxPolarAngle = Math.PI / 2.2;
+
+  // --- Lighting ---
+  const ambient = new THREE.AmbientLight(0x404060, 1.5);
+  scene.add(ambient);
+
+  const hemi = new THREE.HemisphereLight(0x888888, 0x333333, 0.6);
+  hemi.position.set(0, 50, 0);
+  scene.add(hemi);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  dirLight.position.set(30, 50, 20);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 1024;
+  dirLight.shadow.mapSize.height = 1024;
+  dirLight.shadow.camera.near = 1;
+  dirLight.shadow.camera.far = 200;
+  dirLight.shadow.camera.left = -40;
+  dirLight.shadow.camera.right = 40;
+  dirLight.shadow.camera.top = 40;
+  dirLight.shadow.camera.bottom = -40;
+  scene.add(dirLight);
+
+  // --- Ground / Road ---
+  const groundGeo = new THREE.PlaneGeometry(200, 200);
+  const groundMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a1e,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Road markings
+  const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+  const dashGeo = new THREE.PlaneGeometry(4, 0.15);
+  for (let i = -90; i < 90; i += 12) {
+    const dash1 = new THREE.Mesh(dashGeo, lineMat);
+    dash1.rotation.x = -Math.PI / 2;
+    dash1.position.set(i, 0.01, -1.5);
+    scene.add(dash1);
+    const dash2 = new THREE.Mesh(dashGeo, lineMat);
+    dash2.rotation.x = -Math.PI / 2;
+    dash2.position.set(i, 0.01, 1.5);
+    scene.add(dash2);
+  }
+
+  // --- Materials ---
+  const MATS = {
+    car_body: new THREE.MeshStandardMaterial({ color: 0x00e5ff, roughness: 0.3, metalness: 0.6 }),
+    car_body_red: new THREE.MeshStandardMaterial({ color: 0xff3e3e, roughness: 0.25, metalness: 0.7 }),
+    car_body_blue: new THREE.MeshStandardMaterial({ color: 0x4a90ff, roughness: 0.3, metalness: 0.6 }),
+    car_body_white: new THREE.MeshStandardMaterial({ color: 0xf5f5f7, roughness: 0.3, metalness: 0.8 }),
+    car_body_black: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.2, metalness: 0.9 }),
+    car_body_silver: new THREE.MeshStandardMaterial({ color: 0xc0c0c0, roughness: 0.2, metalness: 0.9 }),
+    car_body_orange: new THREE.MeshStandardMaterial({ color: 0xff8c00, roughness: 0.3, metalness: 0.5 }),
+    truck_body: new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.5, metalness: 0.3 }),
+    truck_metal: new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.2, metalness: 0.9 }),
+    bus_body: new THREE.MeshStandardMaterial({ color: 0x4a90ff, roughness: 0.4, metalness: 0.4 }),
+    bus_window: new THREE.MeshPhysicalMaterial({ color: 0xa0c8f0, transparent: true, opacity: 0.7, roughness: 0.1, metalness: 0.8 }),
+    auto_body: new THREE.MeshStandardMaterial({ color: 0xffff00, roughness: 0.3, metalness: 0.4 }),
+    bike_body: new THREE.MeshStandardMaterial({ color: 0xff3e3e, roughness: 0.25, metalness: 0.7 }),
+    bike_wheel: new THREE.MeshStandardMaterial({ color: 0x202020, roughness: 0.8, metalness: 0.2 }),
+    glass_dark: new THREE.MeshPhysicalMaterial({ color: 0x0a0a1a, transparent: true, opacity: 0.55, roughness: 0.05, metalness: 0.9, transmission: 0.9 }),
+    wheel_rubber: new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.95, metalness: 0.0 }),
+    wheel_metal: new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.4, metalness: 0.8 }),
+    signal_green: new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.8 }),
+    signal_yellow: new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.8 }),
+    signal_red: new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xff4444, emissiveIntensity: 0.8 }),
+    signal_dark: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x111111, emissiveIntensity: 0.1 }),
+    pole_metal: new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.3, metalness: 0.9 }),
+    countdown_led: new THREE.MeshBasicMaterial({ color: 0xff4444, toneMapped: false }),
+    road_text: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, toneMapped: false }),
+    cross_hatch: new THREE.MeshBasicMaterial({ color: 0x3a3a4a, transparent: true, opacity: 0.4, toneMapped: false }),
   };
 
-  var VEHICLE_COLORS = {
-    car: 0x3b82f6,
-    bus: 0x10b981,
-    auto: 0xf59e0b,
-    bike: 0x8b5cf6,
-    truck: 0xef4444,
-  };
+  // --- Vehicle Factory (multi-part THREE.Group models) ---
+  function createCar(colorMat, length = 4.5, width = 1.8, height = 1.4) {
+    const group = new THREE.Group();
 
-  var J1_POSITION = 0;
-  var J2_POSITION = 60;
-  var CORRIDOR_LENGTH_TOTAL = 120;
+    // Chassis (main body)
+    const chassisGeo = new THREE.BoxGeometry(length * 0.92, height * 0.5, width);
+    const chassis = new THREE.Mesh(chassisGeo, colorMat);
+    chassis.position.y = height * 0.4;
+    chassis.castShadow = true;
+    chassis.receiveShadow = true;
+    group.add(chassis);
 
-  var DigitalTwinScene = function(canvasContainer) {
-    var self = this;
-    this.container = canvasContainer;
-    this.scene = null;
-    this.camera = null;
-    this.renderer = null;
-    this.controls = null;
-    this.clock = new THREE.Clock();
-    this.vehicleMeshes = [];
-    this.vehicleInstances = [];
-    this.vehicleTemplate = null;
-    this.vehicleGroup = new THREE.Group();
-    this.signalGroups = {};
-    this.signalState = {
-      J1: { NS: 'green', EW: 'red', yellow: 0, allRed: false },
-      J2: { NS: 'green', EW: 'red', yellow: 0, allRed: false },
-    };
-    this.aiZones = {};
-    this.spillbackZone = null;
-    this.lights = {};
-    this.currentPreset = 'isometric';
-    this.cameraPresets = {};
-    this.scenario = {
-      name: 'normal',
-      time: 0,
-      phase: 'running',
-      transitionTimer: 0,
-    };
-    this.isQueueSenseMode = true;
-    this.frameCount = 0;
-    this.lastTime = 0;
-    this.onStateUpdate = null;
-    this.onSignalUpdate = null;
-    this.onScenarioChange = null;
-    this.onModeChange = null;
-    this.onZoneUpdate = null;
-    this.onTelemetry = null;
+    // Cabin (rear passenger section)
+    const cabinGeo = new THREE.BoxGeometry(length * 0.5, height * 0.45, width * 0.85);
+    const cabin = new THREE.Mesh(cabinGeo, colorMat);
+    cabin.position.set(-length * 0.15, height * 0.75, 0);
+    cabin.castShadow = true;
+    group.add(cabin);
 
-    this.init();
-  };
+    // Hood (front)
+    const hoodGeo = new THREE.BoxGeometry(length * 0.25, height * 0.3, width * 0.9);
+    const hood = new THREE.Mesh(hoodGeo, colorMat);
+    hood.position.set(length * 0.4, height * 0.55, 0);
+    hood.castShadow = true;
+    group.add(hood);
 
-  DigitalTwinScene.prototype.init = function() {
-    this.createRenderer();
-    this.createScene();
-    this.createLights();
-    this.createCameraPresets();
-    this.createRoads();
-    this.createJunctions();
-    this.createSignals();
-    this.createVehicles();
-    this.createAIZones();
-    this.createSpillbackVisual();
-    this.setupEventListeners();
-    this.animate();
-  };
+    // Windshield
+    const windshieldGeo = new THREE.PlaneGeometry(length * 0.35, height * 0.35);
+    const windshield = new THREE.Mesh(windshieldGeo, MATS.glass_dark);
+    windshield.rotation.y = Math.PI / 2;
+    windshield.position.set(-length * 0.15, height * 0.85, 0);
+    windshield.castShadow = true;
+    group.add(windshield);
 
-  DigitalTwinScene.prototype.createRenderer = function() {
-    var self = this;
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-      stencil: false,
-    });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    this.container.appendChild(this.renderer.domElement);
-    this.container.id = 'three-canvas';
-  };
-
-  DigitalTwinScene.prototype.createScene = function() {
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x090d16);
-    this.scene.fog = new THREE.FogExp2(0x090d16, 0.002);
-  };
-
-  DigitalTwinScene.prototype.createLights = function() {
-    var ambient = new THREE.AmbientLight(0x404060, 1.5);
-    this.scene.add(ambient);
-
-    var sun = new THREE.DirectionalLight(0xffffff, 1.0);
-    sun.position.set(20, 40, 15);
-    sun.castShadow = true;
-    sun.shadow.mapSize.width = 2048;
-    sun.shadow.mapSize.height = 2048;
-    sun.shadow.camera.near = 0.5;
-    sun.shadow.camera.far = 100;
-    sun.shadow.camera.left = -30;
-    sun.shadow.camera.right = 30;
-    sun.shadow.camera.top = 30;
-    sun.shadow.camera.bottom = -30;
-    sun.shadow.bias = -0.0001;
-    this.scene.add(sun);
-    this.lights.sun = sun;
-
-    var hemi = new THREE.HemisphereLight(0x4a6fa5, 0x1a1a2e, 0.4);
-    this.scene.add(hemi);
-
-    this.createJunctionPoolLights();
-  };
-
-  DigitalTwinScene.prototype.createJunctionPoolLights = function() {
-    var positions = { J1: J1_POSITION, J2: J2_POSITION };
-    for (var jid in positions) {
-      var zPos = positions[jid];
-      var poolLight = new THREE.PointLight(0x10b981, 0.5, 15);
-      poolLight.position.set(0, 8, zPos);
-      this.scene.add(poolLight);
-    }
-  };
-
-  DigitalTwinScene.prototype.createCameraPresets = function() {
-    var self = this;
-    var aspect = this.container.clientWidth / this.container.clientHeight;
-
-    this.cameraPresets.isometric = new THREE.PerspectiveCamera(35, aspect, 0.1, 200);
-    this.cameraPresets.isometric.position.set(-25, 20, 40);
-    this.cameraPresets.isometric.lookAt(0, 0, 30);
-
-    this.cameraPresets.topDown = new THREE.OrthographicCamera(
-      -CORRIDOR_LENGTH_TOTAL / 2,
-      CORRIDOR_LENGTH_TOTAL / 2,
-      ROAD_WIDTH * 1.5,
-      -ROAD_WIDTH * 1.5,
-      0.1,
-      200
-    );
-    this.cameraPresets.topDown.position.set(0, 35, CORRIDOR_LENGTH / 2);
-    this.cameraPresets.topDown.lookAt(0, 0, CORRIDOR_LENGTH / 2);
-    this.cameraPresets.topDown.rotation.x = -Math.PI / 2;
-
-    this.cameraPresets.driver = new THREE.PerspectiveCamera(50, aspect, 0.1, 200);
-    this.cameraPresets.driver.position.set(0, 2, 0);
-    this.cameraPresets.driver.lookAt(0, 0, 10);
-
-    this.camera = this.cameraPresets.isometric.clone();
-
-    // OrbitControls (available as THREE.OrbitControls from CDN)
-    if (typeof THREE.OrbitControls !== 'undefined') {
-      this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.05;
-      this.controls.minDistance = 10;
-      this.controls.maxDistance = 80;
-      this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    // Wheels (4)
+    const wheelGeo = new THREE.CylinderGeometry(width * 0.18, width * 0.18, width * 0.25, 32);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelPositions = [
+      [-length * 0.32, height * 0.25, width * 0.55],
+      [-length * 0.32, height * 0.25, -width * 0.55],
+      [length * 0.3, height * 0.25, width * 0.55],
+      [length * 0.3, height * 0.25, -width * 0.55],
+    ];
+    for (const pos of wheelPositions) {
+      const wheel = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+      wheel.position.set(pos[0], pos[1], pos[2]);
+      wheel.castShadow = true;
+      wheel.receiveShadow = true;
+      group.add(wheel);
     }
 
-    this.updateControlsForPreset(this.currentPreset);
-  };
+    // Headlights (2)
+    const lightGeo = new THREE.SphereGeometry(width * 0.08, 16, 16);
+    const headLight1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    headLight1.position.set(length * 0.45, height * 0.55, width * 0.35);
+    const headLight2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    headLight2.position.set(length * 0.45, height * 0.55, -width * 0.35);
+    group.add(headLight1, headLight2);
 
-  DigitalTwinScene.prototype.updateControlsForPreset = function(preset) {
-    if (preset === 'isometric' && this.controls) {
-      this.controls.enabled = true;
-      this.controls.target.set(0, 0, CORRIDOR_LENGTH / 2);
-    } else if (this.controls) {
-      this.controls.enabled = false;
-    }
-  };
+    // Brake lights (2)
+    const brake1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    brake1.position.set(-length * 0.45, height * 0.55, width * 0.2);
+    brake1.material.emissiveIntensity = 0;
+    const brake2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    brake2.position.set(-length * 0.45, height * 0.55, -width * 0.2);
+    brake2.material.emissiveIntensity = 0;
+    group.add(brake1, brake2);
 
-  DigitalTwinScene.prototype.switchCameraPreset = function(presetName) {
-    var target = this.cameraPresets[presetName];
-    if (!target) return;
+    // Store references for animation
+    group.userData = { type: 'car', headlights: [headLight1, headLight2], brakeLights: [brake1, brake2], wheels: [] };
 
-    this.currentPreset = presetName;
-    if (target.isOrthographicCamera) {
-      this.camera = target.clone();
-      this.camera.rotation.copy(target.rotation);
-      this.camera.position.copy(target.position);
-    } else {
-      this.camera = target.clone();
-    }
-
-    this.updateControlsForPreset(presetName);
-
-    if (this.onPresetChange) {
-      this.onPresetChange(presetName);
-    }
-  };
-
-  DigitalTwinScene.prototype.createRoads = function() {
-    var roadGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, ROAD_WIDTH * 2.5);
-    var roadMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1a1a2e,
-      roughness: 0.9,
-      metalness: 0.1,
-    });
-    var road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.rotation.x = -Math.PI / 2;
-    road.receiveShadow = true;
-    this.scene.add(road);
-
-    var curbGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, 0.5);
-    var curbMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a3e, roughness: 0.8 });
-
-    var curbN = new THREE.Mesh(curbGeometry, curbMaterial);
-    curbN.rotation.x = -Math.PI / 2;
-    curbN.position.set(0, 0.01, ROAD_WIDTH + 0.25);
-    curbN.receiveShadow = true;
-    this.scene.add(curbN);
-
-    var curbS = curbN.clone();
-    curbS.position.set(0, 0.01, -(ROAD_WIDTH + 0.25));
-    this.scene.add(curbS);
-
-    this.createLaneMarkings();
-    this.createSideLines();
-    this.createBackground();
-  };
-
-  DigitalTwinScene.prototype.createLaneMarkings = function() {
-    var laneCount = NUM_LANES;
-    var laneWidthMeters = ROAD_WIDTH / laneCount;
-    var centerLineGeometry = new THREE.PlaneGeometry(0.1, CORRIDOR_LENGTH_TOTAL);
-    var centerLineMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff, transparent: true, opacity: 0.3,
-    });
-
-    var dashGeometry = new THREE.PlaneGeometry(0.1, 2);
-    var dashMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff, transparent: true, opacity: 0.8,
-      emissive: 0xffffff, emissiveIntensity: 0.2,
-    });
-
-    for (var i = 0; i < laneCount - 1; i++) {
-      var offset = -ROAD_WIDTH / 2 + laneWidthMeters * (i + 1);
-      for (var z = 0; z < CORRIDOR_LENGTH_TOTAL; z += 4) {
-        var dash = new THREE.Mesh(dashGeometry, dashMaterial);
-        dash.rotation.x = -Math.PI / 2;
-        dash.position.set(offset, 0.02, z - CORRIDOR_LENGTH_TOTAL / 2);
-        this.scene.add(dash);
+    // Store wheel references
+    let wheelIdx = 0;
+    group.traverse(function(child) {
+      if (child.geometry && child.geometry.type === 'CylinderGeometry') {
+        group.userData.wheels.push(child);
       }
-    }
-
-    var centerLine = new THREE.Mesh(centerLineGeometry, centerLineMaterial);
-    centerLine.rotation.x = -Math.PI / 2;
-    centerLine.position.y = 0.01;
-    this.scene.add(centerLine);
-  };
-
-  DigitalTwinScene.prototype.createSideLines = function() {
-    var lineGeometry = new THREE.PlaneGeometry(0.1, CORRIDOR_LENGTH_TOTAL);
-    var lineMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff, transparent: true, opacity: 0.5,
     });
 
-    var leftLine = new THREE.Mesh(lineGeometry, lineMaterial);
-    leftLine.rotation.x = -Math.PI / 2;
-    leftLine.position.set(-ROAD_WIDTH / 2 - 0.05, 0.02, 0);
-    this.scene.add(leftLine);
+    return group;
+  }
 
-    var rightLine = leftLine.clone();
-    rightLine.position.set(ROAD_WIDTH / 2 + 0.05, 0.02, 0);
-    this.scene.add(rightLine);
-  };
+  // --- Truck ---
+  function createTruck(colorMat) {
+    const group = new THREE.Group();
 
-  DigitalTwinScene.prototype.createBackground = function() {
-    var groundGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL + 20, ROAD_WIDTH * 4);
-    var groundMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0f2020, roughness: 1.0,
-    });
-    var ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    this.scene.add(ground);
+    // Cab (forward control)
+    const cabGeo = new THREE.BoxGeometry(3, 2.2, 2.4);
+    const cab = new THREE.Mesh(cabGeo, MATS.truck_metal);
+    cab.position.y = 1.8;
+    cab.castShadow = true;
+    group.add(cab);
 
-    // Simple atmospheric fog planes instead of skybox shader (avoids WebGL2 shader issues with Three.js r128)
-    var fogGeometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL + 40, 40);
-    var fogMaterial = new THREE.MeshStandardMaterial({
-      color: 0x090d16,
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-    var fogPlane = new THREE.Mesh(fogGeometry, fogMaterial);
-    fogPlane.rotation.x = -Math.PI / 2;
-    fogPlane.position.y = 5;
-    this.scene.add(fogPlane);
-  };
+    // Cab windshield
+    const windGeo = new THREE.PlaneGeometry(2, 1.2);
+    const windshield = new THREE.Mesh(windGeo, MATS.glass_dark);
+    windshield.rotation.y = Math.PI / 2;
+    windshield.position.set(0, 2.8, 0);
+    windshield.castShadow = true;
+    group.add(windshield);
 
-  DigitalTwinScene.prototype.createJunctions = function() {
-    this.createJunction('J1', J1_POSITION);
-    this.createJunction('J2', J2_POSITION);
-    this.createJunctionLabels();
-  };
+    // Trailer
+    const trailerGeo = new THREE.BoxGeometry(5, 1.2, 2.4);
+    const trailer = new THREE.Mesh(trailerGeo, colorMat);
+    trailer.position.set(-4.5, 1.4, 0);
+    trailer.castShadow = true;
+    group.add(trailer);
 
-  DigitalTwinScene.prototype.createJunction = function(jid, zPos) {
-    var self = this;
-    var junctionGeometry = new THREE.PlaneGeometry(JUNCTION_SIZE, JUNCTION_SIZE);
-    var junctionTexture = this.createHatchTexture();
-    var junctionMaterial = new THREE.MeshStandardMaterial({
-      map: junctionTexture,
-      color: 0x422008,
-      roughness: 0.8,
-      transparent: true,
-      opacity: 0.7,
-    });
+    // Trailer sides
+    const sideGeo = new THREE.BoxGeometry(5, 0.8, 0.2);
+    const side1 = new THREE.Mesh(sideGeo, colorMat);
+    side1.position.set(-4.5, 2.2, 1.1);
+    side1.castShadow = true;
+    const side2 = new THREE.Mesh(sideGeo, colorMat);
+    side2.position.set(-4.5, 2.2, -1.1);
+    side2.castShadow = true;
+    group.add(side1, side2);
 
-    var junction = new THREE.Mesh(junctionGeometry, junctionMaterial);
-    junction.rotation.x = -Math.PI / 2;
-    junction.position.set(0, 0.03, zPos);
-    junction.receiveShadow = true;
-    this.scene.add(junction);
-
-    var curbGeometry = new THREE.RingGeometry(JUNCTION_SIZE / 2, JUNCTION_SIZE / 2 + 0.3, 4);
-    var curbMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a3e, roughness: 0.7 });
-
-    var corners = [
-      [-JUNCTION_SIZE / 2 - 0.15, 0, -JUNCTION_SIZE / 2 - 0.15],
-      [JUNCTION_SIZE / 2 + 0.15, 0, -JUNCTION_SIZE / 2 - 0.15],
-      [JUNCTION_SIZE / 2 + 0.15, 0, JUNCTION_SIZE / 2 + 0.15],
-      [-JUNCTION_SIZE / 2 - 0.15, 0, JUNCTION_SIZE / 2 + 0.15],
+    // Wheels (6: 2 for cab, 4 for trailer)
+    const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.35, 32);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelPositions = [
+      [1.2, 0.7, 1.3], [1.2, 0.7, -1.3],  // cab front
+      [1.2, 0.7, 0],   // cab rear
+      [-2.5, 0.7, 1.3], [-2.5, 0.7, -1.3], // trailer mid
+      [-6.2, 0.7, 0],   // trailer rear
     ];
-
-    for (var i = 0; i < corners.length; i++) {
-      var pos = corners[i];
-      var curb = new THREE.Mesh(curbGeometry, curbMaterial);
-      curb.position.set(pos[0], 0.05, pos[2]);
-      curb.rotation.x = -Math.PI / 2;
-      curb.castShadow = true;
-      curb.receiveShadow = true;
-      this.scene.add(curb);
+    for (const pos of wheelPositions) {
+      const wheel = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+      wheel.position.set(pos[0], pos[1], pos[2]);
+      wheel.castShadow = true;
+      group.add(wheel);
     }
 
-    this.createZebraCrossings(jid, zPos);
+    // Headlights
+    const lightGeo = new THREE.SphereGeometry(0.2, 16, 16);
+    const hl1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl1.position.set(1.5, 1.8, 0.5);
+    const hl2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl2.position.set(1.5, 1.8, -0.5);
+    group.add(hl1, hl2);
 
-    this.signalGroups[jid] = {
-      zPos: zPos,
-      group: new THREE.Group(),
-    };
-  };
+    // Brake lights
+    const bl1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    bl1.position.set(-6.8, 1.7, 0.3);
+    bl1.material.emissiveIntensity = 0;
+    const bl2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    bl2.position.set(-6.8, 1.7, -0.3);
+    bl2.material.emissiveIntensity = 0;
+    group.add(bl1, bl2);
 
-  DigitalTwinScene.prototype.createHatchTexture = function() {
-    var canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
-    var ctx = canvas.getContext('2d');
+    group.userData = { type: 'truck', headlights: [hl1, hl2], brakeLights: [bl1, bl2] };
+    return group;
+  }
 
-    ctx.fillStyle = '#422008';
-    ctx.fillRect(0, 0, 64, 64);
+  // --- Bus ---
+  function createBus(colorMat) {
+    const group = new THREE.Group();
 
-    ctx.strokeStyle = '#1a1a3e';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    for (var i = 0; i < 64; i += 8) {
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i - 64, 64);
-    }
-    ctx.stroke();
+    // Main coach body
+    const bodyGeo = new THREE.BoxGeometry(9, 2.8, 2.6);
+    const body = new THREE.Mesh(bodyGeo, colorMat);
+    body.position.y = 2.2;
+    body.castShadow = true;
+    group.add(body);
 
-    var texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(JUNCTION_SIZE / 16, JUNCTION_SIZE / 16);
-    return texture;
-  };
+    // Front windshield
+    const windGeo = new THREE.PlaneGeometry(3, 2.2);
+    const windshield = new THREE.Mesh(windGeo, MATS.glass_dark);
+    windshield.rotation.y = Math.PI / 2;
+    windshield.position.set(-3.2, 3, 0);
+    windshield.castShadow = true;
+    group.add(windshield);
 
-  DigitalTwinScene.prototype.createZebraCrossings = function(jid, zPos) {
-    var zebraGeometry = new THREE.PlaneGeometry(2, 1.5);
-    var zebraMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff, transparent: true, opacity: 0.8,
-      emissive: 0xffffff, emissiveIntensity: 0.5,
-    });
+    // AC unit on roof
+    const acGeo = new THREE.BoxGeometry(4, 0.6, 1.2);
+    const acUnit = new THREE.Mesh(acGeo, MATS.truck_metal);
+    acUnit.position.set(1.5, 3.8, 0);
+    acUnit.castShadow = true;
+    group.add(acUnit);
 
-    var offsets = [
-      [0, 0.01, -JUNCTION_SIZE / 2 - 0.75],
-      [0, 0.01, JUNCTION_SIZE / 2 + 0.75],
-      [-JUNCTION_SIZE / 2 - 1.0, 0.01, 0],
-      [JUNCTION_SIZE / 2 + 1.0, 0.01, 0],
+    // Side windows
+    const winGeo = new THREE.BoxGeometry(5, 1.2, 0.05);
+    const winMat = new THREE.MeshPhysicalMaterial({ color: 0xa0c8f0, transparent: true, opacity: 0.6, roughness: 0.1, metalness: 0.8 });
+    const win1 = new THREE.Mesh(winGeo, winMat);
+    win1.position.set(1, 3.4, 1.3);
+    win1.castShadow = true;
+    const win2 = new THREE.Mesh(winGeo, winMat);
+    win2.position.set(-1.5, 3.4, 1.3);
+    win2.castShadow = true;
+    group.add(win1, win2);
+
+    // Wheels (6)
+    const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.4, 32);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelPositions = [
+      [-3.8, 0.8, 1.4], [-3.8, 0.8, -1.4],  // front axle
+      [0.5, 0.8, 1.4], [0.5, 0.8, -1.4],    // mid axle
+      [3.5, 0.8, 1.4], [3.5, 0.8, -1.4],    // rear axle
     ];
-
-    for (var i = 0; i < offsets.length; i++) {
-      var offset = offsets[i];
-      var zebra = new THREE.Mesh(zebraGeometry, zebraMaterial);
-      zebra.rotation.x = -Math.PI / 2;
-      zebra.position.set(offset[0], offset[1], zPos);
-      this.scene.add(zebra);
+    for (const pos of wheelPositions) {
+      const wheel = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+      wheel.position.set(pos[0], pos[1], pos[2]);
+      wheel.castShadow = true;
+      group.add(wheel);
     }
-  };
 
-  DigitalTwinScene.prototype.createJunctionLabels = function() {
-    var canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 64;
-    var ctx = canvas.getContext('2d');
-    ctx.font = '24px monospace';
-    ctx.fillStyle = '#10b981';
-    ctx.textAlign = 'center';
-    ctx.fillText('J1', 128, 32);
+    // Headlights
+    const lightGeo = new THREE.SphereGeometry(0.25, 16, 16);
+    const hl1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl1.position.set(-4.3, 2.4, 0.4);
+    const hl2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl2.position.set(-4.3, 2.4, -0.4);
+    group.add(hl1, hl2);
 
-    var texture = new THREE.CanvasTexture(canvas);
-    var material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-    var sprite = new THREE.Sprite(material);
-    sprite.scale.set(10, 3, 1);
-    sprite.position.set(-ROAD_WIDTH / 2 - 4, 8, J1_POSITION);
-    this.scene.add(sprite);
+    // Brake lights
+    const bl1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    bl1.position.set(4.3, 2.3, 0.3);
+    bl1.material.emissiveIntensity = 0;
+    const bl2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    bl2.position.set(4.3, 2.3, -0.3);
+    bl2.material.emissiveIntensity = 0;
+    group.add(bl1, bl2);
 
-    var canvas2 = document.createElement('canvas');
-    canvas2.width = 256;
-    canvas2.height = 64;
-    var ctx2 = canvas2.getContext('2d');
-    ctx2.font = '24px monospace';
-    ctx2.fillStyle = '#10b981';
-    ctx2.textAlign = 'center';
-    ctx2.fillText('J2', 128, 32);
+    group.userData = { type: 'bus', headlights: [hl1, hl2], brakeLights: [bl1, bl2] };
+    return group;
+  }
 
-    var texture2 = new THREE.CanvasTexture(canvas2);
-    var material2 = new THREE.SpriteMaterial({ map: texture2, transparent: true });
-    var sprite2 = new THREE.Sprite(material2);
-    sprite2.scale.set(10, 3, 1);
-    sprite2.position.set(-ROAD_WIDTH / 2 - 4, 8, J2_POSITION);
-    this.scene.add(sprite2);
-  };
+  // --- Auto-rickshaw (3-wheeler) ---
+  function createAutoRickshaw(colorMat) {
+    const group = new THREE.Group();
 
-  DigitalTwinScene.prototype.createSignals = function() {
-    this.createSignalAtJunction('J1', J1_POSITION);
-    this.createSignalAtJunction('J2', J2_POSITION);
-  };
+    // Main cabin
+    const cabinGeo = new THREE.BoxGeometry(2.2, 1.4, 1.3);
+    const cabin = new THREE.Mesh(cabinGeo, colorMat);
+    cabin.position.y = 1.0;
+    cabin.castShadow = true;
+    group.add(cabin);
 
-  DigitalTwinScene.prototype.createSignalAtJunction = function(jid, zPos) {
-    var group = new THREE.Group();
-    group.name = jid;
+    // Rear passenger cabin
+    const rearGeo = new THREE.SphereGeometry(0.8, 16, 16);
+    const rear = new THREE.Mesh(rearGeo, colorMat);
+    rear.position.set(0.9, 1.0, 0);
+    rear.castShadow = true;
+    group.add(rear);
 
-    var directions = [
-      { pos: [0, 4, zPos - ROAD_WIDTH - 2], rot: [0, 0, 0], name: 'NS_approach' },
-      { pos: [0, 4, zPos + ROAD_WIDTH + 2], rot: [0, Math.PI, 0], name: 'NS_approach_opposite' },
-      { pos: [-ROAD_WIDTH - 2, 4, zPos], rot: [0, 0, Math.PI / 2], name: 'EW_approach' },
-      { pos: [ROAD_WIDTH + 2, 4, zPos], rot: [0, -Math.PI / 2, 0], name: 'EW_approach_opposite' },
+    // Front cabin (driver)
+    const frontGeo = new THREE.BoxGeometry(1, 1.2, 1.2);
+    const front = new THREE.Mesh(frontGeo, colorMat);
+    front.position.set(-1.3, 1.0, 0);
+    front.castShadow = true;
+    group.add(front);
+
+    // Wheels (3)
+    const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.3, 24);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelPositions = [
+      [-0.9, 0.4, 1.0],  // front left
+      [-0.9, 0.4, -1.0], // front right
+      [1.1, 0.4, 0],     // rear
     ];
-
-    for (var i = 0; i < directions.length; i++) {
-      var dir = directions[i];
-      var signal = this.createSignalHead(dir.pos, dir.rot, jid, dir.name);
-      group.add(signal);
+    for (const pos of wheelPositions) {
+      const wheel = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+      wheel.position.set(pos[0], pos[1], pos[2]);
+      wheel.castShadow = true;
+      group.add(wheel);
     }
 
-    this.scene.add(group);
-    this.signalGroups[jid].group = group;
-  };
+    // Headlight
+    const lightGeo = new THREE.SphereGeometry(0.15, 12, 12);
+    const hl1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl1.position.set(-1.6, 1.0, 0.25);
+    const hl2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl2.position.set(-1.6, 1.0, -0.25);
+    group.add(hl1, hl2);
 
-  DigitalTwinScene.prototype.createSignalHead = function(position, rotation, junctionId, approach) {
-    var group = new THREE.Group();
-    group.position.set(position[0], position[1], position[2]);
-    group.rotation.set(rotation[0], rotation[1], rotation[2]);
+    group.userData = { type: 'auto' };
+    return group;
+  }
 
-    var poleGeometry = new THREE.CylinderGeometry(0.15, 0.2, 6, 8);
-    var poleMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1e293b, metalness: 0.8, roughness: 0.3,
-    });
-    var pole = new THREE.Mesh(poleGeometry, poleMaterial);
+  // --- Bike/Motorcycle ---
+  function createBike(colorMat) {
+    const group = new THREE.Group();
+
+    // Frame
+    const segCount = 8;
+    const frameGeo = new THREE.CylinderGeometry(0.05, 0.05, 2.0, segCount);
+    const frame = new THREE.Mesh(frameGeo, MATS.bike_wheel);
+    frame.rotation.z = Math.PI / 2;
+    frame.position.y = 0.6;
+    frame.castShadow = true;
+    group.add(frame);
+
+  // Fuel tank
+    const tankGeo = new THREE.SphereGeometry(0.25, 16, 16);
+    const tank = new THREE.Mesh(tankGeo, colorMat);
+    tank.position.set(-0.2, 0.65, 0);
+    tank.castShadow = true;
+    group.add(tank);
+
+    // Wheels (2 large)
+    const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.12, 32);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheel1 = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+    wheel1.position.set(0.6, 0.4, 0);
+    wheel1.castShadow = true;
+    wheel1.receiveShadow = true;
+    group.add(wheel1);
+    const wheel2 = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+    wheel2.position.set(-0.6, 0.4, 0);
+    wheel2.castShadow = true;
+    wheel2.receiveShadow = true;
+    group.add(wheel2);
+
+    // Headlight
+    const lightGeo = new THREE.SphereGeometry(0.12, 12, 12);
+    const hl = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl.position.set(0.9, 0.5, 0);
+    group.add(hl);
+
+    group.userData = { type: 'bike' };
+    return group;
+  }
+
+  // --- Ambulance ---
+  function createAmbulance() {
+    const group = new THREE.Group();
+
+    // Main body (white)
+    const bodyGeo = new THREE.BoxGeometry(5, 2.2, 2.2);
+    const body = new THREE.Mesh(bodyGeo, MATS.car_body_white);
+    body.position.y = 1.6;
+    body.castShadow = true;
+    group.add(body);
+
+    // Cabin front (white rounded)
+    const cabinGeo = new THREE.BoxGeometry(1.5, 2, 2.2);
+    const cabin = new THREE.Mesh(cabinGeo, MATS.car_body_white);
+    cabin.position.set(-2.6, 1.7, 0);
+    cabin.castShadow = true;
+    group.add(cabin);
+
+    // Windshield
+    const windGeo = new THREE.PlaneGeometry(1.2, 1.2);
+    const windshield = new THREE.Mesh(windGeo, MATS.glass_dark);
+    windshield.rotation.y = Math.PI / 2;
+    windshield.position.set(-2.6, 2.2, 0);
+    windshield.castShadow = true;
+    group.add(windshield);
+
+    // Red cross on doors
+    function makeRedCross() {
+      const crossMat = new THREE.MeshBasicMaterial({ color: 0xff3e3e, transparent: true, opacity: 0.9, toneMapped: false });
+      const crossGroup = new THREE.Group();
+      const hBarGeo = new THREE.BoxGeometry(0.15, 0.5, 0.05);
+      const vBarGeo = new THREE.BoxGeometry(0.15, 1.0, 0.05);
+      const hBar = new THREE.Mesh(hBarGeo, crossMat);
+      const vBar = new THREE.Mesh(vBarGeo, crossMat);
+      crossGroup.add(hBar, vBar);
+      return crossGroup;
+    }
+    const cross1 = makeRedCross();
+    cross1.position.set(-0.8, 1.6, 1.11);
+    group.add(cross1);
+    const cross2 = makeRedCross();
+    cross2.position.set(-0.8, 1.6, -1.11);
+    group.add(cross2);
+
+    // Flashing light bar on roof
+    const lightBarGeo = new THREE.BoxGeometry(3, 0.25, 0.6);
+    const lightBar = new THREE.Mesh(lightBarGeo, MATS.pole_metal);
+    lightBar.position.y = 3.0;
+    lightBar.castShadow = true;
+    group.add(lightBar);
+
+    // Point lights on light bar (flashing)
+    const flashLight1 = new THREE.PointLight(0xff3e3e, 0, 8);
+    flashLight1.position.set(-1, 3.1, 0);
+    scene.add(flashLight1);
+    const flashLight2 = new THREE.PointLight(0x00e5ff, 0, 8);
+    flashLight2.position.set(1, 3.1, 0);
+    scene.add(flashLight2);
+
+    // Wheels (4)
+    const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 28);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelPositions = [
+      [-1.6, 0.8, 1.2], [-1.6, 0.8, -1.2], [1.5, 0.8, 1.2], [1.5, 0.8, -1.2]
+    ];
+    for (const pos of wheelPositions) {
+      const wheel = new THREE.Mesh(wheelGeo, MATS.wheel_rubber);
+      wheel.position.set(pos[0], pos[1], pos[2]);
+      wheel.castShadow = true;
+      group.add(wheel);
+    }
+
+    // Headlights
+    const lightGeo = new THREE.SphereGeometry(0.18, 16, 16);
+    const hl1 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl1.position.set(-3.4, 1.8, 0.3);
+    const hl2 = new THREE.Mesh(lightGeo, MATS.signal_red);
+    hl2.position.set(-3.4, 1.8, -0.3);
+    group.add(hl1, hl2);
+
+    group.userData = { type: 'ambulance', flashLights: [flashLight1, flashLight2], flashState: 0 };
+    return group;
+  }
+
+  // --- Traffic Signal Pole ---
+  function createSignalPole(x, z) {
+    const group = new THREE.Group();
+
+    // Cantilever pole
+    const poleGeo = new THREE.CylinderGeometry(0.12, 0.18, 12, 16);
+    const pole = new THREE.Mesh(poleGeo, MATS.pole_metal);
+    pole.position.set(x, 6, z);
     pole.castShadow = true;
     pole.receiveShadow = true;
     group.add(pole);
 
-    var boxGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.5);
-    var boxMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0f172a, metalness: 0.5, roughness: 0.4,
-    });
-    var box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set(0, 5, 0);
+    // Arm
+    const armGeo = new THREE.CylinderGeometry(0.1, 0.1, 8, 12);
+    const arm = new THREE.Mesh(armGeo, MATS.pole_metal);
+    arm.rotation.z = Math.PI / 2;
+    arm.position.set(x, 11.5, z);
+    arm.castShadow = true;
+    group.add(arm);
+
+    // Signal box
+    const boxGeo = new THREE.BoxGeometry(0.8, 2.4, 0.4);
+    const box = new THREE.Mesh(boxGeo, MATS.pole_metal);
+    box.position.set(x + 4, 11.5, z);
     box.castShadow = true;
     group.add(box);
 
-    var sphereGeometry = new THREE.SphereGeometry(0.22, 16, 16);
+    // Signal bulbs (3: red, yellow, green)
+    const bulbGeo = new THREE.SphereGeometry(0.25, 16, 16);
+    const redBulb = new THREE.Mesh(bulbGeo, MATS.signal_dark);
+    redBulb.position.set(x + 4, 12.4, z);
+    const yellowBulb = new THREE.Mesh(bulbGeo, MATS.signal_dark);
+    yellowBulb.position.set(x + 4, 11.3, z);
+    const greenBulb = new THREE.Mesh(bulbGeo, MATS.signal_dark);
+    greenBulb.position.set(x + 4, 10.2, z);
+    group.add(redBulb, yellowBulb, greenBulb);
 
-    var bulbPositions = [
-      { y: 0.25, color: 0xff0000, name: 'red' },
-      { y: 0, color: 0xffff00, name: 'yellow' },
-      { y: -0.25, color: 0x00ff00, name: 'green' },
-    ];
+    // Countdown display (floating plane)
+    const displayGeo = new THREE.PlaneGeometry(1.2, 0.5);
+    const display = new THREE.Mesh(displayGeo, new THREE.MeshBasicMaterial({
+      color: 0x0a0a0e,
+      transparent: true,
+      opacity: 0.9,
+      toneMapped: false
+    }));
+    display.position.set(x + 4, 8.8, z);
+    display.rotation.y = Math.PI / 2;
+    group.add(display);
 
-    for (var i = 0; i < bulbPositions.length; i++) {
-      var bp = bulbPositions[i];
-      var emissiveColor = bp.color === 0xff0000 ? new THREE.Color(0.5, 0, 0) :
-                          bp.color === 0xffff00 ? new THREE.Color(0.5, 0.5, 0) :
-                          new THREE.Color(0, 0.5, 0);
+    // Countdown number using sprite-like plane
+    const numberGeo = new THREE.PlaneGeometry(0.6, 0.35);
+    const number = new THREE.Mesh(numberGeo, MATS.countdown_led);
+    number.position.set(x + 4, 8.8, z + 0.01);
+    number.rotation.y = Math.PI / 2;
+    group.add(number);
 
-      var bulbMaterial = new THREE.MeshStandardMaterial({
-        color: bp.color,
-        emissive: emissiveColor,
-        emissiveIntensity: 0,
-        transparent: true,
-        opacity: 0.3,
-      });
-
-      var bulb = new THREE.Mesh(sphereGeometry, bulbMaterial);
-      bulb.position.set(0, bp.y, 0.35);
-      bulb.userData = { color: bp.color, name: bp.name, junctionId: junctionId, approach: approach };
-      group.add(bulb);
-
-      if (!group.userData.bulbs) group.userData.bulbs = {};
-      group.userData.bulbs[bp.name] = bulb;
-    }
-
-    var coverGeometry = new THREE.BoxGeometry(0.7, 1, 0.1);
-    var coverMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x101020, transparent: true, opacity: 0.3,
-      roughness: 0.1, metalness: 0.1, transmission: 0.5,
-    });
-    var cover = new THREE.Mesh(coverGeometry, coverMaterial);
-    cover.position.set(0, 0, 0.55);
-    group.add(cover);
+    group.userData = {
+      bulbs: { red: redBulb, yellow: yellowBulb, green: greenBulb },
+      countdown: number,
+      countdownValue: 30,
+      phase: 'red'
+    };
 
     return group;
-  };
+  }
 
-  DigitalTwinScene.prototype.updateSignalColor = function(junctionId, direction, color) {
-    var group = this.signalGroups[junctionId] && this.signalGroups[junctionId].group;
-    if (!group) return;
+  // --- Intersection ---
+  function createIntersection() {
+    const group = new THREE.Group();
 
-    for (var i = 0; i < group.children.length; i++) {
-      var signal = group.children[i];
-      if (signal.userData && signal.userData.bulbs) {
-        var bulbs = signal.userData.bulbs;
-        for (var name in bulbs) {
-          var bulb = bulbs[name];
-          var bulbMat = bulb.material;
-          if (name === color) {
-            bulbMat.emissiveIntensity = 0.8;
-            bulbMat.opacity = 1;
-            bulb.scale.setScalar(1.1);
-          } else {
-            bulbMat.emissiveIntensity = 0;
-            bulbMat.opacity = 0.3;
-            bulb.scale.setScalar(1);
-          }
+    // Road cross
+    const asphaltGeo = new THREE.PlaneGeometry(60, 60);
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1e, roughness: 0.9, metalness: 0.1 });
+    const asphalt = new THREE.Mesh(asphaltGeo, asphaltMat);
+    asphalt.rotation.x = -Math.PI / 2;
+    asphalt.receiveShadow = true;
+    group.add(asphalt);
 
-          if (name === 'red' && color === 'red') {
-            bulbMat.emissive = new THREE.Color(0.6, 0.1, 0.1);
-            bulbMat.color.set(0xff4444);
-          } else if (name === 'yellow' && color === 'yellow') {
-            bulbMat.emissive = new THREE.Color(0.6, 0.6, 0.1);
-            bulbMat.color.set(0xffff44);
-          } else if (name === 'green' && color === 'green') {
-            bulbMat.emissive = new THREE.Color(0.1, 0.6, 0.1);
-            bulbMat.color.set(0x44ff44);
-          } else if (name !== color) {
-            bulbMat.emissive.setHex(0x000000);
-            bulbMat.color.set(0x333333);
-            bulbMat.opacity = 0.15;
-          }
-        }
-      }
-    }
-  };
+    // Road strips (4 directions)
+    const stripMat = new THREE.MeshStandardMaterial({ color: 0x15151b, roughness: 0.9, metalness: 0.1 });
+    const stripGeo = new THREE.BoxGeometry(8, 0.05, 6);
 
-  DigitalTwinScene.prototype.createVehicles = function() {
-    this.vehicleGroup = new THREE.Group();
-    this.scene.add(this.vehicleGroup);
+    // South approach (coming from top, going down)
+    const stripS = new THREE.Mesh(stripGeo, stripMat);
+    stripS.rotation.x = -Math.PI / 2;
+    stripS.position.set(0, 0.02, -20);
+    stripS.receiveShadow = true;
+    group.add(stripS);
 
-    this.createVehicleInstance('car', 20);
-    this.createVehicleInstance('bus', 5);
-    this.createVehicleInstance('auto', 15);
-    this.createVehicleInstance('bike', 20);
-    this.createVehicleInstance('truck', 5);
+    // North approach
+    const stripN = new THREE.Mesh(stripGeo, stripMat);
+    stripN.rotation.x = -Math.PI / 2;
+    stripN.position.set(0, 0.02, 20);
+    stripN.receiveShadow = true;
+    group.add(stripN);
 
-    this.populateVehicles();
-  };
+    // West approach
+    const stripW = new THREE.Mesh(stripGeo, stripMat);
+    stripW.rotation.x = -Math.PI / 2;
+    stripW.rotation.z = Math.PI / 2;
+    stripW.position.set(-20, 0.02, 0);
+    stripW.receiveShadow = true;
+    group.add(stripW);
 
-  DigitalTwinScene.prototype.createVehicleInstance = function(classType, count) {
-    var geometry = this.getVehicleGeometry(classType);
-    var color = VEHICLE_COLORS[classType];
+    // East approach
+    const stripE = new THREE.Mesh(stripGeo, stripMat);
+    stripE.rotation.x = -Math.PI / 2;
+    stripE.rotation.z = Math.PI / 2;
+    stripE.position.set(20, 0.02, 0);
+    stripE.receiveShadow = true;
+    group.add(stripE);
 
-    var material = new THREE.MeshStandardMaterial({
-      color: color,
-      roughness: 0.4,
-      metalness: 0.6,
-      transparent: classType === 'bike',
-      opacity: classType === 'bike' ? 0.8 : 1,
-    });
+    // Stop lines
+    const stopLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, toneMapped: false });
+    const stopLineGeo = new THREE.PlaneGeometry(6, 0.1);
+    const stopLine1 = new THREE.Mesh(stopLineGeo, stopLineMat);
+    stopLine1.rotation.x = -Math.PI / 2;
+    stopLine1.position.set(0, 0.01, -6);
+    group.add(stopLine1);
+    const stopLine2 = new THREE.Mesh(stopLineGeo, stopLineMat);
+    stopLine2.rotation.x = -Math.PI / 2;
+    stopLine2.position.set(0, 0.01, 6);
+    group.add(stopLine2);
+    const stopLine3 = new THREE.Mesh(stopLineGeo, stopLineMat);
+    stopLine3.rotation.x = -Math.PI / 2;
+    stopLine3.rotation.z = Math.PI / 2;
+    stopLine3.position.set(-6, 0.01, 0);
+    group.add(stopLine3);
+    const stopLine4 = new THREE.Mesh(stopLineGeo, stopLineMat);
+    stopLine4.rotation.x = -Math.PI / 2;
+    stopLine4.rotation.z = Math.PI / 2;
+    stopLine4.position.set(6, 0.01, 0);
+    group.add(stopLine4);
 
-    var instanced = new THREE.InstancedMesh(geometry, material, count);
-    instanced.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    instanced.frustumCulled = false;
-    instanced.userData = { classType: classType, count: count, color: color };
+    // Crosswalk markings (zebra)
+    const crossMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6, toneMapped: false });
+    const crossGeo = new THREE.PlaneGeometry(1, 0.4);
+    for (let i = -2; i <= 2; i++) {
+      // NS crosswalk
+      const cw1 = new THREE.Mesh(crossGeo, crossMat);
+      cw1.rotation.x = -Math.PI / 2;
+      cw1.position.set(i * 1.2, 0.02, 0);
+      group.add(cw1);
 
-    this.vehicleGroup.add(instanced);
-    this.vehicleInstances[classType] = { mesh: instanced, instances: [] };
-  };
-
-  DigitalTwinScene.prototype.getVehicleGeometry = function(classType) {
-    var geometry;
-    switch (classType) {
-      case 'car': geometry = new THREE.BoxGeometry(1.2, 0.5, 2.0); break;
-      case 'bus': geometry = new THREE.BoxGeometry(2.8, 0.7, 8.0); break;
-      case 'auto': geometry = new THREE.BoxGeometry(0.8, 0.6, 1.6); break;
-      case 'bike': geometry = new THREE.BoxGeometry(0.4, 0.3, 0.8); break;
-      case 'truck': geometry = new THREE.BoxGeometry(2.0, 0.8, 5.0); break;
-      default: geometry = new THREE.BoxGeometry(1.0, 0.5, 1.5);
-    }
-
-    if (THREE.BufferGeometryUtils) {
-      return THREE.BufferGeometryUtils.toCreasedNormals(geometry);
-    }
-    return geometry;
-  };
-
-  DigitalTwinScene.prototype.populateVehicles = function() {
-    for (var lane = 0; lane < 2; lane++) {
-      var laneX = -ROAD_WIDTH / 4 + (lane - 0.5) * (ROAD_WIDTH / 2);
-      var count = 8 + Math.floor(Math.random() * 6);
-      for (var i = 0; i < count; i++) {
-        var z = (i / count) * CORRIDOR_LENGTH_TOTAL - CORRIDOR_LENGTH_TOTAL / 2;
-        if (z < J1_POSITION - JUNCTION_SIZE || z > J1_POSITION + JUNCTION_SIZE) {
-          this.addVehicleInstance('car', laneX, z, 0, 0, Math.random() * 0.1 - 0.05);
-        }
-      }
+      // EW crosswalk
+      const cw2 = new THREE.Mesh(crossGeo, crossMat);
+      cw2.rotation.x = -Math.PI / 2;
+      cw2.rotation.z = Math.PI / 2;
+      cw2.position.set(0, 0.02, i * 1.2);
+      group.add(cw2);
     }
 
-    for (var zi = 0; zi < [J1_POSITION, J2_POSITION].length; zi++) {
-      var zPos = [J1_POSITION, J2_POSITION][zi];
-      var c = 4 + Math.floor(Math.random() * 4);
-      for (var j = 0; j < c; j++) {
-        var x = (j / c) * ROAD_WIDTH - ROAD_WIDTH / 2;
-        if (x < -JUNCTION_SIZE || x > JUNCTION_SIZE) {
-          var laneZ = -ROAD_WIDTH / 4 + Math.random() * 2;
-          this.addVehicleInstance('auto', x, zPos + laneZ, 0, 0, Math.PI / 2);
-        }
-      }
+    // Sidewalks
+    const sidewalkGeo = new THREE.PlaneGeometry(60, 4);
+    const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.95, metalness: 0.1 });
+    const sw1 = new THREE.Mesh(sidewalkGeo, sidewalkMat);
+    sw1.rotation.x = -Math.PI / 2;
+    sw1.position.set(0, 0.01, -32);
+    sw1.receiveShadow = true;
+    group.add(sw1);
+    const sw2 = new THREE.Mesh(sidewalkGeo, sidewalkMat);
+    sw2.rotation.x = -Math.PI / 2;
+    sw2.position.set(0, 0.01, 32);
+    sw2.receiveShadow = true;
+    group.add(sw2);
+    const sw3 = new THREE.Mesh(sidewalkGeo, sidewalkMat);
+    sw3.rotation.x = -Math.PI / 2;
+    sw3.rotation.z = Math.PI / 2;
+    sw3.position.set(-32, 0.01, 0);
+    sw3.receiveShadow = true;
+    group.add(sw3);
+    const sw4 = new THREE.Mesh(sidewalkGeo, sidewalkMat);
+    sw4.rotation.x = -Math.PI / 2;
+    sw4.rotation.z = Math.PI / 2;
+    sw4.position.set(32, 0.01, 0);
+    sw4.receiveShadow = true;
+    group.add(sw4);
 
-      if (Math.random() > 0.5) {
-        var bx = -JUNCTION_SIZE - 5 - Math.random() * 3;
-        this.addVehicleInstance('bus', bx, zPos, 0, 0, Math.PI / 2);
-      }
+    // Signal poles at each approach
+    const poleN = createSignalPole(0, 8);
+    group.add(poleN);
+    const poleS = createSignalPole(0, -8);
+    group.add(poleS);
+    const poleE = createSignalPole(8, 0);
+    group.add(poleE);
+    const poleW = createSignalPole(-8, 0);
+    group.add(poleW);
+
+    group.userData = { poles: [poleN, poleS, poleE, poleW] };
+    return group;
+  }
+
+  // --- Vehicle fleet ---
+  const vehicleColors = [MATS.car_body_blue, MATS.car_body, MATS.car_body_red, MATS.car_body_silver, MATS.car_body_orange, MATS.car_body_black];
+  const vehicles = [];
+  const vehicleSpeeds = {};
+
+  function spawnVehicles(scenario) {
+    // Clear existing
+    while (vehicles.length > 0) {
+      const v = vehicles.pop();
+      v.parent.remove(v);
     }
 
-    for (var bi = 0; bi < 10; bi++) {
-      var bz = Math.random() * CORRIDOR_LENGTH_TOTAL - CORRIDOR_LENGTH_TOTAL / 2;
-      var bx = -ROAD_WIDTH / 2 + Math.random() * ROAD_WIDTH;
-      this.addVehicleInstance('bike', bx, bz, 0, 0, Math.random() > 0.5 ? 0 : Math.PI);
+    const positions = [
+      { start: [-30, 0.5, -15], dir: new THREE.Vector3(1, 0, 0), count: 4 },
+      { start: [-30, 0.5, 20], dir: new THREE.Vector3(1, 0, 0), count: 3 },
+      { start: [20, 0.5, -25], dir: new THREE.Vector3(0, 0, 1), count: 2 },
+      { start: [30, 0.5, 0], dir: new THREE.Vector3(-1, 0, 0), count: 3 },
+    ];
+
+    let counts = [4, 3, 2, 3];
+    if (scenario === 'surge') {
+      counts = [8, 6, 2, 4];
+    } else if (scenario === 'spillback') {
+      counts = [5, 4, 3, 3];
+    } else if (scenario === 'emergency') {
+      counts = [3, 2, 2, 2];
     }
 
-    for (var ti = 0; ti < 3; ti++) {
-      var tz = 10 + ti * 15;
-      if (tz < CORRIDOR_LENGTH_TOTAL - 10) {
-        this.addVehicleInstance('truck', ROAD_WIDTH / 4, tz, 0, 0, 0);
-      }
-    }
-  };
-
-  DigitalTwinScene.prototype.addVehicleInstance = function(classType, x, z, y, tilt, rotation, speed) {
-    if (speed === undefined) speed = 0.02;
-    var instance = this.vehicleInstances[classType];
-    if (!instance || !instance.instances) return;
-
-    var instanceId = instance.instances.length;
-    if (instanceId >= instance.count) return;
-
-    var dummy = new THREE.Object3D();
-    dummy.position.set(x, y + (classType === 'bike' ? 0.2 : 0.15), z);
-    dummy.rotation.y = rotation;
-    dummy.updateMatrix();
-
-    instance.mesh.setMatrixAt(instanceId, dummy.matrix);
-
-    var vehicleData = {
-      id: classType + '_' + instanceId + '_' + Date.now(),
-      classType: classType,
-      x: x,
-      z: z,
-      y: y,
-      rotationY: rotation,
-      speed: speed * (0.5 + Math.random() * 0.5),
-      targetX: x,
-      targetZ: z,
-      targetRotation: rotation,
-      instanceId: instanceId,
-      dummy: dummy,
-    };
-
-    instance.instances.push(vehicleData);
-    instance.mesh.instanceMatrix.needsUpdate = true;
-
-    return vehicleData;
-  };
-
-  DigitalTwinScene.prototype.updateVehicles = function(deltaTime) {
-    for (var classType in this.vehicleInstances) {
-      var instance = this.vehicleInstances[classType];
-      if (!instance.instances) continue;
-
-      for (var i = 0; i < instance.instances.length; i++) {
-        var v = instance.instances[i];
-        var speed = v.speed * (this.scenario.name === 'surge' ? 2 : 1);
-
-        if (v.rotationY < Math.PI / 4 || v.rotationY > Math.PI * 6 / 4) {
-          v.targetZ += speed * deltaTime * 60;
-          if (v.targetZ > CORRIDOR_LENGTH_TOTAL / 2) {
-            v.targetZ = -CORRIDOR_LENGTH_TOTAL / 2;
-          }
+    let vi = 0;
+    for (let approach = 0; approach < positions.length; approach++) {
+      for (let i = 0; i < counts[approach]; i++) {
+        let vehicle;
+        const typeRand = Math.random();
+        if (scenario === 'emergency' && vi === 0) {
+          vehicle = createAmbulance();
+        } else if (typeRand < 0.05) {
+          vehicle = createAutoRickshaw(vehicleColors[Math.floor(Math.random() * vehicleColors.length)]);
+        } else if (typeRand < 0.1) {
+          vehicle = createBike(vehicleColors[Math.floor(Math.random() * vehicleColors.length)]);
+        } else if (typeRand < 0.15) {
+          vehicle = createBus(MATS.bus_body);
+        } else if (typeRand < 0.2) {
+          vehicle = createTruck(MATS.truck_body);
         } else {
-          v.targetX += speed * deltaTime * 60;
-          if (Math.abs(v.targetX) > ROAD_WIDTH / 2 + 2) {
-            v.targetX = -ROAD_WIDTH / 2 - 2;
-          }
+          vehicle = createCar(vehicleColors[Math.floor(Math.random() * vehicleColors.length)]);
         }
 
-        this.applyTrafficLightLogic(v, deltaTime);
+        const p = positions[approach];
+        vehicle.position.copy(p.start);
+        vehicle.userData.id = vi;
+        vehicle.userData.approach = approach;
+        vehicle.userData.baseSpeed = 0.3 + Math.random() * 0.5;
+        vehicle.userData.stopped = false;
+        vehicle.userData.waitTime = 0;
 
-        v.dummy.position.lerp(
-          new THREE.Vector3(v.targetX, v.y + (v.classType === 'bike' ? 0.2 : 0.15), v.targetZ),
-          0.1
-        );
-        v.dummy.rotation.y = THREE.MathUtils.damp(v.dummy.rotation.y, v.targetRotation, 2, deltaTime);
-        v.dummy.updateMatrix();
-        instance.mesh.setMatrixAt(v.instanceId, v.dummy.matrix);
+        // Set initial heading
+        vehicle.lookAt(vehicle.position.clone().add(p.dir));
+        vehicle.userData.direction = p.dir.clone();
+
+        scene.add(vehicle);
+        vehicles.push(vehicle);
+        vehicleSpeeds[vi] = vehicle.userData.baseSpeed;
+        vi++;
       }
-
-      instance.mesh.instanceMatrix.needsUpdate = true;
     }
+  }
+
+  // --- Animation state ---
+  const state = {
+    scenario: 'auto',
+    mode: 'queuesense',
+    camera: 'isometric',
+    autoCycle: true,
+    time: 0,
+    step: 0,
+    signalPhase: 'ns_green',
+    phaseTimer: 0,
+    downstreamBlockage: 0,
+    density: 0.5,
   };
 
-  DigitalTwinScene.prototype.applyTrafficLightLogic = function(vehicle, deltaTime) {
-    var z = vehicle.z;
-    var x = vehicle.x;
+  // --- Create intersection ---
+  const intersection = createIntersection();
+  scene.add(intersection);
+  spawnVehicles('auto');
 
-    var junctions = ['J1', 'J2'];
-    for (var ji = 0; ji < junctions.length; ji++) {
-      var jid = junctions[ji];
-      var zPos = jid === 'J1' ? J1_POSITION : J2_POSITION;
-      var distToJunction = Math.abs(z - zPos);
+  // --- Signal timing ---
+  const PHASE_CYCLE = 60; // seconds for a full cycle
+  const PHASE_GREEN_NS = 20; // NS green
+  const PHASE_YELLOW_NS = 4;  // NS yellow
+  const PHASE_GREEN_EW = 20; // EW green
+  const PHASE_YELLOW_EW = 4;  // EW yellow
+  const PHASE_ALL_RED = 4;    // all-red clearance
 
-      if (distToJunction < JUNCTION_SIZE * 1.5) {
-        var isStopped = vehicle.rotationY < Math.PI / 4;
-        var signal = this.signalState[jid];
-        var shouldStop = signal.EW === 'green' || signal.EW === 'yellow';
+  function updateSignals(delta) {
+    state.phaseTimer += delta;
+    const cycle = state.phaseTimer % PHASE_CYCLE;
 
-        if (isStopped && shouldStop) {
-          vehicle.targetZ = z;
-          vehicle.speed = 0;
-        } else if (vehicle.speed === 0) {
-          vehicle.speed = 0.02 * (0.5 + Math.random() * 0.5);
+    const poles = intersection.userData.pols || intersection.userData.poles;
+    let currentPhase = 'red';
+
+    if (cycle < PHASE_GREEN_NS) {
+      currentPhase = 'ns_green';
+    } else if (cycle < PHASE_GREEN_NS + PHASE_YELLOW_NS) {
+      currentPhase = 'ns_yellow';
+    } else if (cycle < PHASE_GREEN_NS + PHASE_YELLOW_NS + PHASE_ALL_RED) {
+      currentPhase = 'all_red';
+    } else if (cycle < PHASE_GREEN_NS + PHASE_YELLOW_NS + PHASE_ALL_RED + PHASE_GREEN_EW) {
+      currentPhase = 'ew_green';
+    } else if (cycle < PHASE_GREEN_NS + PHASE_YELLOW_NS + PHASE_ALL_RED + PHASE_GREEN_EW + PHASE_YELLOW_EW) {
+      currentPhase = 'ew_yellow';
+    }
+
+    // In queuesense mode, adjust phase durations based on queue pressure
+    if (state.mode === 'queuesense') {
+      // Simple adaptive: extend green for direction with more vehicles
+      let nsCount = 0, ewCount = 0;
+      for (const v of vehicles) {
+        const angle = Math.atan2(v.userData.direction.z, v.userData.direction.x);
+        if (Math.abs(angle) < Math.PI / 4 || Math.abs(angle - Math.PI) < Math.PI / 4) {
+          nsCount++;
+        } else {
+          ewCount++;
         }
       }
-    }
-  };
-
-  DigitalTwinScene.prototype.createAIZones = function() {
-    this.createAIDetectionZone('J1_N', new THREE.Vector3(0, 2, J1_POSITION - 10), 'north');
-    this.createAIDetectionZone('J1_E', new THREE.Vector3(-10, 2, J1_POSITION), 'east');
-    this.createAIDetectionZone('J2_N', new THREE.Vector3(0, 2, J2_POSITION - 10), 'north');
-    this.createAIDetectionZone('exit_east', new THREE.Vector3(0, 1, J2_POSITION + 15), 'exit');
-  };
-
-  DigitalTwinScene.prototype.createAIDetectionZone = function(zoneId, position, direction) {
-    var geometry = new THREE.RingGeometry(6, 8, 32);
-    var material = new THREE.MeshStandardMaterial({
-      color: 0x06b6d4,
-      transparent: true,
-      opacity: 0.2,
-      side: THREE.DoubleSide,
-      emissive: 0x06b6d4,
-      emissiveIntensity: 0.3,
-    });
-
-    var zone = new THREE.Mesh(geometry, material);
-    zone.position.copy(position);
-
-    if (direction === 'north' || direction === 'south') {
-      zone.rotation.x = Math.PI / 2;
-    } else if (direction === 'east' || direction === 'west') {
-      zone.rotation.z = Math.PI / 2;
+      if (nsCount > ewCount * 1.5 && cycle < PHASE_GREEN_NS + 5) {
+        // Extend NS green
+        currentPhase = cycle < PHASE_GREEN_NS + 8 ? 'ns_green' : 'ns_yellow';
+      }
     }
 
-    zone.userData = { zoneId: zoneId, direction: direction, pcuCount: 0 };
-    this.scene.add(zone);
-    this.aiZones[zoneId] = zone;
+    // Update all poles
+    for (const pole of poles) {
+      const bulbs = pole.userData.bulbs;
+      const isNS = (pole.position.z !== 0); // N/S poles
+      const isEW = (pole.position.x !== 0); // E/W poles
 
-    this.animateScanLine(zone, direction);
-  };
+      // Reset all
+      bulbs.red.material = MATS.signal_dark;
+      bulbs.yellow.material = MATS.signal_dark;
+      bulbs.green.material = MATS.signal_dark;
 
-  DigitalTwinScene.prototype.animateScanLine = function(zone, direction) {
-    var geometry = new THREE.PlaneGeometry(8, 0.2);
-    var material = new THREE.MeshStandardMaterial({
-      color: 0x06b6d4,
-      transparent: true,
-      opacity: 0.6,
-      emissive: 0x06b6d4,
-      emissiveIntensity: 0.5,
-    });
+      if (isNS) {
+        if (currentPhase === 'ns_green' || currentPhase === 'all_red') {
+          bulbs.green.material = MATS.signal_green;
+        } else if (currentPhase === 'ns_yellow') {
+          bulbs.yellow.material = MATS.signal_yellow;
+        } else if (currentPhase === 'ew_green' || currentPhase === 'ew_yellow' || currentPhase === 'red') {
+          bulbs.red.material = MATS.signal_red;
+        }
+      }
 
-    var scanLine = new THREE.Mesh(geometry, material);
-    zone.add(scanLine);
+      if (isEW) {
+        if (currentPhase === 'ew_green' || currentPhase === 'all_red') {
+          bulbs.green.material = MATS.signal_green;
+        } else if (currentPhase === 'ew_yellow') {
+          bulbs.yellow.material = MATS.signal_yellow;
+        } else if (currentPhase === 'ns_green' || currentPhase === 'ns_yellow' || currentPhase === 'red') {
+          bulbs.red.material = MATS.signal_red;
+        }
+      }
 
-    var self = this;
-    function animate() {
-      if (self.scenario.phase !== 'running') return;
-
-      var elapsed = self.clock.getElapsedTime();
-      var sweep = (Math.sin(elapsed * 0.5) * 0.5 + 0.5) * 6;
-
-      if (direction === 'north' || direction === 'south') {
-        scanLine.position.z = sweep - 3;
+      // Countdown
+      let remaining = 0;
+      if (currentPhase === 'ns_green' || currentPhase === 'ew_green') {
+        remaining = Math.max(0, Math.floor(PHASE_GREEN_NS - cycle));
+        pole.userData.countdown.material = new THREE.MeshBasicMaterial({
+          color: 0xff4444, transparent: true, opacity: 0.9, toneMapped: false
+        });
       } else {
-        scanLine.position.x = sweep - 3;
-      }
-
-      requestAnimationFrame(animate);
-    }
-    animate();
-  };
-
-  DigitalTwinScene.prototype.createSpillbackVisual = function() {
-    var geometry = new THREE.PlaneGeometry(10, ROAD_WIDTH * 2.5);
-    var material = new THREE.MeshStandardMaterial({
-      color: 0x7f1d1d,
-      transparent: true,
-      opacity: 0,
-      emissive: 0x7f1d1d,
-      emissiveIntensity: 0,
-      side: THREE.DoubleSide,
-    });
-
-    this.spillbackZone = new THREE.Mesh(geometry, material);
-    this.spillbackZone.rotation.x = -Math.PI / 2;
-    this.spillbackZone.position.set(0, 0.05, CORRIDOR_LENGTH / 2);
-    this.scene.add(this.spillbackZone);
-  };
-
-  DigitalTwinScene.prototype.setSpillbackActive = function(active, occupancy) {
-    if (!this.spillbackZone) return;
-    if (occupancy === undefined) occupancy = 0.85;
-
-    var material = this.spillbackZone.material;
-    if (active) {
-      material.opacity = 0.4 + occupancy * 0.3;
-      material.emissiveIntensity = 0.3 + occupancy * 0.2;
-    } else {
-      material.opacity = 0;
-      material.emissiveIntensity = 0;
-    }
-  };
-
-  DigitalTwinScene.prototype.updateSignalPhase = function(junctionId, direction, color, duration) {
-    if (!duration) duration = 0;
-    this.signalState[junctionId][direction] = color;
-    this.updateSignalColor(junctionId, direction, color);
-
-    if (this.onSignalUpdate) {
-      this.onSignalUpdate({
-        junction: junctionId,
-        direction: direction,
-        color: color,
-        duration: duration,
-      });
-    }
-  };
-
-  DigitalTwinScene.prototype.setScenario = function(scenarioName) {
-    this.scenario.name = scenarioName;
-    this.scenario.time = 0;
-    this.scenario.phase = 'running';
-
-    switch (scenarioName) {
-      case 'normal':
-        this.setSpillbackActive(false);
-        this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'red');
-        this.updateSignalPhase('J2', 'NS', 'green');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        break;
-
-      case 'surge':
-        this.setSpillbackActive(false);
-        this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'red');
-        this.updateSignalPhase('J2', 'NS', 'green');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        this.spawnSurgeVehicles();
-        break;
-
-      case 'spillback':
-        this.setSpillbackActive(true, 0.85);
-        this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'red');
-        this.updateSignalPhase('J2', 'NS', 'green');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        break;
-
-      case 'bottleneck':
-        this.setSpillbackActive(true, 0.92);
-        this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'yellow');
-        this.updateSignalPhase('J2', 'NS', 'green');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        break;
-
-      case 'emergency':
-        this.setSpillbackActive(false);
-        this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'red');
-        this.updateSignalPhase('J2', 'NS', 'green');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        this.spawnAmbulance();
-        break;
-
-      case 'sensor_fault':
-        this.updateSignalPhase('J1', 'NS', 'yellow');
-        this.updateSignalPhase('J1', 'EW', 'red');
-        this.updateSignalPhase('J2', 'NS', 'yellow');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        break;
-
-      case 'recovery':
-        this.setSpillbackActive(false);
-        this.updateSignalPhase('J1', 'NS', 'green');
-        this.updateSignalPhase('J1', 'EW', 'red');
-        this.updateSignalPhase('J2', 'NS', 'green');
-        this.updateSignalPhase('J2', 'EW', 'red');
-        break;
-    }
-
-    if (this.onScenarioChange) {
-      this.onScenarioChange(scenarioName);
-    }
-  };
-
-  DigitalTwinScene.prototype.spawnSurgeVehicles = function() {
-    for (var i = 0; i < 15; i++) {
-      var z = Math.random() * 20 - 10 + J1_POSITION;
-      this.addVehicleInstance('car', ROAD_WIDTH / 4 + 1, z, 0, 0, 0, 0.05);
-    }
-    for (var j = 0; j < 5; j++) {
-      var zb = Math.random() * 15 + J1_POSITION;
-      this.addVehicleInstance('bus', ROAD_WIDTH / 4 + 1, zb, 0, 0, 0, 0.04);
-    }
-  };
-
-  DigitalTwinScene.prototype.spawnAmbulance = function() {
-    var geometry = new THREE.BoxGeometry(1.0, 0.6, 2.5);
-    var material = new THREE.MeshStandardMaterial({
-      color: 0xef4444,
-      emissive: 0xef4444,
-      emissiveIntensity: 0.5,
-    });
-
-    var ambulance = new THREE.Mesh(geometry, material);
-    ambulance.position.set(0, 0.5, J1_POSITION - 15);
-    ambulance.rotation.y = 0;
-    ambulance.userData = { type: 'ambulance', corridorPos: 0 };
-    this.scene.add(ambulance);
-    this.ambulance = ambulance;
-
-    var lightGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-    var redLight = new THREE.Mesh(lightGeometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-    redLight.position.set(-0.5, 0.8, 0);
-    ambulance.add(redLight);
-
-    var blueLight = new THREE.Mesh(lightGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff }));
-    blueLight.position.set(0.5, 0.8, 0);
-    ambulance.add(blueLight);
-
-    this.ambulanceLights = { red: redLight, blue: blueLight, ambulance: ambulance };
-  };
-
-  DigitalTwinScene.prototype.updateAmbulance = function(deltaTime) {
-    if (!this.ambulance) return;
-
-    var speed = 0.5 * deltaTime * 60;
-    this.ambulance.position.z += speed;
-
-    var elapsed = this.clock.getElapsedTime();
-    if (this.ambulanceLights) {
-      var intensity = Math.abs(Math.sin(elapsed * 10)) * 0.5 + 0.5;
-      this.ambulanceLights.red.material.emissiveIntensity = intensity;
-      this.ambulanceLights.blue.material.emissiveIntensity = intensity;
-    }
-
-    if (this.ambulance.position.z > J2_POSITION + 5) {
-      this.ambulance = null;
-      this.ambulanceLights = null;
-      this.setScenario('recovery');
-    }
-  };
-
-  DigitalTwinScene.prototype.setMode = function(mode) {
-    this.isQueueSenseMode = mode === 'queuesense';
-
-    if (this.isQueueSenseMode) {
-      for (var id in this.aiZones) {
-        this.aiZones[id].visible = true;
-      }
-      var sc = this.scenario.name;
-      this.setSpillbackActive(sc === 'spillback' || sc === 'bottleneck');
-    } else {
-      for (var id2 in this.aiZones) {
-        this.aiZones[id2].visible = false;
-      }
-
-      var sc2 = this.scenario.name;
-      if (sc2 === 'spillback' || sc2 === 'bottleneck') {
-        this.setGridlockVisualization(true);
-      } else {
-        this.setGridlockVisualization(false);
-      }
-    }
-
-    if (this.onModeChange) {
-      this.onModeChange(this.isQueueSenseMode);
-    }
-  };
-
-  DigitalTwinScene.prototype.setGridlockVisualization = function(active) {
-    if (active) {
-      var geometry = new THREE.PlaneGeometry(CORRIDOR_LENGTH_TOTAL, ROAD_WIDTH * 3);
-      var material = new THREE.MeshStandardMaterial({
-        color: 0x7f1d1d,
-        transparent: true,
-        opacity: 0.3,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      });
-
-      var overlay = new THREE.Mesh(geometry, material);
-      overlay.rotation.x = -Math.PI / 2;
-      overlay.position.y = 0.02;
-      this.scene.add(overlay);
-      this.gridlockOverlay = overlay;
-    } else {
-      if (this.gridlockOverlay) {
-        this.scene.remove(this.gridlockOverlay);
-        this.gridlockOverlay.geometry.dispose();
-        this.gridlockOverlay.material.dispose();
-        this.gridlockOverlay = null;
-      }
-    }
-
-    Object.keys(this.vehicleInstances).forEach(function(classType) {
-      var instance = self.vehicleInstances[classType];
-      if (instance && instance.instances) {
-        instance.instances.forEach(function(v) {
-          v.speed = v.speed * (active ? 0.3 : 3.3);
+        remaining = 0;
+        pole.userData.countdown.material = new THREE.MeshBasicMaterial({
+          color: 0xffaa00, transparent: true, opacity: 0.6, toneMapped: false
         });
       }
-    });
-  };
-
-  DigitalTwinScene.prototype.updateScenarioEngine = function(deltaTime) {
-    this.scenario.time += deltaTime;
-    this.scenario.transitionTimer += deltaTime;
-
-    if (this.scenario.phase === 'running') {
-      var durations = {
-        normal: 30,
-        surge: 20,
-        spillback: 25,
-        emergency: 15,
-        recovery: 15,
-        sensor_fault: 10,
-      };
-
-      var duration = durations[this.scenario.name] || 15;
-
-      if (this.scenario.transitionTimer > duration) {
-        var nextScenario = this.getNextScenario();
-        this.setScenario(nextScenario);
-        this.scenario.transitionTimer = 0;
-      }
+      pole.userData.countdownValue = remaining;
     }
 
-    this.updateZonePCUs();
-    this.updateSignalCycle(deltaTime);
-    this.updatePedestrianFlash(deltaTime);
-  };
+    state.signalPhase = currentPhase;
+  }
 
-  DigitalTwinScene.prototype.getNextScenario = function() {
-    var sequence = ['normal', 'surge', 'spillback', 'emergency', 'recovery', 'normal'];
-    var currentIndex = sequence.indexOf(this.scenario.name);
-    return sequence[(currentIndex + 1) % sequence.length];
-  };
+  // --- Vehicle movement ---
+  function getGreenDirection() {
+    const phase = state.signalPhase;
+    if (phase === 'ns_green' || phase === 'ns_yellow') return 'ns';
+    if (phase === 'ew_green' || phase === 'ew_yellow') return 'ew';
+    return 'all_red';
+  }
 
-  DigitalTwinScene.prototype.updateZonePCUs = function() {
-    for (var id in this.aiZones) {
-      var zone = this.aiZones[id];
-      var count = Math.floor(Math.random() * 8) + 1;
-      zone.userData.pcuCount = count;
+  function isVehicleStopped(vehicle) {
+    const approach = vehicle.userData.approach;
+    // North approach (approach 0,1) is NS direction
+    // West approach (2) is EW direction, East approach (3) is EW direction
+    const green = getGreenDirection();
 
-      var material = zone.material;
-      var intensity = Math.min(count / 12, 1);
-      material.opacity = 0.2 + intensity * 0.3;
-      material.emissiveIntensity = 0.3 + intensity * 0.4;
+    if (green === 'all_red') return true;
+
+    if (approach === 0 || approach === 1) {
+      // Coming from south going north — NS direction
+      // They go through the intersection on NS green
+      return green === 'ew';
+    } else {
+      // Coming from west going east, or east going west — EW direction
+      return green === 'ns';
     }
+  }
 
-    if (this.onZoneUpdate) {
-      var zones = {};
-      for (var id2 in this.aiZones) {
-        zones[id2] = this.aiZones[id2].userData.pcuCount;
-      }
-      this.onZoneUpdate(zones);
-    }
-  };
+  function updateVehicles(delta) {
+    for (const vehicle of vehicles) {
+      const stopped = isVehicleStopped(vehicle);
+      vehicle.userData.stopped = stopped;
 
-  DigitalTwinScene.prototype.updateSignalCycle = function(deltaTime) {
-    this.signalTime = (this.signalTime || 0) + deltaTime;
+      if (stopped) {
+        vehicle.userData.waitTime += delta;
+        vehicle.userData.currentSpeed = 0;
 
-    if (this.signalTime > 30) {
-      this.signalTime = 0;
+        // Brake lights on
+        if (vehicle.userData.brakeLights && vehicle.userData.brakeLights) {
+          for (const bl of vehicle.userData.brakeLights) {
+            bl.material.emissiveIntensity = 0.5;
+          }
+        }
+      } else {
+        vehicle.userData.waitTime = 0;
+        vehicle.userData.currentSpeed = vehicle.userData.baseSpeed * 0.5;
 
-      var states = this.signalState;
-      for (var jid in states) {
-        var state = states[jid];
-        if (state.NS === 'green') {
-          this.updateSignalPhase(jid, 'NS', 'yellow', 5);
-        } else if (state.NS === 'yellow') {
-          this.updateSignalPhase(jid, 'NS', 'red');
-          this.updateSignalPhase(jid, 'EW', 'green', 25);
-        } else if (state.EW === 'green') {
-          this.updateSignalPhase(jid, 'EW', 'yellow', 5);
-        } else if (state.EW === 'yellow') {
-          this.updateSignalPhase(jid, 'EW', 'red');
-          this.updateSignalPhase(jid, 'NS', 'green', 25);
+        // Brake lights off
+        if (vehicle.userData.brakeLights) {
+          for (const bl of vehicle.userData.brakeLights) {
+            bl.material.emissiveIntensity = 0;
+          }
         }
       }
-    }
-  };
 
-  DigitalTwinScene.prototype.updatePedestrianFlash = function(deltaTime) {
-    var elapsed = this.clock.getElapsedTime();
-    if (Math.floor(elapsed) % 2 === 0 && this.pedestrianCrossing) {
-      this.pedestrianCrossing.material.emissiveIntensity = Math.abs(Math.sin(elapsed * 3)) * 0.5;
-    }
-  };
+      // Move the vehicle
+      const speed = vehicle.userData.currentSpeed || 0;
+      if (speed > 0) {
+        const moveVec = vehicle.userData.direction.clone().multiplyScalar(speed * delta * 60);
+        vehicle.position.add(moveVec);
 
-  DigitalTwinScene.prototype.animate = function() {
-    var self = this;
-    var deltaTime = Math.min(this.clock.getDelta(), 0.1);
-    this.frameCount++;
+        // Rotate wheels for cars/trucks/buses
+        if (vehicle.userData.wheels) {
+          for (const w of vehicle.userData.wheels) {
+            w.rotation.z += (speed * delta * 60) / 0.4;
+          }
+        }
+      }
 
-    if (this.controls && this.controls.enabled) {
-      this.controls.update();
-    }
+      // Ambulance flashing lights
+      if (vehicle.userData.type === 'ambulance') {
+        vehicle.userData.flashState += delta * 4;
+        if (vehicle.userData.flashState > 1) vehicle.userData.flashState = 0;
+        const on = vehicle.userData.flashState < 0.5;
+        if (vehicle.userData.flashLights) {
+          vehicle.userData.flashLights[0].intensity = on ? 1.0 : 0;
+          vehicle.userData.flashLights[1].intensity = on ? 0 : 1.0;
+        }
+      }
 
-    this.updateVehicles(deltaTime);
+      // Reset vehicles that go off screen
+      const pos = vehicle.position;
+      if (Math.abs(pos.x) > 40 || Math.abs(pos.z) > 40) {
+        // Respawn at original approach start
+        vehicle.userData.stopped = false;
+        vehicle.userData.waitTime = 0;
+        const approach = vehicle.userData.approach;
+        const posMap = [
+          { p: new THREE.Vector3(-30, 0.5, -15), d: new THREE.Vector3(1, 0, 0) },
+          { p: new THREE.Vector3(-30, 0.5, 20), d: new THREE.Vector3(1, 0, 0) },
+          { p: new THREE.Vector3(20, 0.5, -25), d: new THREE.Vector3(0, 0, 1) },
+          { p: new THREE.Vector3(30, 0.5, 0), d: new THREE.Vector3(-1, 0, 0) },
+        ];
+        const pm = posMap[approach];
+        vehicle.position.copy(pm.p);
+        vehicle.userData.direction = pm.d.clone();
+        vehicle.lookAt(vehicle.position.clone().add(pm.d));
+      }
 
-    if (this.ambulance) {
-      this.updateAmbulance(deltaTime);
-    }
-
-    this.updateScenarioEngine(deltaTime);
-
-    if (this.renderer && this.scene && this.camera) {
-      this.renderer.render(this.scene, this.camera);
-    }
-
-    if (this.frameCount % 60 === 0 && this.onTelemetry) {
-      this.onTelemetry({
-        fps: Math.round(1 / deltaTime),
-        vehicles: this.getTotalVehicleCount(),
-        scenario: this.scenario.name,
-        mode: this.isQueueSenseMode ? 'queuesense' : 'traditional',
-      });
-    }
-
-    requestAnimationFrame(function() { self.animate(); });
-  };
-
-  DigitalTwinScene.prototype.getTotalVehicleCount = function() {
-    var total = 0;
-    for (var classType in this.vehicleInstances) {
-      var instance = this.vehicleInstances[classType];
-      if (instance && instance.instances) {
-        total += instance.instances.length;
+      // Reset vehicle if too far past intersection on EW approaches
+      if (pos.x > 40) {
+        vehicle.position.set(-32, 0.5, pos.z);
+        vehicle.userData.direction = new THREE.Vector3(1, 0, 0);
+        vehicle.lookAt(vehicle.position.clone().add(vehicle.userData.direction));
       }
     }
-    return total;
-  };
+  }
 
-  DigitalTwinScene.prototype.setupEventListeners = function() {
-    var self = this;
-    window.addEventListener('resize', function() { self.onWindowResize(); });
-  };
+  // --- Render loop ---
+  let lastTime = performance.now();
+  function animate() {
+    requestAnimationFrame(animate);
 
-  DigitalTwinScene.prototype.onWindowResize = function() {
-    var width = this.container.clientWidth;
-    var height = this.container.clientHeight;
+    const now = performance.now();
+    const delta = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
 
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    updateSignals(delta);
+    updateVehicles(delta);
 
-    this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-  };
-
-  DigitalTwinScene.prototype.destroy = function() {
-    this.controls && this.controls.dispose();
-    this.renderer && this.renderer.dispose();
-    this.scene && this.scene.clear();
-
-    if (this.container.contains(this.renderer.domElement)) {
-      this.container.removeChild(this.renderer.domElement);
+    // Update countdown timer text on signal poles
+    for (const pole of intersection.userData.poles) {
+      // Countdown is visual, the number mesh is just a placeholder
+      // In a real implementation this would use a canvas texture
     }
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  // --- Window resize ---
+  window.addEventListener('resize', onWindowResize);
+  function onWindowResize() {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  }
+
+  // --- Public API ---
+  window.QueueSense3D = {
+    setScenario: function(s) {
+      state.scenario = s;
+      spawnVehicles(s);
+    },
+    setMode: function(m) {
+      state.mode = m;
+    },
+    setCamera: function(c) {
+      state.camera = c;
+      switch (c) {
+        case 'isometric':
+          animateCamera(40, 30, 45, 0, 0, 0);
+          break;
+        case 'top':
+          animateCamera(0, 45, 0.01, 0, 0, 0);
+          break;
+        case 'follow':
+          animateCamera(0, 5, 15, 0, 0, 0);
+          break;
+      }
+    },
+    setDensity: function(d) {
+      state.density = d / 100;
+    },
+    setDownstreamBlockage: function(b) {
+      state.downstreamBlockage = b / 100;
+    },
+    setAutoCycle: function(v) {
+      state.autoCycle = v;
+    },
+    updateReason: function(text) {
+      const reasonEl = document.getElementById('reasonText');
+      if (reasonEl) reasonEl.textContent = text;
+    },
+    animateCamera: animateCamera,
+    getState: function() { return state; },
   };
 
-  /* =============================================================================
-     GLOBAL EXPOSURE
-     ============================================================================= */
+  function animateCamera(tx, ty, tz, lx, ly, lz) {
+    // Simple camera animation
+    const start = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+    const target = { x: tx, y: ty, z: tz };
+    const lookStart = { x: controls.target.x, y: controls.target.y, z: controls.target.z };
+    const lookTarget = { x: lx, y: ly, z: lz };
 
-  var twinScene = null;
+    let progress = 0;
+    const duration = 1.5;
+    const interval = 16;
+    const step = interval / (duration * 1000);
 
-  window.initDigitalTwin = function(canvasContainer) {
-    twinScene = new DigitalTwinScene(canvasContainer);
+    function stepAnim() {
+      progress += step;
+      if (progress > 1) progress = 1;
+      camera.position.lerpVectors(
+        new THREE.Vector3(start.x, start.y, start.z),
+        new THREE.Vector3(target.x, target.y, target.z),
+        progress
+      );
+      controls.target.lerpVectors(
+        new THREE.Vector3(lookStart.x, lookStart.y, lookStart.z),
+        new THREE.Vector3(lookTarget.x, lookTarget.y, lookTarget.z),
+        progress
+      );
+      controls.update();
+      if (progress < 1) {
+        requestAnimationFrame(stepAnim);
+      }
+    }
+    stepAnim();
+  }
 
-    twinScene.onStateUpdate = function(state) {
-      if (window.onTwinStateUpdate) window.onTwinStateUpdate(state);
-    };
-    twinScene.onSignalUpdate = function(signal) {
-      if (window.onSignalUpdate) window.onSignalUpdate(signal);
-    };
-    twinScene.onScenarioChange = function(scenario) {
-      if (window.onScenarioChange) window.onScenarioChange(scenario);
-    };
-    twinScene.onModeChange = function(isQueueSense) {
-      if (window.onModeChange) window.onModeChange(isQueueSense);
-    };
-    twinScene.onZoneUpdate = function(zones) {
-      if (window.onZoneUpdate) window.onZoneUpdate(zones);
-    };
-    twinScene.onTelemetry = function(stats) {
-      if (window.onTwinTelemetry) window.onTwinTelemetry(stats);
-    };
+  // Start animation
+  animate();
 
-    return twinScene;
+  // Export for global access
+  window.__threeScene = {
+    scene: scene,
+    camera: camera,
+    renderer: renderer,
+    controls: controls,
+    vehicles: vehicles,
+    intersection: intersection,
+    spawnVehicles: spawnVehicles,
+    createCar: createCar,
+    createTruck: createTruck,
+    createBus: createBus,
+    createAutoRickshaw: createAutoRickshaw,
+    createBike: createBike,
+    createAmbulance: createAmbulance,
+    createSignalPole: createSignalPole,
+    createIntersection: createIntersection,
   };
 
-  window.getTwinScene = function() {
-    return twinScene;
-  };
-
-  window.switchCameraPreset = function(preset) {
-    if (twinScene) twinScene.switchCameraPreset(preset);
-  };
-
-  window.setScenario = function(scenario) {
-    if (twinScene) twinScene.setScenario(scenario);
-  };
-
-  window.setMode = function(mode) {
-    if (twinScene) twinScene.setMode(mode);
-  };
-
-  window.triggerEmergencyFlush = function() {
-    if (twinScene) twinScene.setScenario('emergency');
-  };
-
-  window.setSpillbackActive = function(active, occupancy) {
-    if (twinScene) twinScene.setSpillbackActive(active, occupancy);
-  };
-
-  window.updateSignalPhase = function(junctionId, direction, color, duration) {
-    if (twinScene) twinScene.updateSignalPhase(junctionId, direction, color, duration);
-  };
 })();

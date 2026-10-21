@@ -769,30 +769,13 @@ def get_dynamic_benchmark_data(requested_scenario: Optional[str] = None) -> Dict
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index(scenario: Optional[str] = None):
-    """Serve the dark-mode ICCC Command Center HTML with optional initial scenario."""
+    """Serve the QueueSense dashboard."""
     html_path = STATIC_DIR / "index.html"
     if html_path.exists():
         with open(html_path, "r", encoding="utf-8") as f:
             content = f.read()
-
-        normal_active = 'id="btnPresetNormal"\n              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-emerald-950/70 text-emerald-300 border-2 border-emerald-500 shadow-lg shadow-emerald-950/50 hover:bg-emerald-900/60"'
-        normal_inactive = 'id="btnPresetNormal"\n              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-slate-300 border border-slate-700 hover:border-emerald-500 hover:bg-emerald-950/40"'
-
-        spill_inactive = 'id="btnPresetSpillback"\n              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-rose-300 border border-slate-700 hover:border-rose-500 hover:bg-rose-950/40"'
-        spill_active = 'id="btnPresetSpillback"\n              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-rose-950/70 text-rose-300 border-2 border-rose-500 shadow-lg shadow-rose-950/50 hover:bg-rose-900/60"'
-
-        watch_inactive = 'id="btnPresetWatchdog"\n              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-slate-900 text-amber-300 border border-slate-700 hover:border-amber-500 hover:bg-amber-950/40"'
-        watch_active = 'id="btnPresetWatchdog"\n              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center space-x-2 bg-amber-950/70 text-amber-300 border-2 border-amber-500 shadow-lg shadow-amber-950/50 hover:bg-amber-900/60"'
-
-        if scenario == "spillback":
-            content = content.replace(normal_active, normal_inactive)
-            content = content.replace(spill_inactive, spill_active)
-        elif scenario == "watchdog":
-            content = content.replace(normal_active, normal_inactive)
-            content = content.replace(watch_inactive, watch_active)
-
         return HTMLResponse(content=content)
-    return HTMLResponse(content="<h1>QueueSense ICCC Static UI Loading...</h1>")
+    return HTMLResponse(content="<h1>QueueSense Dashboard — Loading...</h1>")
 
 
 @app.get("/api/state")
