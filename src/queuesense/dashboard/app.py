@@ -653,6 +653,9 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 engine = SimEngine()
 
 
+
+
+
 # ------------------------------------------------------------------------------
 # Dynamic Benchmark Loader (Critical Requirement: benchmark_v2 PRIORITY)
 # ------------------------------------------------------------------------------
@@ -1235,3 +1238,17 @@ def create_app(source: str = "uvh26") -> FastAPI:
     if source in DATASET_SOURCES or Path(source).exists():
         engine.set_source(source)
     return app
+
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.endswith('.js') or path.endswith('.css') or path.endswith('.html'):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        return response
+
+app.add_middleware(CacheControlMiddleware)

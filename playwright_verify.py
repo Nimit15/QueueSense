@@ -85,7 +85,7 @@ async def run_verification():
             print(f"Screenshot: {screenshot_path}")
 
             # Test scenario buttons
-            scenarios = ['auto', 'surge', 'spillback', 'emergency']
+            scenarios = ['normal', 'surge', 'spillback', 'emergency']
             for i, scenario in enumerate(scenarios):
                 btn = page.locator(f'button[data-scenario="{scenario}"]')
                 if await btn.count() > 0:
@@ -112,7 +112,7 @@ async def run_verification():
                     errors.append(f"Mode button not found: {mode}")
 
             # Test camera views
-            for cam in ['isometric', 'top', 'follow']:
+            for cam in ['isometric', 'top', 'corridor']:
                 btn = page.locator(f'button[data-cam="{cam}"]')
                 if await btn.count() > 0:
                     await btn.click()

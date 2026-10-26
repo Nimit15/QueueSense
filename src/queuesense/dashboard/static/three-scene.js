@@ -13,13 +13,29 @@ const state = {
   autoRunning: true,
   simTime: 0,
   vehicles: [],
-  signals: {},
+  signals: {
+    groups: {},
+    stopBars: {},
+    downstreamSensor: null,
+    currentPhase: 0,
+    phaseName: 'ns_green',
+    phaseTimer: 0,
+    phaseDuration: 0,
+  },
   densityLevel: 50,
   exitBlock: 0,
   emergencyActive: false,
   kpi: { queue: 0, wait: 0, exit: 0 },
   scenarioTimer: 0,
   scenarioStep: 0,
+};
+
+const SIGNAL_CYCLE = {
+  ns_green: 25,
+  ns_yellow: 4,
+  all_red: 2,
+  ew_green: 25,
+  ew_yellow: 4,
 };
 
 // ─── Three.js Core ────────────────────────────────────────────
@@ -1092,18 +1108,15 @@ function isSignalGreen(signalKey) {
 }
 
 // ─── Signal Control ─────────────────────────────────────────
-let signalPhase = 0;
-let signalTimer = 0;
-const SIGNAL_CYCLE = {
-  ns_green: 25,
-  ns_yellow: 4,
-  all_red: 2,
-  ew_green: 25,
-  ew_yellow: 4,
-};
-
 function updateSignals(delta) {
-  signalTimer += delta;
+  state.signalTimer += delta;
+
+  // Update state for external access (timer, current phase)
+  state.signals.currentPhase = state.signalPhase;
+  const phaseNames = ['ns_green', 'ns_yellow', 'all_red', 'ew_green', 'ew_yellow'];
+  state.signals.phaseName = phaseNames[state.signalPhase] || 'unknown';
+  state.signals.phaseTimer = state.signalTimer;
+  state.signals.phaseDuration = getPhaseDuration(state.signalPhase);
 
   if (state.currentMode === 'queuesense') {
     // QueueSense: adaptive timing based on density + spillback
@@ -1118,26 +1131,50 @@ function updateSignals(delta) {
       ewGreen = 5;   // Hold EW red longer to prevent spillback
     }
 
-    if (signalPhase === 0 && signalTimer > nsGreen) setSignalPhase(1);
-    else if (signalPhase === 1 && signalTimer > SIGNAL_CYCLE.ns_yellow) setSignalPhase(2);
-    else if (signalPhase === 2 && signalTimer > SIGNAL_CYCLE.all_red) setSignalPhase(3);
-    else if (signalPhase === 3 && signalTimer > ewGreen) setSignalPhase(4);
-    else if (signalPhase === 4 && signalTimer > SIGNAL_CYCLE.ew_yellow) { setSignalPhase(0); signalTimer = 0; }
+    if (state.signalPhase === 0 && state.signalTimer > nsGreen) setSignalPhase(1);
+    else if (state.signalPhase === 1 && state.signalTimer > SIGNAL_CYCLE.ns_yellow) setSignalPhase(2);
+    else if (state.signalPhase === 2 && state.signalTimer > SIGNAL_CYCLE.all_red) setSignalPhase(3);
+    else if (state.signalPhase === 3 && state.signalTimer > ewGreen) setSignalPhase(4);
+    else if (state.signalPhase === 4 && state.signalTimer > SIGNAL_CYCLE.ew_yellow) { setSignalPhase(0); state.signalTimer = 0; }
   } else {
     // Traditional fixed-time
     const cycle = SIGNAL_CYCLE;
-    if (signalPhase === 0 && signalTimer > cycle.ns_green) setSignalPhase(1);
-    else if (signalPhase === 1 && signalTimer > cycle.ns_yellow) setSignalPhase(2);
-    else if (signalPhase === 2 && signalTimer > cycle.all_red) setSignalPhase(3);
-    else if (signalPhase === 3 && signalTimer > cycle.ew_green) setSignalPhase(4);
-    else if (signalPhase === 4 && signalTimer > cycle.ew_yellow) { setSignalPhase(0); signalTimer = 0; }
+    if (state.signalPhase === 0 && state.signalTimer > cycle.ns_green) setSignalPhase(1);
+    else if (state.signalPhase === 1 && state.signalTimer > cycle.ns_yellow) setSignalPhase(2);
+    else if (state.signalPhase === 2 && state.signalTimer > cycle.all_red) setSignalPhase(3);
+    else if (state.signalPhase === 3 && state.signalTimer > cycle.ew_green) setSignalPhase(4);
+    else if (state.signalPhase === 4 && state.signalTimer > cycle.ew_yellow) { setSignalPhase(0); state.signalTimer = 0; }
+  }
+}
+
+function getPhaseDuration(phase) {
+  if (state.currentMode === 'queuesense') {
+    const densityFactor = state.densityLevel / 50;
+    const downstreamBlocked = state.exitBlock > 70;
+    let nsGreen = SIGNAL_CYCLE.ns_green * (0.8 + densityFactor * 0.5);
+    let ewGreen = SIGNAL_CYCLE.ew_green * (0.8 + densityFactor * 0.4);
+    if (downstreamBlocked) {
+      nsGreen = 30;
+      ewGreen = 5;
+    }
+    const durations = [nsGreen, SIGNAL_CYCLE.ns_yellow, SIGNAL_CYCLE.all_red, ewGreen, SIGNAL_CYCLE.ew_yellow];
+    return durations[phase] || 0;
+  } else {
+    const cycle = SIGNAL_CYCLE;
+    const durations = [cycle.ns_green, cycle.ns_yellow, cycle.all_red, cycle.ew_green, cycle.ew_yellow];
+    return durations[phase] || 0;
   }
 }
 
 function setSignalPhase(phase) {
-  if (phase === signalPhase) return;
-  signalPhase = phase;
-  signalTimer = 0;
+  if (phase === state.signalPhase) return;
+  state.signalPhase = phase;
+  state.signalTimer = 0;
+
+  // Update state for external access
+  state.signals.currentPhase = phase;
+  const phaseNames = ['ns_green', 'ns_yellow', 'all_red', 'ew_green', 'ew_yellow'];
+  state.signals.phaseName = phaseNames[phase] || 'unknown';
 
   // NS = north/south/j2, EW = east/west
   const nsKeys = ['north', 'south', 'j2_north', 'j2_south'];
@@ -1233,6 +1270,16 @@ function updateAISpeech(phase) {
   if (reasonText) reasonText.textContent = text;
 }
 
+// ─── Expose Signal State for UI ───────────────────────────────
+// Called from animation loop to keep UI in sync
+function exposeSignalState() {
+  // Signal phase and timer are already updated in updateSignals()
+  // This ensures window.QueueSense.state has current signal info
+  if (window.QueueSense && window.QueueSense.state) {
+    window.QueueSense.state.signals = state.signals;
+  }
+}
+
 // ─── Spawn Logic ────────────────────────────────────────────
 let spawnTimer = 0;
 
@@ -1309,6 +1356,7 @@ function animate() {
   updateSpawning(delta * timeScale);
   updateScenarioCycle(delta * timeScale);
   updateKPIs(delta * timeScale);
+  exposeSignalState();
 
   // Pulse downstream sensor ring
   if (state.signals.downstreamSensor) {
@@ -1406,8 +1454,7 @@ function applyScenario(scenario) {
   state.vehicles.forEach(v => scene.remove(v));
   state.vehicles = [];
   state.simTime = 0;
-  signalTimer = 0;
-  signalPhase = 0;
+  state.signalTimer = 0;
   scenarioChangeTimer = 0;
 
   switch (scenario) {
@@ -1419,6 +1466,8 @@ function applyScenario(scenario) {
       break;
     case 'surge':
       state.densityLevel = 55;
+      state.signalPhase = 0;
+      state.signalTimer = 0;
       setSignalPhase(0);
       spawnInitialVehicles(4);
       setTimeout(() => { state.densityLevel = 90; }, 15000);
@@ -1426,6 +1475,8 @@ function applyScenario(scenario) {
     case 'spillback':
       state.densityLevel = 75;
       state.exitBlock = 80;
+      state.signalPhase = 0;
+      state.signalTimer = 0;
       setSignalPhase(0);
       spawnInitialVehicles(8);
       break;
@@ -1433,6 +1484,8 @@ function applyScenario(scenario) {
       state.densityLevel = 50;
       state.exitBlock = 0;
       state.emergencyActive = true;
+      state.signalPhase = 0;
+      state.signalTimer = 0;
       setSignalPhase(0);
       spawnInitialVehicles(5);
       setTimeout(() => {
@@ -1556,10 +1609,27 @@ function onWindowResize() {
 }
 
 // ─── Auto-init when DOM is ready ──────────────────────────
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
+function tryInit() {
+  const container = document.getElementById('scene-container');
+  if (!container) {
+    console.error('Scene container not found');
+    return;
+  }
+
+  // Wait for container to have valid dimensions
+  if (container.clientWidth === 0 || container.clientHeight === 0) {
+    console.log('Container not ready, waiting...', container.clientWidth, container.clientHeight);
+    requestAnimationFrame(tryInit);
+    return;
+  }
+
   init();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', tryInit);
+} else {
+  tryInit();
 }
 
 // Expose for debugging

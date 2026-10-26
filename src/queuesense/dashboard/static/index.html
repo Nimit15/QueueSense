@@ -8,21 +8,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/styles.css">
-  <!-- Three.js ESM (via importmap) -->
+  <link rel="stylesheet" href="/static/styles.css?v=20261027">
   <script type="importmap">
-  {
-    "imports": {
-      "three": "/static/lib/three.module.min.js",
-      "three/OrbitControls": "/static/lib/OrbitControls.module.js"
+    {
+      "imports": {
+        "three": "https://esm.sh/three@0.160.0",
+        "three/OrbitControls": "https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js",
+        "three/addons/": "https://esm.sh/three@0.160.0/examples/jsm/"
+      }
     }
-  }
   </script>
-  <!-- GSAP and Chart.js as UMD globals -->
-  <script src="/static/lib/gsap.min.js"></script>
-  <script src="/static/lib/chart.umd.min.js"></script>
-  <script type="module" src="/static/three-scene.js"></script>
-  <script type="module" src="/static/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="/static/three-scene.js?v=20261027"></script>
+  <script type="module" src="/static/app.js?v=20261027"></script>
 </head>
 <body>
   <!-- ===== Navigation ===== -->
@@ -40,17 +38,11 @@
         <span class="nav__status-dot" aria-hidden="true"></span>
         <span class="nav__status-text">Live Simulation</span>
       </div>
-      <div class="nav__links">
-        <a href="#sandbox">Live 3D Sandbox</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#benchmark">300-Case Benchmark</a>
-        <a href="#data">Data Sources</a>
-      </div>
       <div class="nav__mode-switch">
-        <button class="mode-toggle" data-mode="queuesense" id="modeQS" aria-pressed="true">
+        <button class="mode-toggle mode-toggle--active" data-mode="queuesense" id="modeQS" aria-pressed="true">
           <span class="mode-toggle__label">QueueSense AI</span>
         </button>
-        <button class="mode-toggle mode-toggle--alt" data-mode="traditional" id="modeTrad" aria-pressed="false">
+        <button class="mode-toggle" data-mode="traditional" id="modeTrad" aria-pressed="false">
           <span class="mode-toggle__label">Traditional</span>
         </button>
       </div>
@@ -71,13 +63,13 @@
         <button class="cam-btn" data-cam="corridor" id="camFollow" aria-pressed="false">Corridor</button>
       </div>
 
-      <!-- Mode Toggle Pill (hero) -->
+      <!-- Mode Toggle Pill (hero, synced with nav) -->
       <div class="hero__pill hero__pill--mode" role="group" aria-label="Control mode">
         <button class="mode-pill-btn mode-pill-btn--active" data-mode="queuesense" id="modeQS2" aria-pressed="true">QueueSense AI</button>
         <button class="mode-pill-btn" data-mode="traditional" id="modeTrad2" aria-pressed="false">Traditional</button>
       </div>
 
-      <!-- Timeline Indicator -->
+      <!-- Timeline / Scenario Indicator -->
       <div class="hero__timeline" role="status" aria-live="polite">
         <div class="timeline__track">
           <div class="timeline__progress" id="timelineProgress"></div>
@@ -97,7 +89,7 @@
           </button>
         </div>
         <div class="scenario-grid" role="group" aria-label="Traffic scenarios">
-          <button class="scenario-btn scenario-btn--active" data-scenario="auto" id="scnAuto" aria-pressed="true">
+          <button class="scenario-btn scenario-btn--active" data-scenario="normal" id="scnNormal" aria-pressed="true">
             <span class="scenario-label">Normal Flow</span>
             <span class="scenario-sub">Balanced traffic</span>
           </button>
@@ -119,11 +111,11 @@
       <!-- Operator Controls -->
       <div class="card">
         <div class="card__header">
-          <h3>Traffic Density</h3>
+          <h3>Operator Controls</h3>
         </div>
         <div class="slider-group">
           <label class="slider-label">
-            <span>Affects spawning rate</span>
+            <span>Traffic Density</span>
             <span class="slider-value" id="valDensity">Normal</span>
           </label>
           <input type="range" min="0" max="100" value="50" class="slider slider--accent" id="sliderDensity" aria-label="Traffic density level">
@@ -170,15 +162,15 @@
       <!-- Live KPI Grid -->
       <div class="kpi-grid" role="region" aria-label="Live KPIs">
         <div class="kpi-card">
-          <span class="kpi-value" id="kpiQueue" aria-label="Queue in PCU">—</span>
+          <span class="kpi-value" id="kpiQueue" aria-label="Queue in PCU">12.4</span>
           <span class="kpi-label">Queue (PCU)</span>
         </div>
         <div class="kpi-card">
-          <span class="kpi-value" id="kpiWait" aria-label="Average wait time">—</span>
+          <span class="kpi-value" id="kpiWait" aria-label="Average wait time">4.2</span>
           <span class="kpi-label">Avg Wait (s)</span>
         </div>
         <div class="kpi-card">
-          <span class="kpi-value" id="kpiExit" aria-label="Exit fill percentage">—</span>
+          <span class="kpi-value" id="kpiExit" aria-label="Exit fill percentage">18</span>
           <span class="kpi-label">Exit Fill (%)</span>
         </div>
       </div>
@@ -254,12 +246,12 @@
 
       <div class="metric-cards" role="region" aria-label="Key metrics">
         <div class="metric-card">
-          <span class="metric-card__value" id="metricBestQueue">1.8</span>
-          <span class="metric-card__label">Lowest Avg Queue (PCU)</span>
+          <span class="metric-card__value" id="metricBestQueue">-82.3%</span>
+          <span class="metric-card__label">Wait vs Fixed-Time</span>
         </div>
         <div class="metric-card">
-          <span class="metric-card__value" id="metricBestSpillback">0</span>
-          <span class="metric-card__label">Spillback Incidents</span>
+          <span class="metric-card__value" id="metricBestSpillback">-56.7%</span>
+          <span class="metric-card__label">Downstream Spillback</span>
         </div>
         <div class="metric-card">
           <span class="metric-card__value" id="metricEmergency">28.5s</span>
@@ -324,6 +316,5 @@
       </div>
     </div>
   </footer>
-
-  </body>
+</body>
 </html>
